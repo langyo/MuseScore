@@ -22,9 +22,11 @@
 #ifndef MU_ISYSTEMINFO_H
 #define MU_ISYSTEMINFO_H
 
+#include "types/version.h"
+
 #include "modularity/imoduleinterface.h"
 
-namespace mu {
+namespace muse {
 class ISystemInfo : MODULE_EXPORT_INTERFACE
 {
     INTERFACE_ID(ISystemInfo)
@@ -47,6 +49,7 @@ public:
 
     virtual CpuArchitecture cpuArchitecture() const = 0;
     virtual ProductType productType() const = 0;
+    virtual Version productVersion() const = 0;
 };
 }
 

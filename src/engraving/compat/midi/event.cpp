@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -234,7 +234,7 @@ void EventsHolder::mergePitchWheelEvents(EventsHolder& pitchWheelEvents)
             const auto& event = eventPair.second;
             const auto& tick = eventPair.first;
             if (event.type() == ME_NOTEON && event.velo() != 0) {
-                const auto& pwEvent = findLess(pitchWheelEvents[i], tick);
+                const auto& pwEvent = muse::findLess(pitchWheelEvents[i], tick);
                 if (pwEvent != pitchWheelEvents[i].end()
                     && pwEvent->second.type() == ME_PITCHBEND) {
                     PitchWheelSpecs specs;

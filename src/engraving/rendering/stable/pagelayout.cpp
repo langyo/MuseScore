@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -76,7 +76,7 @@ void PageLayout::getNextPage(LayoutContext& ctx)
         ctx.mutState().setPage(ctx.mutDom().pages()[ctx.state().pageIdx()]);
         std::vector<System*>& systems = ctx.mutState().page()->systems();
         ctx.mutState().setPageOldMeasure(systems.empty() ? nullptr : systems.back()->measures().back());
-        const system_idx_t i = mu::indexOf(systems, ctx.state().curSystem());
+        const system_idx_t i = muse::indexOf(systems, ctx.state().curSystem());
         if (i < systems.size() && i > 0 && systems[i - 1]->page() == ctx.state().page()) {
             // Current and previous systems are on the current page.
             // Erase only the current and the following systems
@@ -150,11 +150,6 @@ void PageLayout::collectPage(LayoutContext& ctx)
         double distance;
         if (ctx.state().prevSystem()) {
             distance = SystemLayout::minDistance(ctx.state().prevSystem(), ctx.state().curSystem(), ctx);
-            if (ctx.conf().isPrintingMode()) {
-                double top = ctx.state().curSystem()->minTop();
-                double bottom = ctx.state().prevSystem()->minBottom();
-                distance += std::abs(top - bottom);
-            }
         } else {
             // this is the first system on page
             if (ctx.state().curSystem()->vbox()) {
@@ -203,12 +198,12 @@ void PageLayout::collectPage(LayoutContext& ctx)
         if (ctx.state().rangeDone()) {
             // take next system unchanged
             if (systemIdx > 0) {
-                nextSystem = mu::value(ctx.mutDom().systems(), systemIdx++);
+                nextSystem = muse::value(ctx.mutDom().systems(), systemIdx++);
                 if (!nextSystem) {
                     // TODO: handle next movement
                 }
             } else {
-                nextSystem = ctx.state().systemList().empty() ? 0 : mu::takeFirst(ctx.mutState().systemList());
+                nextSystem = ctx.state().systemList().empty() ? 0 : muse::takeFirst(ctx.mutState().systemList());
                 if (nextSystem) {
                     ctx.mutDom().systems().push_back(nextSystem);
                 }
@@ -670,11 +665,11 @@ void PageLayout::distributeStaves(LayoutContext& ctx, Page* page, double footerP
     // Try to make the gaps equal, taking the spread factors and maximum spacing into account.
     static const int maxPasses { 20 };     // Saveguard to prevent endless loops.
     int pass { 0 };
-    while (!RealIsNull(spaceRemaining) && (ngaps > 0) && (++pass < maxPasses)) {
+    while (!muse::RealIsNull(spaceRemaining) && (ngaps > 0) && (++pass < maxPasses)) {
         ngaps = 0;
         double smallest     { vgdl.smallest() };
         double nextSmallest { vgdl.smallest(smallest) };
-        if (RealIsNull(smallest) || RealIsNull(nextSmallest)) {
+        if (muse::RealIsNull(smallest) || muse::RealIsNull(nextSmallest)) {
             break;
         }
 
@@ -685,7 +680,7 @@ void PageLayout::distributeStaves(LayoutContext& ctx, Page* page, double footerP
         double addedSpace { 0.0 };
         VerticalGapDataList modified;
         for (VerticalGapData* vgd : vgdl) {
-            if (!RealIsNull(vgd->spacing() - smallest)) {
+            if (!muse::RealIsNull(vgd->spacing() - smallest)) {
                 continue;
             }
             double step { nextSmallest - vgd->spacing() };
@@ -693,7 +688,7 @@ void PageLayout::distributeStaves(LayoutContext& ctx, Page* page, double footerP
                 continue;
             }
             step = vgd->addSpacing(step);
-            if (!RealIsNull(step)) {
+            if (!muse::RealIsNull(step)) {
                 addedSpace += step * vgd->factor();
                 modified.push_back(vgd);
                 ++ngaps;
@@ -718,13 +713,13 @@ void PageLayout::distributeStaves(LayoutContext& ctx, Page* page, double footerP
     spaceRemaining = std::min(maxPageFill * static_cast<double>(vgdl.size()), spaceRemaining);
     pass = 0;
     ngaps = 1;
-    while (!RealIsNull(spaceRemaining) && !RealIsNull(maxPageFill) && (ngaps > 0) && (++pass < maxPasses)) {
+    while (!muse::RealIsNull(spaceRemaining) && !muse::RealIsNull(maxPageFill) && (ngaps > 0) && (++pass < maxPasses)) {
         ngaps = 0;
         double addedSpace { 0.0 };
         double step { spaceRemaining / vgdl.sumStretchFactor() };
         for (VerticalGapData* vgd : vgdl) {
             double res { vgd->addFillSpacing(step, maxPageFill) };
-            if (!RealIsNull(res)) {
+            if (!muse::RealIsNull(res)) {
                 addedSpace += res * vgd->factor();
                 ++ngaps;
             }

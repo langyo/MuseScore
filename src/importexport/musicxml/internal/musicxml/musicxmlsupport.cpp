@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -38,7 +38,7 @@
 
 using AccidentalType = mu::engraving::AccidentalType;
 using SymId = mu::engraving::SymId;
-const static std::map<mu::String, AccidentalType> smuflAccidentalTypes {
+const static std::map<muse::String, AccidentalType> smuflAccidentalTypes {
     { u"accidentalDoubleFlatOneArrowDown",                AccidentalType::DOUBLE_FLAT_ONE_ARROW_DOWN },
     { u"accidentalFlatOneArrowDown",                      AccidentalType::FLAT_ONE_ARROW_DOWN },
     { u"accidentalNaturalOneArrowDown",                   AccidentalType::NATURAL_ONE_ARROW_DOWN },
@@ -175,7 +175,7 @@ VoiceOverlapDetector::VoiceOverlapDetector()
 void VoiceOverlapDetector::addNote(const int startTick, const int endTick, const int& voice, const int staff)
 {
     // if necessary, create the note list for voice
-    if (!mu::contains(_noteLists, voice)) {
+    if (!muse::contains(_noteLists, voice)) {
         _noteLists.insert({ voice, NoteList() });
     }
     _noteLists[voice].addNote(startTick, endTick, staff);
@@ -197,7 +197,7 @@ void VoiceOverlapDetector::newMeasure()
 
 bool VoiceOverlapDetector::stavesOverlap(const int& voice) const
 {
-    if (mu::contains(_noteLists, voice)) {
+    if (muse::contains(_noteLists, voice)) {
         return _noteLists.at(voice).anyStaffOverlaps();
     } else {
         return false;
@@ -224,23 +224,23 @@ String MusicXMLInstrument::toString() const
 
 String errorStringWithLocation(int line, int col, const String& error)
 {
-    return mtrc("iex_musicxml", "line %1, column %2:").arg(line).arg(col) + u" " + error;
+    return muse::mtrc("iex_musicxml", "line %1, column %2:").arg(line).arg(col) + u" " + error;
 }
 
 //---------------------------------------------------------
 //   checkAtEndElement
 //---------------------------------------------------------
 
-String checkAtEndElement(const XmlStreamReader& e, const String& expName)
+muse::String checkAtEndElement(const muse::XmlStreamReader& e, const muse::String& expName)
 {
     if (e.isEndElement() && e.name() == expName.toAscii().constChar()) {
         return String();
     }
 
-    String res = mtrc("iex_musicxml", "expected token type and name ‘EndElement %1’, actual ‘%2 %3’")
+    String res = muse::mtrc("iex_musicxml", "expected token type and name ‘EndElement %1’, actual ‘%2 %3’")
                  .arg(expName)
-                 .arg(String::fromAscii(e.tokenString().ascii()))
-                 .arg(String::fromAscii(e.name().ascii()));
+                 .arg(muse::String::fromAscii(e.tokenString().ascii()))
+                 .arg(muse::String::fromAscii(e.name().ascii()));
     return res;
 }
 
@@ -509,7 +509,7 @@ SymId mxmlString2accSymId(const String mxmlName, const String smufl)
         map[u"koron"] = SymId::accidentalKoron;
     }
 
-    if (mu::contains(map, mxmlName)) {
+    if (muse::contains(map, mxmlName)) {
         return map.at(mxmlName);
     } else if (mxmlName == u"other") {
         return SymNames::symIdByName(smufl);
@@ -627,7 +627,7 @@ String accidentalType2MxmlString(const AccidentalType type)
 
 String accidentalType2SmuflMxmlString(const AccidentalType type)
 {
-    return mu::key(smuflAccidentalTypes, type);
+    return muse::key(smuflAccidentalTypes, type);
 }
 
 //---------------------------------------------------------
@@ -693,14 +693,39 @@ AccidentalType mxmlString2accidentalType(const String mxmlName, const String smu
         map[u"koron"] = AccidentalType::KORON;
     }
 
-    if (mu::contains(map, mxmlName)) {
+    if (muse::contains(map, mxmlName)) {
         return map.at(mxmlName);
-    } else if (mxmlName == "other" && mu::contains(smuflAccidentalTypes, smufl)) {
+    } else if (mxmlName == "other" && muse::contains(smuflAccidentalTypes, smufl)) {
         return smuflAccidentalTypes.at(smufl);
     } else {
         LOGD("mxmlString2accidentalType: unknown accidental '%s'", muPrintable(mxmlName));
     }
     return AccidentalType::NONE;
+}
+
+//---------------------------------------------------------
+//   mxmlAccidentalTextToChar
+//---------------------------------------------------------
+
+/**
+ Convert a MusicXML accidental text to a accidental character.
+ */
+
+String mxmlAccidentalTextToChar(const String mxmlName)
+{
+    static std::map<String, String> map;   // map MusicXML accidental name to MuseScore enum AccidentalType
+    if (map.empty()) {
+        map[u"sharp"] = u"♯";
+        map[u"natural"] = u"♮";
+        map[u"flat"] = u"♭";
+    }
+
+    if (muse::contains(map, mxmlName)) {
+        return map.at(mxmlName);
+    } else {
+        LOGD("mxmlAccidentalTextToChar: unsupported accidental '%s'", muPrintable(mxmlName));
+    }
+    return u"";
 }
 
 //---------------------------------------------------------

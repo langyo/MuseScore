@@ -30,10 +30,12 @@
 #include "internal/extensionsprovider.h"
 #include "internal/extensionsconfiguration.h"
 #include "internal/extensionsactioncontroller.h"
+#include "internal/extensioninstaller.h"
+#include "internal/extensionsexecpointsregister.h"
 
 #include "view/extensionbuilder.h"
 #include "view/extensionsuiengine.h"
-#include "view/extensionsmodel.h"
+#include "view/extensionslistmodel.h"
 
 #include "api/v1/extapiv1.h"
 
@@ -42,7 +44,7 @@
 #include "log.h"
 
 using namespace muse::extensions;
-using namespace mu::modularity;
+using namespace muse::modularity;
 
 static void extensions_init_qrc()
 {
@@ -57,12 +59,15 @@ std::string ExtensionsModule::moduleName() const
 void ExtensionsModule::registerExports()
 {
     m_configuration = std::make_shared<ExtensionsConfiguration>();
-    m_provider = std::make_shared<ExtensionsProvider>();
+    m_provider = std::make_shared<ExtensionsProvider>(iocContext());
     m_actionController = std::make_shared<ExtensionsActionController>();
+    m_execPointsRegister = std::make_shared<ExtensionsExecPointsRegister>();
 
     ioc()->registerExport<IExtensionsProvider>(moduleName(), m_provider);
     ioc()->registerExport<IExtensionsConfiguration>(moduleName(), m_configuration);
-    ioc()->registerExport<IExtensionsUiEngine>(moduleName(), new ExtensionsUiEngine());
+    ioc()->registerExport<IExtensionsUiEngine>(moduleName(), new ExtensionsUiEngine(iocContext()));
+    ioc()->registerExport<IExtensionInstaller>(moduleName(), new ExtensionInstaller());
+    ioc()->registerExport<IExtensionsExecPointsRegister>(moduleName(), m_execPointsRegister);
 }
 
 void ExtensionsModule::registerResources()
@@ -79,10 +84,13 @@ void ExtensionsModule::registerUiTypes()
 
 void ExtensionsModule::resolveImports()
 {
-    auto ir = ioc()->resolve<mu::ui::IInteractiveUriRegister>(moduleName());
+    auto ir = ioc()->resolve<ui::IInteractiveUriRegister>(moduleName());
     if (ir) {
-        ir->registerQmlUri(Uri("musescore://extensions/viewer"), "Muse/Extensions/ExtensionViewerDialog.qml");
+        ir->registerQmlUri(Uri("muse://extensions/viewer"), "Muse/Extensions/ExtensionViewerDialog.qml");
     }
+
+    m_execPointsRegister->reg(moduleName(), { EXEC_DISABLED, TranslatableString("extensions", "Disabled") });
+    m_execPointsRegister->reg(moduleName(), { EXEC_MANUALLY, TranslatableString("extensions", "Manually") });
 }
 
 void ExtensionsModule::registerApi()

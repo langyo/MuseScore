@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -56,7 +56,7 @@ class Engraving_NoteTests : public ::testing::Test
 
 TEST_F(Engraving_NoteTests, note)
 {
-    MasterScore* score = compat::ScoreAccess::createMasterScore();
+    MasterScore* score = compat::ScoreAccess::createMasterScore(nullptr);
     Chord* chord = Factory::createChord(score->dummy()->segment());
     Note* note = Factory::createNote(chord);
     chord->add(note);
@@ -514,7 +514,7 @@ TEST_F(Engraving_NoteTests, LongNoteAfterShort_183746)
     EXPECT_TRUE(s && s->segmentType() == SegmentType::ChordRest);
     EXPECT_TRUE(s->tick() == Fraction(1, 128));
 
-    EngravingItem* e = s->firstElement(0);
+    EngravingItem* e = s->firstElementForNavigation(0);
     EXPECT_TRUE(e && e->isNote());
 
     std::vector<Note*> nl = toNote(e)->tiedNotes();

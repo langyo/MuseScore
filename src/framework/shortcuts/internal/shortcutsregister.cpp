@@ -29,14 +29,16 @@
 
 #include "log.h"
 
-using namespace mu::shortcuts;
-using namespace mu::async;
+using namespace muse;
+using namespace muse::shortcuts;
+using namespace muse::async;
 
 static constexpr std::string_view SHORTCUTS_TAG("Shortcuts");
 static constexpr std::string_view SHORTCUT_TAG("SC");
 static constexpr std::string_view ACTION_CODE_TAG("key");
 static constexpr std::string_view STANDARD_KEY_TAG("std");
 static constexpr std::string_view SEQUENCE_TAG("seq");
+static constexpr std::string_view AUTOREPEAT_TAG("autorepeat");
 
 static const std::string SHORTCUTS_RESOURCE_NAME("SHORTCUTS");
 
@@ -113,14 +115,15 @@ void ShortcutsRegister::mergeShortcuts(ShortcutList& shortcuts, const ShortcutLi
         bool found = false;
 
         for (Shortcut& sc : shortcuts) {
-            //! NOTE If user shortcut is found, set context (context should always as default)
+            //! NOTE If a user shortcut is found, set context & auto repeat (always use default values)
             if (sc.action == defSc.action) {
                 sc.context = defSc.context;
+                sc.autoRepeat = defSc.autoRepeat;
                 found = true;
             } else if (sc.context == defSc.context) {
                 for (const std::string& seq : sc.sequences) {
                     //! NOTE If user shortcut has sequence from default shortcut, remove the sequence from default shortcut
-                    mu::remove_if(scForAdd.sequences, [&seq](const std::string& cmp){
+                    muse::remove_if(scForAdd.sequences, [&seq](const std::string& cmp){
                         return cmp == seq;
                     });
                 }
@@ -281,6 +284,8 @@ Shortcut ShortcutsRegister::readShortcut(deprecated::XmlReader& reader) const
             shortcut.standardKey = QKeySequence::StandardKey(reader.readInt());
         } else if (tag == SEQUENCE_TAG) {
             shortcut.sequences.push_back(reader.readString());
+        } else if (tag == AUTOREPEAT_TAG) {
+            shortcut.autoRepeat = reader.readInt();
         } else {
             reader.skipCurrentElement();
         }
@@ -296,7 +301,7 @@ const ShortcutList& ShortcutsRegister::shortcuts() const
     return m_shortcuts;
 }
 
-mu::Ret ShortcutsRegister::setShortcuts(const ShortcutList& shortcuts)
+Ret ShortcutsRegister::setShortcuts(const ShortcutList& shortcuts)
 {
     TRACEFUNC;
 
@@ -368,14 +373,14 @@ Notification ShortcutsRegister::shortcutsChanged() const
     return m_shortcutsChanged;
 }
 
-mu::Ret ShortcutsRegister::setAdditionalShortcuts(const std::string& context, const ShortcutList& shortcuts)
+Ret ShortcutsRegister::setAdditionalShortcuts(const std::string& context, const ShortcutList& shortcuts)
 {
     m_additionalShortcutsMap[context] = shortcuts;
 
     mergeShortcuts(m_shortcuts, m_additionalShortcutsMap[context]);
     m_shortcutsChanged.notify();
 
-    return make_ok();
+    return muse::make_ok();
 }
 
 const Shortcut& ShortcutsRegister::shortcut(const std::string& actionCode) const
@@ -411,7 +416,7 @@ ShortcutList ShortcutsRegister::shortcutsForSequence(const std::string& sequence
     return list;
 }
 
-mu::Ret ShortcutsRegister::importFromFile(const io::path_t& filePath)
+Ret ShortcutsRegister::importFromFile(const io::path_t& filePath)
 {
     mi::ReadResourceLockGuard(multiInstancesProvider(), SHORTCUTS_RESOURCE_NAME);
 
@@ -426,7 +431,7 @@ mu::Ret ShortcutsRegister::importFromFile(const io::path_t& filePath)
     return make_ret(Ret::Code::Ok);
 }
 
-mu::Ret ShortcutsRegister::exportToFile(const io::path_t& filePath) const
+Ret ShortcutsRegister::exportToFile(const io::path_t& filePath) const
 {
     return writeToFile(m_shortcuts, filePath);
 }

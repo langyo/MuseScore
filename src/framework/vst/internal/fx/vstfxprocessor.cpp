@@ -22,8 +22,8 @@
 
 #include "vstfxprocessor.h"
 
-using namespace mu;
-using namespace mu::vst;
+using namespace muse;
+using namespace muse::vst;
 using namespace muse::audio;
 
 VstFxProcessor::VstFxProcessor(VstPluginPtr&& pluginPtr, const AudioFxParams& params)
@@ -47,7 +47,7 @@ void VstFxProcessor::init()
         });
     }
 
-    m_pluginPtr->pluginSettingsChanged().onReceive(this, [this](const audio::AudioUnitConfig& newConfig) {
+    m_pluginPtr->pluginSettingsChanged().onReceive(this, [this](const muse::audio::AudioUnitConfig& newConfig) {
         if (m_params.configuration == newConfig) {
             return;
         }
@@ -59,7 +59,7 @@ void VstFxProcessor::init()
 
 AudioFxType VstFxProcessor::type() const
 {
-    return audio::AudioFxType::VstFx;
+    return muse::audio::AudioFxType::VstFx;
 }
 
 const AudioFxParams& VstFxProcessor::params() const

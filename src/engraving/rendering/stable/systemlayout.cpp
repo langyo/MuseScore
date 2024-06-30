@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -526,7 +526,7 @@ System* SystemLayout::collectSystem(LayoutContext& ctx)
 void SystemLayout::justifySystem(System* system, double curSysWidth, double targetSystemWidth)
 {
     double rest = targetSystemWidth - curSysWidth;
-    if (RealIsNull(rest)) {
+    if (muse::RealIsNull(rest)) {
         return;
     }
     if (rest < 0) {
@@ -573,7 +573,7 @@ System* SystemLayout::getNextSystem(LayoutContext& ctx)
         system = Factory::createSystem(ctx.mutDom().dummyParent()->page());
         ctx.mutState().setSystemOldMeasure(nullptr);
     } else {
-        system = mu::takeFirst(ctx.mutState().systemList());
+        system = muse::takeFirst(ctx.mutState().systemList());
         ctx.mutState().setSystemOldMeasure(system->measures().empty() ? 0 : system->measures().back());
         system->clear();       // remove measures from system
     }
@@ -788,13 +788,13 @@ void SystemLayout::layoutSystemElements(System* system, LayoutContext& ctx)
                 continue;
             }
             if (mno && mno->addToSkyline()) {
-                ss->skyline().add(mno->ldata()->bbox().translated(m->pos() + mno->pos()));
+                ss->skyline().add(mno->ldata()->bbox().translated(m->pos() + mno->pos()), mno);
             }
             if (mmrr && mmrr->addToSkyline()) {
-                ss->skyline().add(mmrr->ldata()->bbox().translated(m->pos() + mmrr->pos()));
+                ss->skyline().add(mmrr->ldata()->bbox().translated(m->pos() + mmrr->pos()), mmrr);
             }
             if (m->staffLines(staffIdx)->addToSkyline()) {
-                ss->skyline().add(m->staffLines(staffIdx)->ldata()->bbox().translated(m->pos()));
+                ss->skyline().add(m->staffLines(staffIdx)->ldata()->bbox().translated(m->pos()), m->staffLines(staffIdx));
             }
             for (Segment& s : m->segments()) {
                 if (!s.enabled()) {
@@ -806,7 +806,7 @@ void SystemLayout::layoutSystemElements(System* system, LayoutContext& ctx)
                     BarLine* bl = toBarLine(s.element(staffIdx * VOICES));
                     if (bl && bl->addToSkyline()) {
                         RectF r = TLayout::layoutRect(bl, ctx);
-                        skyline.add(r.translated(bl->pos() + p));
+                        skyline.add(r.translated(bl->pos() + p), bl);
                     }
                 } else if (s.segmentType() & SegmentType::TimeSig) {
                     TimeSig* ts = toTimeSig(s.element(staffIdx * VOICES));
@@ -1101,9 +1101,6 @@ void SystemLayout::layoutSystemElements(System* system, LayoutContext& ctx)
     //-------------------------------------------------------------
     // Lyric
     //-------------------------------------------------------------
-
-    LyricsLayout::layoutLyrics(ctx, system);
-
     // Layout lyrics dashes and melisma
     // NOTE: loop on a *copy* of unmanagedSpanners because in some cases
     // the underlying operation may invalidate some of the iterators.
@@ -1508,7 +1505,7 @@ void SystemLayout::processLines(System* system, LayoutContext& ctx, std::vector<
                 && ss->visible()
                 && prevSegment->isHarmonicMarkSegment()
                 && ss->isVibratoSegment()
-                && RealIsEqual(prevSegment->x(), ss->x())) {
+                && muse::RealIsEqual(prevSegment->x(), ss->x())) {
                 double diff = ss->ldata()->bbox().bottom() - prevSegment->ldata()->bbox().bottom()
                               + prevSegment->ldata()->bbox().top();
                 prevSegment->mutldata()->moveY(diff);
@@ -1518,7 +1515,7 @@ void SystemLayout::processLines(System* system, LayoutContext& ctx, std::vector<
                 && ss->visible()
                 && prevSegment->isVibratoSegment()
                 && ss->isHarmonicMarkSegment()
-                && RealIsEqual(prevSegment->x(), ss->x())) {
+                && muse::RealIsEqual(prevSegment->x(), ss->x())) {
                 double diff = prevSegment->ldata()->bbox().bottom() - ss->ldata()->bbox().bottom()
                               + ss->ldata()->bbox().top();
                 ss->mutldata()->moveY(diff);
@@ -1535,7 +1532,7 @@ void SystemLayout::processLines(System* system, LayoutContext& ctx, std::vector<
     for (SpannerSegment* ss : segments) {
         if (ss->addToSkyline()) {
             staff_idx_t stfIdx = ss->systemFlag() ? ss->staffIdxOrNextVisible() : ss->staffIdx();
-            if (stfIdx == mu::nidx) {
+            if (stfIdx == muse::nidx) {
                 continue;
             }
             system->staff(stfIdx)->skyline().add(ss->shape().translate(ss->pos()));
@@ -1678,7 +1675,7 @@ void SystemLayout::manageNarrowSpacing(System* system, LayoutContext& ctx, doubl
 
     // First, try to gradually reduce the duration stretch (i.e. flatten the spacing curve)
     double stretchCoeff = firstMeasure->layoutStretch() - step;
-    while (curSysWidth > targetSysWidth && RealIsEqualOrMore(stretchCoeff, 0.0)) {
+    while (curSysWidth > targetSysWidth && muse::RealIsEqualOrMore(stretchCoeff, 0.0)) {
         for (MeasureBase* mb : system->measures()) {
             if (!mb->isMeasure()) {
                 continue;
@@ -1697,7 +1694,7 @@ void SystemLayout::manageNarrowSpacing(System* system, LayoutContext& ctx, doubl
 
     // Now we are limited by the collision checks, so try to gradually squeeze everything without collisions
     double squeezeFactor = 1 - step;
-    while (curSysWidth > targetSysWidth && RealIsEqualOrMore(squeezeFactor, 0.0)) {
+    while (curSysWidth > targetSysWidth && muse::RealIsEqualOrMore(squeezeFactor, 0.0)) {
         for (MeasureBase* mb : system->measures()) {
             if (!mb->isMeasure()) {
                 continue;
@@ -1744,7 +1741,7 @@ void SystemLayout::manageNarrowSpacing(System* system, LayoutContext& ctx, doubl
     // Things don't fit without collisions, so give up and allow collisions
     double smallerStep = 0.25 * step;
     double widthReduction = 1 - smallerStep;
-    while (curSysWidth > targetSysWidth && RealIsEqualOrMore(widthReduction, 0.0)) {
+    while (curSysWidth > targetSysWidth && muse::RealIsEqualOrMore(widthReduction, 0.0)) {
         for (MeasureBase* mb : system->measures()) {
             if (!mb->isMeasure()) {
                 continue;
@@ -1811,7 +1808,7 @@ void SystemLayout::layoutSystem(System* system, LayoutContext& ctx, double xo1, 
         maxNamesWidth = indent - instrumentNameOffset;
     }
 
-    if (RealIsNull(indent)) {
+    if (muse::RealIsNull(indent)) {
         if (ctx.conf().styleB(Sid::alignSystemToMargin)) {
             system->setLeftMargin(0.0);
         } else {
@@ -2056,7 +2053,7 @@ void SystemLayout::addBrackets(System* system, Measure* measure, LayoutContext& 
 
     system->setBracketsXPosition(measure->x());
 
-    mu::join(system->brackets(), bl);
+    muse::join(system->brackets(), bl);
 }
 
 //---------------------------------------------------------
@@ -2106,7 +2103,7 @@ Bracket* SystemLayout::createBracket(System* system, LayoutContext& ctx, Bracket
         for (size_t k = 0; k < bl.size(); ++k) {
             if (bl[k]->track() == track && bl[k]->column() == column && bl[k]->bracketType() == bi->bracketType()
                 && bl[k]->measure() == measure) {
-                b = mu::takeAt(bl, k);
+                b = muse::takeAt(bl, k);
                 break;
             }
         }
@@ -2388,7 +2385,7 @@ void SystemLayout::layoutInstrumentNames(System* system, LayoutContext& ctx)
         size_t nstaves = p->nstaves();
 
         staff_idx_t visible = system->firstVisibleSysStaffOfPart(p);
-        if (visible != mu::nidx) {
+        if (visible != muse::nidx) {
             // The top staff might be invisible but this top staff contains the instrument names.
             // To make sure these instrument name are drawn, even when the top staff is invisible,
             // move the InstrumentName elements to the first visible staff of the part.
@@ -2495,7 +2492,7 @@ void SystemLayout::setInstrumentNames(System* system, LayoutContext& ctx, bool l
 
         size_t idx = 0;
         for (const StaffName& sn : names) {
-            InstrumentName* iname = mu::value(staff->instrumentNames, idx);
+            InstrumentName* iname = muse::value(staff->instrumentNames, idx);
             if (iname == 0) {
                 iname = new InstrumentName(system);
                 // iname->setGenerated(true);

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -94,9 +94,9 @@ enum class Sid {
     lyricsPlacement,
     lyricsPosAbove,
     lyricsPosBelow,
-    lyricsMinTopDistance,
-    lyricsMinBottomDistance,
-    lyricsMinDistance,
+    lyricsMinTopDistance, // actual meaning: distance to elements on same staff
+    lyricsMinBottomDistance, // actual meaning: distance to elements on other staff
+    lyricsMinDistance, // actual meaning: min horizontal spacing of lyrics-to-lyrics
     lyricsLineHeight,
     lyricsDashMinLength,
     lyricsDashMaxLength,
@@ -109,6 +109,11 @@ enum class Sid {
     lyricsDashPad,
     lyricsDashLineThickness,
     lyricsDashYposRatio,
+
+    lyricsShowDashIfSyllableOnFirstNote,
+    lyricsMelismaForce,
+    lyricsMelismaMinLength,
+    lyricsDashPosAtStartOfSystem,
 
     lyricsOddFontFace,
     lyricsOddFontSize,
@@ -197,6 +202,7 @@ enum class Sid {
     stemLengthSmall,
     shortStemStartLocation,
     shortestStem,
+    combineVoice,
     beginRepeatLeftMargin,
     minNoteDistance,
     barNoteDistance,
@@ -220,6 +226,10 @@ enum class Sid {
     accidentalNoteDistance,
     bracketedAccidentalPadding,
     alignAccidentalsLeft,
+    accidentalOrderFollowsNoteDisplacement,
+    alignAccidentalOctavesAcrossSubChords,
+    keepAccidentalSecondsTogether,
+    alignOffsetOctaveAccidentals,
     keysigAccidentalDistance,
     keysigNaturalDistance,
     beamWidth,
@@ -478,6 +488,8 @@ enum class Sid {
     alwaysShowBracketsWhenEmptyStavesAreHidden,
     alwaysShowSquareBracketsWhenEmptyStavesAreHidden,
     hideInstrumentNameIfOneInstrument,
+    firstSystemInstNameVisibility,
+    subsSystemInstNameVisibility,
     gateTime,
     tenutoGateTime,
     staccatoGateTime,
@@ -662,10 +674,15 @@ enum class Sid {
     barGraceDistance,
 
     minVerticalDistance,
+    skylineMinHorizontalClearance,
     ornamentStyle,
     spatium,
 
     autoplaceHairpinDynamicsDistance,
+
+    dynamicsHairpinVoiceBasedPlacement,
+    dynamicsHairpinsAutoCenterOnGrandStaff,
+    dynamicsHairpinsAboveForVocalStaves,
 
     dynamicsOverrideFont,
     dynamicsFont,
@@ -1672,13 +1689,13 @@ private:
 
     struct StyleValue {
         Sid _idx;
-        AsciiStringView _name;         // xml name for read()/write()
+        muse::AsciiStringView _name;         // xml name for read()/write()
         PropertyValue _defaultValue;
 
     public:
         Sid  styleIdx() const { return _idx; }
         int idx() const { return int(_idx); }
-        const AsciiStringView& name() const { return _name; }
+        const muse::AsciiStringView& name() const { return _name; }
         P_TYPE valueType() const { return _defaultValue.type(); }
         const PropertyValue& defaultValue() const { return _defaultValue; }
     };

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -33,7 +33,7 @@
 
 namespace mu::palette {
 class DrumsetPaletteAdapter;
-class DrumsetPanelView : public uicomponents::WidgetView, public async::Asyncable
+class DrumsetPanelView : public muse::uicomponents::WidgetView, public muse::async::Asyncable
 {
     Q_OBJECT
 

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -55,7 +55,7 @@
 
 #include "log.h"
 
-using namespace mu::io;
+using namespace muse::io;
 using namespace mu::engraving;
 
 namespace mu::iex::guitarpro {
@@ -848,8 +848,8 @@ bool GuitarPro4::read(IODevice* io)
             }
             for (int beat = 0; beat < beats; ++beat) {
                 slide = -1;
-                if (mu::contains(slides, static_cast<int>(track))) {
-                    slide = mu::take(slides, static_cast<int>(track));
+                if (muse::contains(slides, static_cast<int>(track))) {
+                    slide = muse::take(slides, static_cast<int>(track));
                 }
 
                 uint8_t beatBits = readUInt8();
@@ -1070,7 +1070,8 @@ bool GuitarPro4::read(IODevice* io)
                             if (!seg) {
                                 break;                //seg = mes->last();
                             }
-                            if (seg->segmentType() == SegmentType::ChordRest) {
+                            if (seg->segmentType() == SegmentType::ChordRest
+                                && seg->cr(chord->track())->isChord()) {
                                 bool br = false;
                                 Chord* cr1 = toChord(seg->cr(chord->track()));
                                 if (cr1) {

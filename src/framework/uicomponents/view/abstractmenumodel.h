@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_UICOMPONENTS_ABSTRACTMENUMODEL_H
-#define MU_UICOMPONENTS_ABSTRACTMENUMODEL_H
+#ifndef MUSE_UICOMPONENTS_ABSTRACTMENUMODEL_H
+#define MUSE_UICOMPONENTS_ABSTRACTMENUMODEL_H
 
 #include <QAbstractListModel>
 
@@ -32,20 +32,17 @@
 #include "ui/iuiactionsregister.h"
 #include "actions/iactionsdispatcher.h"
 
-namespace mu {
-class TranslatableString;
-}
-
-namespace mu::uicomponents {
-class AbstractMenuModel : public QAbstractListModel, public async::Asyncable
+namespace muse::uicomponents {
+class AbstractMenuModel : public QAbstractListModel, public muse::Injectable, public async::Asyncable
 {
     Q_OBJECT
 
-    INJECT(ui::IUiActionsRegister, uiActionsRegister)
-    INJECT(muse::actions::IActionsDispatcher, dispatcher)
-
     Q_PROPERTY(int length READ rowCount NOTIFY itemsChanged)
     Q_PROPERTY(QVariantList items READ itemsProperty NOTIFY itemsChanged)
+
+public:
+    muse::Inject<ui::IUiActionsRegister> uiActionsRegister = { this };
+    muse::Inject<muse::actions::IActionsDispatcher> dispatcher = { this };
 
 public:
     explicit AbstractMenuModel(QObject* parent = nullptr);
@@ -64,7 +61,7 @@ public:
 
 signals:
     void itemsChanged();
-    void itemChanged(mu::uicomponents::MenuItem* item);
+    void itemChanged(uicomponents::MenuItem* item);
 
 protected:
     enum Roles {
@@ -105,4 +102,4 @@ private:
 };
 }
 
-#endif // MU_UICOMPONENTS_ABSTRACTMENUMODEL_H
+#endif // MUSE_UICOMPONENTS_ABSTRACTMENUMODEL_H

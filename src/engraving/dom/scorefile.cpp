@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -36,7 +36,7 @@
 #include "log.h"
 
 using namespace mu;
-using namespace mu::io;
+using namespace muse::io;
 using namespace muse::draw;
 using namespace mu::engraving;
 using namespace mu::engraving::read400;
@@ -121,7 +121,7 @@ bool Score::loadStyle(const String& fn, bool ign, const bool overlap)
             undo(new ChangeStyle(this, st, overlap));
             return true;
         } else {
-            LOGE() << "The style file is not compatible with this version of MuseScore.";
+            LOGE() << "The style file is not compatible with this version of MuseScore Studio.";
             return false;
         }
     }
@@ -175,7 +175,7 @@ void Score::print(Painter* painter, int pageNo)
         }
         painter->save();
         painter->translate(e->pagePos());
-        EngravingItem::renderer()->drawItem(e, painter);
+        renderer()->drawItem(e, painter);
         painter->restore();
     }
     MScore::pdfPrinting = false;

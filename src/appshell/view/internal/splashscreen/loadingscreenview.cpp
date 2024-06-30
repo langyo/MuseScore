@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2022 MuseScore BVBA and others
+ * Copyright (C) 2022 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -33,10 +33,10 @@ using namespace mu::appshell;
 
 static const QString imagePath(":/resources/LoadingScreen.svg");
 
-static constexpr QSize loadingScreenSize(810, 405);
+static constexpr QSize loadingScreenSize(810, 406);
 
 static const QColor messageColor("#99FFFFFF");
-static constexpr QRectF messageRect(loadingScreenSize.width() / 2, 269, 0, 0);
+static constexpr QRectF messageRect(loadingScreenSize.width() / 2, 264, 0, 0);
 
 static const QString website("www.musescore.org");
 static constexpr QRectF websiteRect(loadingScreenSize.width() - 48, loadingScreenSize.height() - 48, 0, 0);
@@ -51,7 +51,7 @@ LoadingScreenView::LoadingScreenView(QWidget* parent)
     setAttribute(Qt::WA_TranslucentBackground);
     resize(loadingScreenSize);
 
-    m_message = qtrc("appshell", "Loading…\u200e");
+    m_message = muse::qtrc("appshell", "Loading…\u200e");
 }
 
 bool LoadingScreenView::event(QEvent* event)
@@ -96,5 +96,5 @@ void LoadingScreenView::draw(QPainter* painter)
 
     painter->drawText(websiteRect.translated(0.0, -websiteBoundingRect.height() - versionNumberSpacing),
                       Qt::AlignBottom | alignment | Qt::TextDontClip,
-                      qtrc("appshell", "Version %1").arg(application()->fullVersion().toString()));
+                      muse::qtrc("appshell", "Version %1").arg(application()->fullVersion().toString()));
 }

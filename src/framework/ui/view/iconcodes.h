@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_UI_ICONCODE_H
-#define MU_UI_ICONCODE_H
+#ifndef MUSE_UI_ICONCODE_H
+#define MUSE_UI_ICONCODE_H
 
 #include <QObject>
 
@@ -42,7 +42,7 @@
 #undef FILE_OPEN
 #endif
 
-namespace mu::ui {
+namespace muse::ui {
 /**
  * @brief The IconCode class simplifies access to the icons from the icon font
  *
@@ -167,6 +167,13 @@ public:
         KEY_SIGNATURE = 0xEF81,
         LINE_DASHED = 0xEF82,
         LINE_WIDE_DASHED = 0xF434,
+
+        ZOOM_TOGGLE = 0xF437,
+        FIT_SELECTION = 0xF438,
+        FIT_PROJECT = 0xF439,
+        TRIM_AUDIO_OUTSIDE_SELECTION = 0xF43A,
+        SILENCE_AUDIO_SELECTION = 0xF43B,
+
         LINE_DOTTED = 0xEF83,
         LINE_NORMAL = 0xEF84,
         LINE_WITH_END_HOOK = 0xEF85,
@@ -347,6 +354,8 @@ public:
         DIMINUENDO = 0xF414,
         CRESCENDO = 0xF415,
 
+        MICROPHONE = 0xF41B,
+
         APP_MINIMIZE = 0xF41C,
         APP_MAXIMIZE = 0xF41D,
         APP_UNMAXIMIZE = 0xF41E,
@@ -377,16 +386,27 @@ public:
 
         CLOUD = 0xF435,
 
+        WAVEFORM = 0xF43C,
         CROSS_STAFF_BEAMING = 0xF43D,
 
         TEMPO_CHANGE = 0xF43F,
 
         PLUGIN = 0xF440,
         LYRICS = 0xF441,
+        LEARN = 0xF441,
+        SPECTROGRAM = 0xF442,
+        SPECTROGRAM_BOX_SELECTION = 0xF443,
+        BRUSH = 0xF444,
 
+        PLAY_FILL = 0xF446,
         STOP_FILL = 0xF447,
+        REWIND_START_FILL = 0xF448,
+        REWIND_END_FILL = 0xF449,
+        RECORD_FILL = 0xF44A,
+        PAUSE_FILL = 0xF44B,
 
         REST_8TH = 0xF44C,
+        CIRCLE = 0xF44D,
 
         SHARE_AUDIO = 0xF44F,
 
@@ -396,6 +416,8 @@ public:
 
         CLOUD_FILL = 0xF454,
         BRAILLE = 0xF455,
+
+        AUTOMATION = 0xF45C,
 
         GUITAR_BEND_REGULAR = 0xF45F,
         GUITAR_PRE_BEND = 0xF460,
@@ -423,4 +445,4 @@ static inline QChar iconCodeToChar(IconCode::Code code)
 }
 }
 
-#endif // MU_UI_ICONCODE_H
+#endif // MUSE_UI_ICONCODE_H

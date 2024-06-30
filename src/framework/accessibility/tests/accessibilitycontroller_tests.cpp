@@ -35,7 +35,7 @@ using ::testing::_;
 using ::testing::SaveArg;
 using ::testing::DoAll;
 
-using namespace mu;
+using namespace muse;
 using namespace muse::accessibility;
 
 class Accessibility_ControllerTests : public ::testing::Test
@@ -44,9 +44,11 @@ public:
 
     void SetUp() override
     {
-        m_controller = std::make_shared<AccessibilityController>();
+        m_controller = std::make_shared<AccessibilityController>(muse::modularity::globalCtx());
 
-        m_mainWindow = std::make_shared<ui::MainWindowMock>();
+        m_controller->setAccesibilityEnabled(true);
+
+        m_mainWindow = std::make_shared<muse::ui::MainWindowMock>();
         m_controller->mainWindow.set(m_mainWindow);
 
         m_application = std::make_shared<ApplicationMock>();
@@ -65,6 +67,7 @@ public:
         size_t accessibleChildCount() const override { return 0; }
         const IAccessible* accessibleChild(size_t) const override { return nullptr; }
         QWindow* accessibleWindow() const override { return nullptr; }
+        muse::modularity::ContextPtr iocContext() const override { return muse::modularity::globalCtx(); }
         IAccessible::Role accessibleRole() const override { return IAccessible::NoRole; }
         QString accessibleName() const override { return QString(); }
         QString accessibleDescription() const override { return QString(); }
@@ -151,7 +154,7 @@ public:
 #endif
 
     std::shared_ptr<AccessibilityController> m_controller;
-    std::shared_ptr<ui::MainWindowMock> m_mainWindow;
+    std::shared_ptr<muse::ui::MainWindowMock> m_mainWindow;
     std::shared_ptr<AccessibilityConfigurationMock> m_configuration;
     std::shared_ptr<ApplicationMock> m_application;
 };

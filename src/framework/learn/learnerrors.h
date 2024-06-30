@@ -19,13 +19,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_LEARN_LEARNERRORS_H
-#define MU_LEARN_LEARNERRORS_H
+#ifndef MUSE_LEARN_LEARNERRORS_H
+#define MUSE_LEARN_LEARNERRORS_H
 
 #include "types/ret.h"
 #include "translation.h"
 
-namespace mu::learn {
+namespace muse::learn {
 enum class Err {
     Undefined       = int(Ret::Code::Undefined),
     NoError         = int(Ret::Code::Ok),
@@ -42,11 +42,11 @@ inline Ret make_ret(Err e)
     case Err::Undefined: return Ret(retCode);
     case Err::NoError: return Ret(retCode);
     case Err::UnknownError: return Ret(retCode);
-    case Err::PlaylistIsEmpty: return Ret(retCode, trc("learn", "The received playlist is empty."));
+    case Err::PlaylistIsEmpty: return Ret(retCode, muse::trc("learn", "The received playlist is empty."));
     }
 
     return Ret(static_cast<int>(e));
 }
 }
 
-#endif // MU_LEARN_LEARNERRORS_H
+#endif // MUSE_LEARN_LEARNERRORS_H

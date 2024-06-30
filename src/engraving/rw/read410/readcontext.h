@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -70,7 +70,6 @@ struct TextStyleMap {
 
 class ReadContext
 {
-    INJECT(IEngravingFontsProvider, engravingFonts)
 public:
 
     ReadContext() = default;
@@ -86,6 +85,7 @@ public:
     const ReadContext* masterCtx() const;
 
     const MStyle& style() const;
+    std::shared_ptr<IEngravingFontsProvider> engravingFonts() const;
 
     bool pasteMode() const { return _pasteMode; }
     void setPasteMode(bool v) { _pasteMode = v; }
@@ -97,6 +97,7 @@ public:
     int fileDivision(int t) const;
 
     double spatium() const;
+    void setSpatium(double v);
 
     compat::DummyElement* dummy() const;
 
@@ -131,10 +132,10 @@ public:
     int currentMeasureIndex() const { return _curMeasureIdx; }
 
     void addBeam(Beam* s);
-    Beam* findBeam(int id) const { return mu::value(_beams, id, nullptr); }
+    Beam* findBeam(int id) const { return muse::value(_beams, id, nullptr); }
 
     void addTuplet(Tuplet* s);
-    Tuplet* findTuplet(int id) const { return mu::value(_tuplets, id, nullptr); }
+    Tuplet* findTuplet(int id) const { return muse::value(_tuplets, id, nullptr); }
     std::unordered_map<int, Tuplet*>& tuplets() { return _tuplets; }
     void checkTuplets();
 
@@ -157,7 +158,7 @@ public:
     TextStyleType lookupUserTextStyle(const String& name) const;
     void clearUserTextStyles() { userTextStyles.clear(); }
 
-    std::list<std::pair<EngravingItem*, mu::PointF> >& fixOffsets() { return _fixOffsets; }
+    std::list<std::pair<EngravingItem*, PointF> >& fixOffsets() { return _fixOffsets; }
 
     void addPartAudioSettingCompat(PartAudioSettingsCompat partAudioSetting);
     const SettingsCompat& settingCompat() { return _settingsCompat; }
@@ -232,7 +233,7 @@ private:
 
     std::list<TextStyleMap> userTextStyles;
 
-    std::list<std::pair<EngravingItem*, mu::PointF> > _fixOffsets;
+    std::list<std::pair<EngravingItem*, PointF> > _fixOffsets;
     SettingsCompat _settingsCompat;
 
     TimeSigMap m_compatTimeSigMap;

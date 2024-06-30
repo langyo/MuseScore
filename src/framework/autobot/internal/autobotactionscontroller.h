@@ -19,16 +19,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_AUTOBOT_AUTOBOTACTIONSCONTROLLER_H
-#define MU_AUTOBOT_AUTOBOTACTIONSCONTROLLER_H
+#ifndef MUSE_AUTOBOT_AUTOBOTACTIONSCONTROLLER_H
+#define MUSE_AUTOBOT_AUTOBOTACTIONSCONTROLLER_H
 
 #include "modularity/ioc.h"
 #include "actions/iactionsdispatcher.h"
 #include "actions/actionable.h"
 #include "iinteractive.h"
 
-namespace mu::autobot {
-class AutobotActionsController : public actions::Actionable
+namespace muse::autobot {
+class AutobotActionsController : public muse::actions::Actionable
 {
     INJECT(actions::IActionsDispatcher, dispatcher)
     INJECT(IInteractive, interactive)
@@ -39,8 +39,8 @@ public:
     void init();
 
 private:
-    void openUri(const mu::UriQuery& uri, bool isSingle = true);
+    void openUri(const muse::UriQuery& uri, bool isSingle = true);
 };
 }
 
-#endif // MU_AUTOBOT_AUTOBOTACTIONSCONTROLLER_H
+#endif // MUSE_AUTOBOT_AUTOBOTACTIONSCONTROLLER_H

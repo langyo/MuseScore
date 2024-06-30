@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -26,6 +26,7 @@
 
 #include "log.h"
 
+using namespace muse;
 using namespace mu;
 using namespace mu::engraving;
 
@@ -43,7 +44,7 @@ const char* SymNames::userNameForSymId(SymId id)
 
 String SymNames::translatedUserNameForSymId(SymId id)
 {
-    return mtrc("engraving/sym", userNameForSymId(id));
+    return muse::mtrc("engraving/sym", userNameForSymId(id));
 }
 
 SymId SymNames::symIdByName(const AsciiStringView& name, SymId def)
@@ -51,7 +52,7 @@ SymId SymNames::symIdByName(const AsciiStringView& name, SymId def)
     if (s_nameToSymIdHash.empty()) {
         loadNameToSymIdHash();
     }
-    return mu::value(s_nameToSymIdHash, name, def);
+    return muse::value(s_nameToSymIdHash, name, def);
 }
 
 SymId SymNames::symIdByName(const String& name, SymId def)
@@ -62,7 +63,7 @@ SymId SymNames::symIdByName(const String& name, SymId def)
 
 SymId SymNames::symIdByOldName(const AsciiStringView& oldName)
 {
-    return mu::value(s_oldNameToSymIdHash, oldName, SymId::noSym);
+    return muse::value(s_oldNameToSymIdHash, oldName, SymId::noSym);
 }
 
 SymId SymNames::symIdByUserName(const String& userName)

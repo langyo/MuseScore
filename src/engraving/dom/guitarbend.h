@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -92,7 +92,7 @@ public:
 
     double lineWidth() const;
 
-    muse::draw::Color uiColor() const;
+    Color uiColor() const;
 
     static void adaptBendsFromTabToStandardStaff(const Staff* staff);
 
@@ -158,7 +158,7 @@ public:
 
     bool isUserModified() const override;
 
-    muse::draw::Color uiColor() const { return guitarBend()->uiColor(); }
+    Color uiColor() const { return guitarBend()->uiColor(); }
 
     struct LayoutData : public LineSegment::LayoutData
     {

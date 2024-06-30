@@ -52,10 +52,6 @@ void ExtensionsActionController::registerPlugins()
         }
     }
 
-    dispatcher()->reg(this, "manage-plugins", [this]() {
-        interactive()->open("musescore://home?section=plugins");
-    });
-
     uiActionsRegister()->reg(m_uiActions);
 }
 
@@ -67,18 +63,18 @@ void ExtensionsActionController::onPluginTriggered(const UriQuery& q)
         return;
     }
 
-    if (m.config.enabled) {
+    if (m.enabled()) {
         provider()->perform(q);
         return;
     }
 
-    mu::IInteractive::Result result = interactive()->warning(
-        mu::qtrc("extensions", "The plugin “%1” is currently disabled. Do you want to enable it now?").arg(m.title).toStdString(),
-        mu::trc("extensions", "Alternatively, you can enable it at any time from Home > Plugins."),
-        { mu::IInteractive::Button::No, mu::IInteractive::Button::Yes });
+    IInteractive::Result result = interactive()->warning(
+        muse::qtrc("extensions", "The plugin “%1” is currently disabled. Do you want to enable it now?").arg(m.title).toStdString(),
+        muse::trc("extensions", "Alternatively, you can enable it at any time from Home > Plugins."),
+        { IInteractive::Button::No, IInteractive::Button::Yes });
 
-    if (result.standardButton() == mu::IInteractive::Button::Yes) {
-        provider()->setEnable(q.uri(), true);
+    if (result.standardButton() == IInteractive::Button::Yes) {
+        provider()->setExecPoint(q.uri(), EXEC_MANUALLY);
         provider()->perform(q);
     }
 }

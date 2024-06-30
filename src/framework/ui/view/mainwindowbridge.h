@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_DOCK_MAINWINDOWBRIDGE_H
-#define MU_DOCK_MAINWINDOWBRIDGE_H
+#ifndef MUSE_DOCK_MAINWINDOWBRIDGE_H
+#define MUSE_DOCK_MAINWINDOWBRIDGE_H
 
 #include <QObject>
 #include <QWindow>
@@ -31,8 +31,8 @@
 #include "framework/ui/imainwindow.h"
 #include "async/notification.h"
 
-namespace mu::ui {
-class MainWindowBridge : public QObject
+namespace muse::ui {
+class MainWindowBridge : public QObject, public Injectable
 {
     Q_OBJECT
 
@@ -40,7 +40,7 @@ class MainWindowBridge : public QObject
     Q_PROPERTY(QString filePath READ filePath WRITE setFilePath NOTIFY filePathChanged)
     Q_PROPERTY(bool fileModified READ fileModified WRITE setFileModified NOTIFY fileModifiedChanged)
 
-    INJECT(IMainWindow, mainWindow)
+    Inject<IMainWindow> mainWindow = { this };
 
 public:
     explicit MainWindowBridge(QObject* parent = nullptr);
@@ -87,4 +87,4 @@ private:
 };
 }
 
-#endif // MU_DOCK_MAINWINDOWBRIDGE_H
+#endif // MUSE_DOCK_MAINWINDOWBRIDGE_H

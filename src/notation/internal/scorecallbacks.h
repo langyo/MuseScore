@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -37,13 +37,13 @@ class ScoreCallbacks : public mu::engraving::MuseScoreView
 public:
     ScoreCallbacks() = default;
 
-    void dataChanged(const mu::RectF&) override;
+    void dataChanged(const muse::RectF&) override;
     void updateAll() override;
-    void drawBackground(muse::draw::Painter*, const RectF&) const override;
-    const mu::Rect geometry() const override;
+    void drawBackground(muse::draw::Painter*, const muse::RectF&) const override;
+    const muse::Rect geometry() const override;
     qreal selectionProximity() const override;
     void setDropTarget(const mu::engraving::EngravingItem* dropTarget) override;
-    void setDropRectangle(const RectF& rect) override;
+    void setDropRectangle(const muse::RectF& rect) override;
     void changeEditElement(mu::engraving::EngravingItem* newElement) override;
     void adjustCanvasPosition(const mu::engraving::EngravingItem*, int staffIdx = -1) override;
 

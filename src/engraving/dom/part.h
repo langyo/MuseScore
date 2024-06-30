@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -78,8 +78,8 @@ public:
     Part(Score* score = nullptr);
     void initFromInstrTemplate(const InstrumentTemplate*);
 
-    const ID& id() const;
-    void setId(const ID& id);
+    const muse::ID& id() const;
+    void setId(const muse::ID& id);
 
     Part* clone() const;
 
@@ -205,7 +205,7 @@ private:
     String m_partName;                ///< used in tracklist (mixer)
     InstrumentList m_instruments;
     std::vector<Staff*> m_staves;
-    ID m_id = INVALID_ID;             ///< used for MusicXml import
+    muse::ID m_id = INVALID_ID;       ///< used for MusicXml import
     bool m_show = false;              ///< show part in partitur if true
     bool m_soloist = false;           ///< used in score ordering
     int m_capoFret = 0;

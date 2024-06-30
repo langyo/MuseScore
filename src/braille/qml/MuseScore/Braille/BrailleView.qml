@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,8 +24,8 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
+import Muse.Ui 1.0
+import Muse.UiComponents 1.0
 import MuseScore.Braille 1.0
 
 StyledFlickable {
@@ -211,18 +211,18 @@ StyledFlickable {
         }
 
         Component.onCompleted: {
-            textInputFieldModel.init()
+            textInputModel.init()
         }
 
-        TextInputFieldModel {
-            id: textInputFieldModel
+        TextInputModel {
+            id: textInputModel
         }
 
         Keys.onPressed: {
             if (event.key === Qt.Key_Tab) {
                 //! NOTE: We need to handle Tab key here because https://doc.qt.io/qt-5/qml-qtquick-controls2-textarea.html#tab-focus
                 //!       and we don't use qt navigation system
-                if (textInputFieldModel.handleShortcut(Qt.Key_Tab, Qt.NoModifier)) {
+                if (textInputModel.handleShortcut(Qt.Key_Tab, Qt.NoModifier)) {
                     brailleTextArea.focus = false;
                     event.accepted = true;
                     return;

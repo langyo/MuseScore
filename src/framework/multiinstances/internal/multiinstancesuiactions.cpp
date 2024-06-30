@@ -25,14 +25,15 @@
 #include "shortcuts/shortcutcontext.h"
 #include "types/translatablestring.h"
 
-using namespace mu::ui;
+using namespace muse;
+using namespace muse::ui;
 using namespace muse::actions;
-using namespace mu::mi;
+using namespace muse::mi;
 
 const UiActionList MultiInstancesUiActions::m_actions = {
     UiAction("multiinstances-dev-show-info",
-             mu::ui::UiCtxAny,
-             mu::shortcuts::CTX_ANY,
+             muse::ui::UiCtxAny,
+             muse::shortcuts::CTX_ANY,
              TranslatableString("action", "&Multiinstances")
              )
 };
@@ -47,7 +48,7 @@ bool MultiInstancesUiActions::actionEnabled(const UiAction&) const
     return true;
 }
 
-mu::async::Channel<ActionCodeList> MultiInstancesUiActions::actionEnabledChanged() const
+async::Channel<ActionCodeList> MultiInstancesUiActions::actionEnabledChanged() const
 {
     static async::Channel<ActionCodeList> ch;
     return ch;
@@ -58,7 +59,7 @@ bool MultiInstancesUiActions::actionChecked(const UiAction&) const
     return false;
 }
 
-mu::async::Channel<ActionCodeList> MultiInstancesUiActions::actionCheckedChanged() const
+async::Channel<ActionCodeList> MultiInstancesUiActions::actionCheckedChanged() const
 {
     static async::Channel<ActionCodeList> ch;
     return ch;

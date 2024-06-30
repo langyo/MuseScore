@@ -19,12 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_NETWORK_NETWORKMANAGERSTUB_H
-#define MU_NETWORK_NETWORKMANAGERSTUB_H
+#ifndef MUSE_NETWORK_NETWORKMANAGERSTUB_H
+#define MUSE_NETWORK_NETWORKMANAGERSTUB_H
 
 #include "network/inetworkmanager.h"
 
-namespace mu::network {
+namespace muse::network {
 class NetworkManagerStub : public INetworkManager
 {
 public:
@@ -38,10 +38,10 @@ public:
               const RequestHeaders& headers = RequestHeaders()) override;
     Ret del(const QUrl& url, IncomingDevice* incomingData, const RequestHeaders& headers = RequestHeaders()) override;
 
-    mu::Progress progress() const override;
+    Progress progress() const override;
 
     void abort() override;
 };
 }
 
-#endif // MU_NETWORK_NETWORKMANAGERSTUB_H
+#endif // MUSE_NETWORK_NETWORKMANAGERSTUB_H

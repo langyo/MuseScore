@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -47,15 +47,15 @@
 #include "log.h"
 
 using namespace mu;
-using namespace mu::io;
+using namespace muse::io;
 using namespace mu::engraving;
 
 //---------------------------------------------------------
 //   MasterScore
 //---------------------------------------------------------
 
-MasterScore::MasterScore(std::weak_ptr<engraving::EngravingProject> project)
-    : Score()
+MasterScore::MasterScore(const muse::modularity::ContextPtr& iocCtx, std::weak_ptr<engraving::EngravingProject> project)
+    : Score(iocCtx)
 {
     m_project = project;
     m_undoStack   = new UndoStack();
@@ -84,11 +84,11 @@ MasterScore::MasterScore(std::weak_ptr<engraving::EngravingProject> project)
     metaTags().insert({ u"translator", u"" });
     metaTags().insert({ u"source", u"" });
     metaTags().insert({ u"copyright", u"" });
-    metaTags().insert({ u"creationDate", Date::currentDate().toString(DateFormat::ISODate) });
+    metaTags().insert({ u"creationDate", muse::Date::currentDate().toString(muse::DateFormat::ISODate) });
 }
 
-MasterScore::MasterScore(const MStyle& s, std::weak_ptr<engraving::EngravingProject> project)
-    : MasterScore{project}
+MasterScore::MasterScore(const muse::modularity::ContextPtr& iocCtx, const MStyle& s, std::weak_ptr<engraving::EngravingProject> project)
+    : MasterScore{iocCtx, project}
 {
     setStyle(s);
 }
@@ -104,7 +104,7 @@ MasterScore::~MasterScore()
     delete m_sigmap;
     delete m_tempomap;
     delete m_undoStack;
-    DeleteAll(m_excerpts);
+    muse::DeleteAll(m_excerpts);
 }
 
 //---------------------------------------------------------
@@ -223,7 +223,7 @@ void MasterScore::addExcerpt(Excerpt* ex, size_t index)
         initParts(ex);
     }
 
-    excerpts().insert(excerpts().begin() + (index == mu::nidx ? excerpts().size() : index), ex);
+    excerpts().insert(excerpts().begin() + (index == muse::nidx ? excerpts().size() : index), ex);
     setExcerptsChanged(true);
 }
 
@@ -233,7 +233,7 @@ void MasterScore::addExcerpt(Excerpt* ex, size_t index)
 
 void MasterScore::removeExcerpt(Excerpt* ex)
 {
-    if (mu::remove(excerpts(), ex)) {
+    if (muse::remove(excerpts(), ex)) {
         setExcerptsChanged(true);
         // delete ex;
     } else {
@@ -250,12 +250,12 @@ MasterScore* MasterScore::clone()
     Buffer buffer;
     buffer.open(IODevice::WriteOnly);
 
-    rw::RWRegister::writer()->writeScore(this, &buffer, false);
+    rw::RWRegister::writer(iocContext())->writeScore(this, &buffer, false);
 
     buffer.close();
 
-    ByteArray scoreData = buffer.data();
-    MasterScore* score = new MasterScore(style(), m_project);
+    muse::ByteArray scoreData = buffer.data();
+    MasterScore* score = new MasterScore(iocContext(), style(), m_project);
 
     XmlReader r(scoreData);
     MscLoader().readMasterScore(score, r, true);
@@ -328,8 +328,8 @@ void MasterScore::setLayoutAll(staff_idx_t staff, const EngravingItem* e)
 
     if (e && e->score() == this) {
         // TODO: map staff number properly
-        const staff_idx_t startStaff = staff == mu::nidx ? 0 : staff;
-        const staff_idx_t endStaff = staff == mu::nidx ? (nstaves() - 1) : staff;
+        const staff_idx_t startStaff = staff == muse::nidx ? 0 : staff;
+        const staff_idx_t endStaff = staff == muse::nidx ? (nstaves() - 1) : staff;
         m_cmdState.setStaff(startStaff);
         m_cmdState.setStaff(endStaff);
 
@@ -579,6 +579,7 @@ MeasureBase* MasterScore::insertMeasure(MeasureBase* beforeMeasure, const Insert
         //
         // remove clef, barlines, time and key signatures
         //
+        bool headerKeySig = false;
         if (measureInsert) {
             // if inserting before first measure, always preserve clefs and signatures
             // at the begining of the score (move them back)
@@ -640,6 +641,9 @@ MeasureBase* MasterScore::insertMeasure(MeasureBase* beforeMeasure, const Insert
                             } else {
                                 ee = e;
                             }
+                            if (s->header()) {
+                                headerKeySig = true;
+                            }
                         } else if (e->isTimeSig()) {
                             TimeSig* ts = toTimeSig(e);
                             timeSigList.push_back(ts);
@@ -655,7 +659,7 @@ MeasureBase* MasterScore::insertMeasure(MeasureBase* beforeMeasure, const Insert
                         }
                         if (ee) {
                             doUndoRemoveElement(ee);
-                            if (s->empty()) {
+                            if (s->empty() && s->isTimeSigType()) {
                                 undoRemoveElement(s);
                             }
                         }
@@ -705,6 +709,9 @@ MeasureBase* MasterScore::insertMeasure(MeasureBase* beforeMeasure, const Insert
         for (KeySig* ks : keySigList) {
             KeySig* nks = Factory::copyKeySig(*ks);
             Segment* s  = newMeasure->undoGetSegmentR(SegmentType::KeySig, Fraction(0, 1));
+            if (headerKeySig || newMeasure->tick().isZero()) {
+                s->setHeader(true);
+            }
             nks->setParent(s);
             if (!nks->isAtonal()) {
                 nks->setKey(nks->concertKey());  // to set correct (transposing) key
@@ -714,6 +721,7 @@ MeasureBase* MasterScore::insertMeasure(MeasureBase* beforeMeasure, const Insert
         for (Clef* clef : clefList) {
             Clef* nClef = Factory::copyClef(*clef);
             Segment* s  = newMeasure->undoGetSegmentR(SegmentType::HeaderClef, Fraction(0, 1));
+            s->setHeader(true);
             nClef->setParent(s);
             undoAddElement(nClef);
         }

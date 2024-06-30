@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -73,6 +73,7 @@ enum layerElementCounter {
 
 class MeiExporter
 {
+public:
     INJECT_STATIC(mu::iex::mei::IMeiConfiguration, configuration)
 
 public:
@@ -84,8 +85,8 @@ private:
     bool writeScore();
     bool writeScoreDef();
     bool writePgHead(const engraving::VBox* vBox);
-    bool writeLines(pugi::xml_node node, const StringList& lines);
-    bool writeLinesWithSMuFL(pugi::xml_node node, const StringList& lines);
+    bool writeLines(pugi::xml_node node, const muse::StringList& lines);
+    bool writeLinesWithSMuFL(pugi::xml_node node, const muse::StringList& lines);
     bool writeScoreDefChange();
     bool writeStaffGrpStart(const engraving::Staff* staff, std::vector<int>& ends, const engraving::Part* part);
     bool writeStaffGrpEnd(const engraving::Staff* staff, std::vector<int>& ends);
@@ -110,8 +111,9 @@ private:
     bool writeChord(const engraving::Chord* chord, const engraving::Staff* staff);
     bool writeGraceGrp(const engraving::Chord* chord, const engraving::Staff* staff, bool isAfter = false);
     bool writeNote(const engraving::Note* note, const engraving::Chord* chord, const engraving::Staff* staff, bool isChord);
+    bool writeMRpt(const engraving::MeasureRepeat* measureRepeat);
     bool writeRest(const engraving::Rest* rest, const engraving::Staff* staff);
-    bool writeSyl(const engraving::Lyrics* lyrics, const String& text, ElisionType elision);
+    bool writeSyl(const engraving::Lyrics* lyrics, const muse::String& text, ElisionType elision);
     bool writeTuplet(const engraving::Tuplet* tuplet, const engraving::EngravingItem* item, bool& closing);
     bool writeVerses(const engraving::ChordRest* chordRest);
     bool writeVerse(const engraving::Lyrics* lyrics);
@@ -130,9 +132,11 @@ private:
     bool writeFermata(const engraving::Fermata* fermata, const libmei::xsdPositiveInteger_List& staffNs, double tstamp);
     bool writeHairpin(const engraving::Hairpin* hairpin, const std::string& startid);
     bool writeHarm(const engraving::Harmony* harmony, const std::string& startid);
+    bool writeLv(const engraving::Articulation* articulation, const std::string& startid);
     bool writeOctave(const engraving::Ottava* ottava, const std::string& startid);
     bool writeOrnament(const engraving::Ornament* ornament, const std::string& startid);
     bool writePedal(const engraving::Pedal* pedal, const std::string& startid);
+    bool writeRehearsalMark(const engraving::RehearsalMark* mark, const std::string& startid);
     bool writeRepeatMark(const engraving::Jump* jump, const engraving::Measure* measure);
     bool writeRepeatMark(const engraving::Marker* marker, const engraving::Measure* measure);
     bool writeSlur(const engraving::Slur* slur, const std::string& startid);
@@ -157,10 +161,11 @@ private:
     void addJumpToRepeatMarks();
     bool addFermataToMap(engraving::track_idx_t track, const engraving::Segment* segment, const engraving::Measure* measure);
     std::pair<libmei::xsdPositiveInteger_List, double> findTstampFor(const engraving::EngravingItem* item);
-    bool isNode(pugi::xml_node node, const String& name);
+    bool isNode(pugi::xml_node node, const muse::String& name);
     pugi::xml_node getLastChordRest(pugi::xml_node node);
     void addNodeToOpenControlEvents(pugi::xml_node node, const engraving::Spanner* spanner, const std::string& startid);
     void addEndidToControlEvents();
+    bool isLaissezVibrer(const engraving::SymId id);
 
     /**
      * Methods for generating @xml:ids
@@ -228,7 +233,7 @@ private:
     std::vector<int> m_layerCounterFor;
 
     /** map of abbreviations for element within layers */
-    inline static const std::map<layerElementCounter, String> s_layerXmlIdMap = {
+    inline static const std::map<layerElementCounter, muse::String> s_layerXmlIdMap = {
         { ACCID_L, u"a" },
         { BEAM_L, u"b" },
         { GRACEGRP_L, u"g" },

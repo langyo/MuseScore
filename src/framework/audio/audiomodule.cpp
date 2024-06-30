@@ -51,16 +51,17 @@
 #include "internal/fx/musefxresolver.h"
 
 #include "diagnostics/idiagnosticspathsregister.h"
+#include "devtools/inputlag.h"
 
 #include "log.h"
 
-using namespace mu;
-using namespace mu::modularity;
+using namespace muse;
+using namespace muse::modularity;
 using namespace muse::audio;
 using namespace muse::audio::synth;
 using namespace muse::audio::fx;
 
-#ifdef JACK_AUDIO
+#ifdef MUSE_MODULE_AUDIO_JACK
 #include "internal/platform/jack/jackaudiodriver.h"
 #endif
 
@@ -85,6 +86,18 @@ using namespace muse::audio::fx;
 #include "internal/platform/web/webaudiodriver.h"
 #endif
 
+static void measureInputLag(const float* buf, const size_t size)
+{
+    if (INPUT_LAG_TIMER_STARTED) {
+        for (size_t i = 0; i < size; ++i) {
+            if (!RealIsNull(buf[i])) {
+                STOP_INPUT_LAG_TIMER;
+                return;
+            }
+        }
+    }
+}
+
 static void audio_init_qrc()
 {
     Q_INIT_RESOURCE(audio);
@@ -108,11 +121,11 @@ void AudioModule::registerExports()
     m_audioOutputController = std::make_shared<AudioOutputDeviceController>();
     m_fxResolver = std::make_shared<FxResolver>();
     m_synthResolver = std::make_shared<SynthResolver>();
-    m_playbackFacade = std::make_shared<Playback>();
+    m_playbackFacade = std::make_shared<Playback>(iocContext());
     m_soundFontRepository = std::make_shared<SoundFontRepository>();
     m_registerAudioPluginsScenario = std::make_shared<RegisterAudioPluginsScenario>();
 
-#if defined(JACK_AUDIO)
+#if defined(MUSE_MODULE_AUDIO_JACK)
     m_audioDriver = std::shared_ptr<IAudioDriver>(new JackAudioDriver());
 #else
 
@@ -134,7 +147,7 @@ void AudioModule::registerExports()
     m_audioDriver = std::shared_ptr<IAudioDriver>(new WebAudioDriver());
 #endif
 
-#endif // JACK_AUDIO
+#endif // MUSE_MODULE_AUDIO_JACK
 
     ioc()->registerExport<IAudioConfiguration>(moduleName(), m_configuration);
     ioc()->registerExport<IAudioThreadSecurer>(moduleName(), std::make_shared<AudioThreadSecurer>());
@@ -159,7 +172,7 @@ void AudioModule::registerResources()
 
 void AudioModule::registerUiTypes()
 {
-    ioc()->resolve<ui::IUiEngine>(moduleName())->addSourceImportPath(audio_QML_IMPORT);
+    ioc()->resolve<ui::IUiEngine>(moduleName())->addSourceImportPath(muse_audio_QML_IMPORT);
 }
 
 void AudioModule::resolveImports()
@@ -218,7 +231,7 @@ void AudioModule::onInit(const IApplication::RunMode& mode)
     setupAudioDriver(mode);
 
     //! --- Diagnostics ---
-    auto pr = ioc()->resolve<diagnostics::IDiagnosticsPathsRegister>(moduleName());
+    auto pr = ioc()->resolve<muse::diagnostics::IDiagnosticsPathsRegister>(moduleName());
     if (pr) {
         std::vector<io::path_t> paths = m_configuration->soundFontDirectories();
         for (const io::path_t& p : paths) {
@@ -258,14 +271,21 @@ void AudioModule::onDestroy()
 
 void AudioModule::setupAudioDriver(const IApplication::RunMode& mode)
 {
+    const bool shouldMeasureInputLag = m_configuration->shouldMeasureInputLag();
+
     IAudioDriver::Spec requiredSpec;
     requiredSpec.sampleRate = m_configuration->sampleRate();
     requiredSpec.format = IAudioDriver::Format::AudioF32;
     requiredSpec.channels = m_configuration->audioChannelsCount();
     requiredSpec.samples = m_configuration->driverBufferSize();
-    requiredSpec.callback = [this](void* /*userdata*/, uint8_t* stream, int byteCount) {
+    requiredSpec.callback = [this, shouldMeasureInputLag](void* /*userdata*/, uint8_t* stream, int byteCount) {
         auto samplesPerChannel = byteCount / (2 * sizeof(float));
-        m_audioBuffer->pop(reinterpret_cast<float*>(stream), samplesPerChannel);
+        float* dest = reinterpret_cast<float*>(stream);
+        m_audioBuffer->pop(dest, samplesPerChannel);
+
+        if (shouldMeasureInputLag) {
+            measureInputLag(dest, samplesPerChannel * m_audioBuffer->audioChannelCount());
+        }
     };
 
     if (mode == IApplication::RunMode::GuiApp) {

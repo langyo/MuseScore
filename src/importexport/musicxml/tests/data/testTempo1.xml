@@ -237,17 +237,9 @@
     <measure number="5">
       <direction placement="above">
         <direction-type>
-          <words>Vivace</words>
+          <words font-weight="bold" font-size="12">Vivace</words>
           </direction-type>
-        </direction>
-      <direction placement="above">
-        <direction-type>
-          <metronome parentheses="yes">
-            <beat-unit>quarter</beat-unit>
-            <per-minute>126</per-minute>
-            </metronome>
-          </direction-type>
-        <sound tempo="126"/>
+        <sound tempo="120"/>
         </direction>
       <note>
         <pitch>

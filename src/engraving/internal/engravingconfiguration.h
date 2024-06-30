@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -33,67 +33,70 @@
 #include "../iengravingconfiguration.h"
 
 namespace mu::engraving {
-class EngravingConfiguration : public IEngravingConfiguration, public async::Asyncable
+class EngravingConfiguration : public IEngravingConfiguration, public muse::Injectable, public muse::async::Asyncable
 {
-    INJECT(mu::IGlobalConfiguration, globalConfiguration)
-    INJECT(mu::ui::IUiConfiguration, uiConfiguration)
-    INJECT(muse::accessibility::IAccessibilityConfiguration, accessibilityConfiguration)
-    INJECT(iex::guitarpro::IGuitarProConfiguration, guitarProConfiguration);
+    muse::Inject<muse::IGlobalConfiguration> globalConfiguration = { this };
+    muse::Inject<muse::ui::IUiConfiguration> uiConfiguration = { this };
+    muse::Inject<muse::accessibility::IAccessibilityConfiguration> accessibilityConfiguration = { this };
+    muse::Inject<iex::guitarpro::IGuitarProConfiguration> guitarProConfiguration = { this };
 
 public:
-    EngravingConfiguration() = default;
+    EngravingConfiguration(const muse::modularity::ContextPtr& iocCtx)
+        : muse::Injectable(iocCtx) {}
 
     void init();
 
-    io::path_t appDataPath() const override;
+    muse::io::path_t appDataPath() const override;
 
-    io::path_t defaultStyleFilePath() const override;
-    void setDefaultStyleFilePath(const io::path_t& path) override;
+    muse::io::path_t defaultStyleFilePath() const override;
+    void setDefaultStyleFilePath(const muse::io::path_t& path) override;
 
-    io::path_t partStyleFilePath() const override;
-    void setPartStyleFilePath(const io::path_t& path) override;
+    muse::io::path_t partStyleFilePath() const override;
+    void setPartStyleFilePath(const muse::io::path_t& path) override;
 
     SizeF defaultPageSize() const override;
 
     String iconsFontFamily() const override;
 
-    muse::draw::Color defaultColor() const override;
-    muse::draw::Color scoreInversionColor() const override;
-    muse::draw::Color invisibleColor() const override;
-    muse::draw::Color lassoColor() const override;
-    muse::draw::Color warningColor() const override;
-    muse::draw::Color warningSelectedColor() const override;
-    muse::draw::Color criticalColor() const override;
-    muse::draw::Color criticalSelectedColor() const override;
-    muse::draw::Color formattingMarksColor() const override;
-    muse::draw::Color thumbnailBackgroundColor() const override;
-    muse::draw::Color noteBackgroundColor() const override;
-    muse::draw::Color fontPrimaryColor() const override;
-
-    muse::draw::Color timeTickAnchorColorLighter() const override;
-    muse::draw::Color timeTickAnchorColorDarker() const override;
+    Color defaultColor() const override;
+    Color scoreInversionColor() const override;
+    Color invisibleColor() const override;
+    Color lassoColor() const override;
+    Color warningColor() const override;
+    Color warningSelectedColor() const override;
+    Color criticalColor() const override;
+    Color criticalSelectedColor() const override;
+    Color formattingMarksColor() const override;
+    Color thumbnailBackgroundColor() const override;
+    Color noteBackgroundColor() const override;
+    Color fontPrimaryColor() const override;
+    Color voiceColor(voice_idx_t voiceIdx) const override;
 
     double guiScaling() const override;
 
-    muse::draw::Color selectionColor(voice_idx_t voiceIndex = 0, bool itemVisible = true,
-                                     bool itemIsUnlinkedFromScore = false) const override;
-    void setSelectionColor(voice_idx_t voiceIndex, muse::draw::Color color) override;
-    async::Channel<voice_idx_t, muse::draw::Color> selectionColorChanged() const override;
+    Color selectionColor(voice_idx_t voiceIndex = 0, bool itemVisible = true, bool itemIsUnlinkedFromScore = false) const override;
+    void setSelectionColor(voice_idx_t voiceIndex, Color color) override;
+    muse::async::Channel<voice_idx_t, Color> selectionColorChanged() const override;
 
-    muse::draw::Color highlightSelectionColor(voice_idx_t voice = 0) const override;
+    Color highlightSelectionColor(voice_idx_t voice = 0) const override;
 
     bool scoreInversionEnabled() const override;
     void setScoreInversionEnabled(bool value) override;
 
-    async::Notification scoreInversionChanged() const override;
+    bool dynamicsApplyToAllVoices() const override;
+    void setDynamicsApplyToAllVoices(bool v) override;
+
+    muse::async::Notification scoreInversionChanged() const override;
 
     const DebuggingOptions& debuggingOptions() const override;
     void setDebuggingOptions(const DebuggingOptions& options) override;
-    async::Notification debuggingOptionsChanged() const override;
+    muse::async::Notification debuggingOptionsChanged() const override;
 
     bool isAccessibleEnabled() const override;
 
     bool guitarProImportExperimental() const override;
+    bool useStretchedBends() const override;
+    bool shouldAddParenthesisOnStandardStaff() const override;
     bool negativeFretsAllowed() const override;
     bool crossNoteHeadAlwaysBlack() const override;
     bool enableExperimentalFretCircle() const override;
@@ -103,10 +106,10 @@ public:
     bool specificSlursLayoutWorkaround() const override;
 
 private:
-    async::Channel<voice_idx_t, muse::draw::Color> m_voiceColorChanged;
-    async::Notification m_scoreInversionChanged;
+    muse::async::Channel<voice_idx_t, Color> m_voiceColorChanged;
+    muse::async::Notification m_scoreInversionChanged;
 
-    ValNt<DebuggingOptions> m_debuggingOptions;
+    muse::ValNt<DebuggingOptions> m_debuggingOptions;
 
     bool m_multiVoice = false;
 };

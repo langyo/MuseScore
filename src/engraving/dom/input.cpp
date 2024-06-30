@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -47,7 +47,7 @@ class DrumSet;
 
 const Drumset* InputState::drumset() const
 {
-    if (!m_segment || m_track == mu::nidx) {
+    if (!m_segment || m_track == muse::nidx) {
         return nullptr;
     }
 
@@ -65,7 +65,7 @@ const Drumset* InputState::drumset() const
 
 StaffGroup InputState::staffGroup() const
 {
-    if (!m_segment || m_track == mu::nidx) {
+    if (!m_segment || m_track == muse::nidx) {
         return StaffGroup::STANDARD;
     }
 
@@ -102,7 +102,7 @@ Fraction InputState::tick() const
 ChordRest* InputState::cr() const
 {
     // _track could potentially be invalid, for instance after navigation through a frame
-    return m_segment && m_track != mu::nidx ? toChordRest(m_segment->element(m_track)) : 0;
+    return m_segment && m_track != muse::nidx ? toChordRest(m_segment->element(m_track)) : 0;
 }
 
 //---------------------------------------------------------
@@ -119,7 +119,7 @@ void InputState::setDots(int n)
 
 void InputState::setVoice(voice_idx_t v)
 {
-    if (v >= VOICES || m_track == mu::nidx) {
+    if (v >= VOICES || m_track == muse::nidx) {
         return;
     }
 

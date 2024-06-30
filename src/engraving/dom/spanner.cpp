@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -120,7 +120,7 @@ void SpannerSegment::spatiumChanged(double ov, double nv)
 //   mimeData
 //---------------------------------------------------------
 
-ByteArray SpannerSegment::mimeData(const PointF& dragOffset) const
+muse::ByteArray SpannerSegment::mimeData(const PointF& dragOffset) const
 {
     if (dragOffset.isNull()) { // where is dragOffset used?
         return spanner()->mimeData(dragOffset);
@@ -759,7 +759,7 @@ void Spanner::doComputeStartElement()
             if (startEl) {
                 m_startElement = startEl;
             } else {
-                m_startElement = startSeg->elementAt(trackZeroVoice(track()));
+                m_startElement = startSeg->firstElement(track2staff(track()));
             }
         }
     }
@@ -811,11 +811,12 @@ void Spanner::doComputeEndElement()
         if (systemFlag()) {
             m_endElement = endSeg;
         } else {
-            EngravingItem* endEl = endSeg->elementAt(track2());
+            track_idx_t trackIdx = effectiveTrack2();
+            EngravingItem* endEl = endSeg->elementAt(trackIdx);
             if (endEl) {
                 m_endElement = endEl;
             } else {
-                m_endElement = endSeg->elementAt(trackZeroVoice(track2()));
+                m_endElement = endSeg->firstElement(track2staff(trackIdx));
             }
         }
     }
@@ -1048,11 +1049,22 @@ Segment* Spanner::startSegment() const
 
     bool mmRest = style().styleB(Sid::createMultiMeasureRests);
     Fraction startTick = tick();
+    track_idx_t trackIdx = track();
+    staff_idx_t staffIdx = track2staff(trackIdx);
 
     Segment* startSeg = score()->tick2segment(startTick, true, SegmentType::ChordRest, mmRest);
 
-    if (!startSeg || !startSeg->elementAt(track())) {
+    if (!startSeg || !startSeg->hasElements(staffIdx) || (isVoiceSpecific() && !startSeg->elementAt(trackIdx))) {
         startSeg = score()->tick2segment(startTick, true, SegmentType::TimeTick, mmRest);
+    }
+
+    if (!startSeg && startTick < score()->endTick()) {
+        Measure* measure = mmRest ? score()->tick2measureMM(startTick) : score()->tick2measure(startTick);
+        if (measure) {
+            TimeTickAnchor* anchor = EditTimeTickAnchors::createTimeTickAnchor(measure, startTick - measure->tick(), track2staff(trackIdx));
+            EditTimeTickAnchors::updateLayout(measure);
+            return anchor->segment();
+        }
     }
 
     if (!startSeg) {
@@ -1071,18 +1083,21 @@ Segment* Spanner::endSegment() const
     assert(score() != NULL);
 
     bool mmRest = style().styleB(Sid::createMultiMeasureRests);
-
     Fraction endTick = tick2();
+    track_idx_t trackIdx = effectiveTrack2();
+    staff_idx_t staffIdx = track2staff(trackIdx);
 
     Segment* endSeg = score()->tick2segment(endTick, true, SegmentType::ChordRest, mmRest);
-    if (!endSeg || !endSeg->elementAt(track())) {
+
+    if (!endSeg || !endSeg->hasElements(staffIdx) || (isVoiceSpecific() && !endSeg->elementAt(trackIdx))) {
         endSeg = score()->tick2segment(endTick, true, SegmentType::TimeTick, mmRest);
     }
 
     if (!endSeg && !endTick.isZero()) {
         Measure* measure = mmRest ? score()->tick2measureMM(endTick) : score()->tick2measure(endTick);
         if (measure) {
-            TimeTickAnchor* anchor = EditTimeTickAnchors::createTimeTickAnchor(measure, endTick - measure->tick(), track2staff(track2()));
+            TimeTickAnchor* anchor = EditTimeTickAnchors::createTimeTickAnchor(measure, endTick - measure->tick(), track2staff(trackIdx));
+            EditTimeTickAnchors::updateLayout(measure);
             return anchor->segment();
         }
     }
@@ -1268,7 +1283,7 @@ EngravingItem* Spanner::nextSegmentElement()
 {
     Segment* s = startSegment();
     if (s) {
-        return s->firstElement(staffIdx());
+        return s->firstElementForNavigation(staffIdx());
     }
     return score()->lastElement();
 }
@@ -1281,7 +1296,7 @@ EngravingItem* Spanner::prevSegmentElement()
 {
     Segment* s = endSegment();
     if (s) {
-        return s->lastElement(staffIdx());
+        return s->lastElementForNavigation(staffIdx());
     }
     return score()->firstElement();
 }
@@ -1465,8 +1480,8 @@ bool Spanner::isUserModified() const
 
 void Spanner::eraseSpannerSegments()
 {
-    DeleteAll(m_segments);
-    DeleteAll(m_unusedSegments);
+    muse::DeleteAll(m_segments);
+    muse::DeleteAll(m_unusedSegments);
     m_segments.clear();
     m_unusedSegments.clear();
 }
@@ -1497,14 +1512,14 @@ String SpannerSegment::formatBarsAndBeats() const
 String SpannerSegment::formatStartBarsAndBeats(const Segment* segment) const
 {
     std::pair<int, float> barbeat = segment->barbeat();
-    return mtrc("engraving", "Start measure: %1; Start beat: %2")
+    return muse::mtrc("engraving", "Start measure: %1; Start beat: %2")
            .arg(String::number(barbeat.first), String::number(barbeat.second));
 }
 
 String SpannerSegment::formatEndBarsAndBeats(const Segment* segment) const
 {
     std::pair<int, float> barbeat = segment->barbeat();
-    return mtrc("engraving", "End measure: %1; End beat: %2")
+    return muse::mtrc("engraving", "End measure: %1; End beat: %2")
            .arg(String::number(barbeat.first), String::number(barbeat.second));
 }
 

@@ -23,7 +23,8 @@
 
 #include "log.h"
 
-using namespace mu::ui;
+using namespace muse;
+using namespace muse::ui;
 using namespace muse::actions;
 
 void UiActionsRegister::init()
@@ -246,7 +247,7 @@ void UiActionsRegister::updateChecked(const ActionCodeList& codes)
     }
 }
 
-mu::async::Channel<ActionCodeList> UiActionsRegister::actionStateChanged() const
+async::Channel<ActionCodeList> UiActionsRegister::actionStateChanged() const
 {
     return m_actionStateChanged;
 }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -48,8 +48,8 @@ class NotationMidiInput : public INotationMidiInput
 public:
     NotationMidiInput(IGetScore* getScore, INotationInteractionPtr notationInteraction, INotationUndoStackPtr undoStack);
 
-    void onMidiEventReceived(const midi::Event& event) override;
-    async::Channel<std::vector<const Note*> > notesReceived() const override;
+    void onMidiEventReceived(const muse::midi::Event& event) override;
+    muse::async::Channel<std::vector<const Note*> > notesReceived() const override;
 
     void onRealtimeAdvance() override;
 
@@ -57,8 +57,8 @@ private:
     mu::engraving::Score* score() const;
 
     void doProcessEvents();
-    Note* addNoteToScore(const midi::Event& e);
-    Note* makeNote(const midi::Event& e);
+    Note* addNoteToScore(const muse::midi::Event& e);
+    Note* makeNote(const muse::midi::Event& e);
 
     void enableMetronome();
     void disableMetronome();
@@ -79,10 +79,10 @@ private:
     IGetScore* m_getScore = nullptr;
     INotationInteractionPtr m_notationInteraction;
     INotationUndoStackPtr m_undoStack;
-    async::Channel<std::vector<const Note*> > m_notesReceivedChannel;
+    muse::async::Channel<std::vector<const Note*> > m_notesReceivedChannel;
 
     QTimer m_processTimer;
-    std::vector<midi::Event> m_eventsQueue;
+    std::vector<muse::midi::Event> m_eventsQueue;
 
     QTimer m_realtimeTimer;
     QTimer m_extendNoteTimer;

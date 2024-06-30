@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -222,7 +222,7 @@ public:
     static void layoutCapo(const Capo* item, Capo::LayoutData* ldata, const LayoutContext& ctx);
 
     static void layoutDeadSlapped(const DeadSlapped* item, DeadSlapped::LayoutData* ldata);
-    static void layoutDynamic(const Dynamic* item, Dynamic::LayoutData* ldata, const LayoutConfiguration& conf);
+    static void layoutDynamic(Dynamic* item, Dynamic::LayoutData* ldata, const LayoutConfiguration& conf);
 
     static void layoutExpression(const Expression* item, Expression::LayoutData* ldata);
 

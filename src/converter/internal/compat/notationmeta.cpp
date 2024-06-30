@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -32,6 +32,7 @@
 
 #include "log.h"
 
+using namespace muse;
 using namespace mu::converter;
 using namespace mu::engraving;
 
@@ -40,7 +41,7 @@ static QString boolToString(bool b)
     return b ? "true" : "false";
 }
 
-mu::RetVal<std::string> NotationMeta::metaJson(notation::INotationPtr notation)
+RetVal<std::string> NotationMeta::metaJson(notation::INotationPtr notation)
 {
     IF_ASSERT_FAILED(notation) {
         return make_ret(Ret::Code::UnknownError);

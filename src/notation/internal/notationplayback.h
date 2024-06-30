@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -38,45 +38,45 @@ class Score;
 }
 
 namespace mu::notation {
-class NotationPlayback : public INotationPlayback, public async::Asyncable
+class NotationPlayback : public INotationPlayback, public muse::async::Asyncable
 {
     INJECT(INotationConfiguration, configuration)
 
 public:
-    NotationPlayback(IGetScore* getScore, async::Notification notationChanged);
+    NotationPlayback(IGetScore* getScore, muse::async::Notification notationChanged);
 
     void init() override;
 
     const engraving::InstrumentTrackId& metronomeTrackId() const override;
-    engraving::InstrumentTrackId chordSymbolsTrackId(const ID& partId) const override;
+    engraving::InstrumentTrackId chordSymbolsTrackId(const muse::ID& partId) const override;
     bool isChordSymbolsTrack(const engraving::InstrumentTrackId& trackId) const override;
 
-    const mpe::PlaybackData& trackPlaybackData(const engraving::InstrumentTrackId& trackId) const override;
+    const muse::mpe::PlaybackData& trackPlaybackData(const engraving::InstrumentTrackId& trackId) const override;
     void triggerEventsForItems(const std::vector<const EngravingItem*>& items) override;
     void triggerMetronome(int tick) override;
 
     engraving::InstrumentTrackIdSet existingTrackIdSet() const override;
-    async::Channel<engraving::InstrumentTrackId> trackAdded() const override;
-    async::Channel<engraving::InstrumentTrackId> trackRemoved() const override;
+    muse::async::Channel<engraving::InstrumentTrackId> trackAdded() const override;
+    muse::async::Channel<engraving::InstrumentTrackId> trackRemoved() const override;
 
     muse::audio::msecs_t totalPlayTime() const override;
-    async::Channel<muse::audio::msecs_t> totalPlayTimeChanged() const override;
+    muse::async::Channel<muse::audio::msecs_t> totalPlayTimeChanged() const override;
 
-    float playedTickToSec(midi::tick_t tick) const override;
-    midi::tick_t secToPlayedTick(float sec) const override;
-    midi::tick_t secToTick(float sec) const override;
+    float playedTickToSec(muse::midi::tick_t tick) const override;
+    muse::midi::tick_t secToPlayedTick(float sec) const override;
+    muse::midi::tick_t secToTick(float sec) const override;
 
-    RetVal<midi::tick_t> playPositionTickByRawTick(midi::tick_t tick) const override;
-    RetVal<midi::tick_t> playPositionTickByElement(const EngravingItem* element) const override;
+    muse::RetVal<muse::midi::tick_t> playPositionTickByRawTick(muse::midi::tick_t tick) const override;
+    muse::RetVal<muse::midi::tick_t> playPositionTickByElement(const EngravingItem* element) const override;
 
-    void addLoopBoundary(LoopBoundaryType boundaryType, midi::tick_t tick) override;
+    void addLoopBoundary(LoopBoundaryType boundaryType, muse::midi::tick_t tick) override;
     void setLoopBoundariesEnabled(bool enabled) override;
     const LoopBoundaries& loopBoundaries() const override;
-    async::Notification loopBoundariesChanged() const override;
+    muse::async::Notification loopBoundariesChanged() const override;
 
-    const Tempo& tempo(midi::tick_t tick) const override;
-    MeasureBeat beat(midi::tick_t tick) const override;
-    midi::tick_t beatToTick(int measureIndex, int beatIndex) const override;
+    const Tempo& tempo(muse::midi::tick_t tick) const override;
+    MeasureBeat beat(muse::midi::tick_t tick) const override;
+    muse::midi::tick_t beatToTick(int measureIndex, int beatIndex) const override;
 
     double tempoMultiplier() const override;
     void setTempoMultiplier(double multiplier) override;
@@ -90,7 +90,7 @@ private:
 
     void addLoopIn(int tick);
     void addLoopOut(int tick);
-    RectF loopBoundaryRectByTick(LoopBoundaryType boundaryType, int tick) const;
+    muse::RectF loopBoundaryRectByTick(LoopBoundaryType boundaryType, int tick) const;
     void updateLoopBoundaries();
     void updateTotalPlayTime();
 
@@ -102,13 +102,13 @@ private:
 
     IGetScore* m_getScore = nullptr;
 
-    async::Notification m_notationChanged;
+    muse::async::Notification m_notationChanged;
 
     LoopBoundaries m_loopBoundaries;
-    async::Notification m_loopBoundariesChanged;
+    muse::async::Notification m_loopBoundariesChanged;
 
     muse::audio::msecs_t m_totalPlayTime = 0;
-    async::Channel<muse::audio::msecs_t> m_totalPlayTimeChanged;
+    muse::async::Channel<muse::audio::msecs_t> m_totalPlayTimeChanged;
 
     mutable Tempo m_currentTempo;
 

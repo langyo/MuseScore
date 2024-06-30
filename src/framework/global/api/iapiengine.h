@@ -19,18 +19,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_API_IAPIENGINE_H
-#define MU_API_IAPIENGINE_H
+#ifndef MUSE_API_IAPIENGINE_H
+#define MUSE_API_IAPIENGINE_H
 
 #include <QJSValue>
 #include <QObject>
+#include "modularity/ioc.h"
 
-namespace mu::api {
+namespace muse::api {
 class IApiEngine
 {
 public:
     virtual ~IApiEngine() = default;
 
+    virtual const modularity::ContextPtr& iocContext() const = 0;
     virtual QJSValue newQObject(QObject* o) = 0;
     virtual QJSValue newObject() = 0;
     virtual QJSValue newArray(size_t length = 0) = 0;

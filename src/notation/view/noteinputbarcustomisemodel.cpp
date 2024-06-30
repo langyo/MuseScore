@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -31,9 +31,9 @@
 #include "log.h"
 
 using namespace mu::notation;
-using namespace mu::workspace;
-using namespace mu::ui;
-using namespace mu::uicomponents;
+using namespace muse::workspace;
+using namespace muse::ui;
+using namespace muse::uicomponents;
 using namespace muse::actions;
 
 static const QString NOTE_INPUT_TOOLBAR_NAME("noteInput");
@@ -232,7 +232,7 @@ NoteInputBarCustomiseItem* NoteInputBarCustomiseModel::makeItem(const UiAction& 
 NoteInputBarCustomiseItem* NoteInputBarCustomiseModel::makeSeparatorItem()
 {
     NoteInputBarCustomiseItem* item = new NoteInputBarCustomiseItem(NoteInputBarCustomiseItem::ItemType::SEPARATOR, this);
-    item->setTitle(QString("-------  %1  -------").arg(qtrc("notation", "Separator line")));
+    item->setTitle(QString("-------  %1  -------").arg(muse::qtrc("notation", "Separator line")));
     item->setChecked(true); //! NOTE Can't be unchecked
     return item;
 }

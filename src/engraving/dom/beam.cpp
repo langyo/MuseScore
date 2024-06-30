@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -46,6 +46,7 @@
 #include "log.h"
 
 using namespace mu;
+using namespace muse;
 using namespace mu::engraving;
 
 namespace mu::engraving {
@@ -109,7 +110,7 @@ Beam::~Beam()
 
     clearBeamSegments();
 
-    DeleteAll(m_fragments);
+    muse::DeleteAll(m_fragments);
     m_fragments.clear();
 }
 
@@ -171,7 +172,7 @@ void Beam::remove(EngravingItem* e)
 void Beam::addChordRest(ChordRest* a)
 {
     a->setBeam(this);
-    if (!mu::contains(m_elements, a)) {
+    if (!muse::contains(m_elements, a)) {
         //
         // insert element in same order as it appears
         // in the score
@@ -197,7 +198,7 @@ void Beam::addChordRest(ChordRest* a)
 
 void Beam::removeChordRest(ChordRest* a)
 {
-    if (!mu::remove(m_elements, a)) {
+    if (!muse::remove(m_elements, a)) {
         LOGD("Beam::remove(): cannot find ChordRest");
     }
     a->setBeam(0);
@@ -438,10 +439,10 @@ void Beam::setAsFeathered(const bool slower)
 
 void Beam::reset()
 {
-    if (growLeft() != 1.0) {
+    if (!RealIsEqual(growLeft(), 1.0)) {
         undoChangeProperty(Pid::GROW_LEFT, 1.0);
     }
-    if (growRight() != 1.0) {
+    if (!RealIsEqual(growRight(), 1.0)) {
         undoChangeProperty(Pid::GROW_RIGHT, 1.0);
     }
     if (userModified()) {
@@ -710,39 +711,9 @@ void Beam::addSkyline(Skyline& sk)
     if (m_beamSegments.empty() || !addToSkyline()) {
         return;
     }
-    double lw2 = point(style().styleS(Sid::beamWidth)) * .5 * mag();
-    const LineF bs = m_beamSegments.front()->line;
-    double d  = (std::abs(bs.y2() - bs.y1())) / (bs.x2() - bs.x1());
-    if (m_beamSegments.size() > 1 && d > M_PI / 6.0) {
-        d = M_PI / 6.0;
-    }
-    double ww      = lw2 / sin(M_PI_2 - atan(d));
-    double _spatium = spatium();
 
-    for (const BeamSegment* beamSegment : m_beamSegments) {
-        double x = beamSegment->line.x1();
-        double y = beamSegment->line.y1();
-        double w = beamSegment->line.x2() - x;
-        int n   = (d < 0.01) ? 1 : int(ceil(w / _spatium));
-
-        double s = (beamSegment->line.y2() - y) / w;
-        w /= n;
-        for (int i = 1; i <= n; ++i) {
-            double y2 = y + w * s;
-            double yn, ys;
-            if (y2 > y) {
-                yn = y;
-                ys = y2;
-            } else {
-                yn = y2;
-                ys = y;
-            }
-            sk.north().add(x, yn - ww, w);
-            sk.south().add(x, ys + ww, w);
-            x += w;
-            y = y2;
-        }
-    }
+    // Only add the outer segment, no need to add the inner one
+    sk.add(m_beamSegments.front()->shape());
 }
 
 //---------------------------------------------------------
@@ -891,7 +862,7 @@ void Beam::clearBeamSegments()
         chordRest->setBeamlet(nullptr);
     }
 
-    DeleteAll(m_beamSegments);
+    muse::DeleteAll(m_beamSegments);
     m_beamSegments.clear();
 }
 
@@ -919,7 +890,7 @@ Shape BeamSegment::shape() const
     }
     double beamHorizontalLength = endPoint.x() - startPoint.x();
     // If beam is horizontal, one rectangle is enough
-    if (RealIsEqual(startPoint.y(), endPoint.y())) {
+    if (muse::RealIsEqual(startPoint.y(), endPoint.y())) {
         RectF rect(startPoint.x(), startPoint.y(), beamHorizontalLength, _beamWidth / 2);
         rect.adjust(0.0, -_beamWidth / 2, 0.0, 0.0);
         shape.add(rect, parentElement);

@@ -21,8 +21,8 @@
  */
 #include "workspaceconfigurationstub.h"
 
-using namespace mu::workspace;
-using namespace mu;
+using namespace muse::workspace;
+using namespace muse;
 
 io::paths_t WorkspaceConfigurationStub::workspacePaths() const
 {

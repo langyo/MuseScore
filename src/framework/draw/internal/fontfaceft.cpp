@@ -31,7 +31,9 @@
 #include FT_TRUETYPE_TABLES_H
 #include <hb-ft.h>
 
+#ifndef MUSE_MODULE_DRAW_USE_QTTEXTDRAW
 #include <ext/import-font.h>
+#endif
 
 #include "global/types/bytearray.h"
 #include "global/io/file.h"
@@ -87,7 +89,7 @@ struct muse::draw::SymbolMetrics
 
 struct muse::draw::FData
 {
-    mu::ByteArray fontData;
+    ByteArray fontData;
     FT_Face face = nullptr;
     hb_font_t* hb_font = nullptr;
     std::unordered_map<glyph_idx_t, GlyphMetrics> glyphsMetrics;
@@ -109,7 +111,7 @@ FontFaceFT::~FontFaceFT()
     delete m_data;
 }
 
-bool FontFaceFT::load(const FaceKey& key, const mu::io::path_t& path, bool isSymbolMode)
+bool FontFaceFT::load(const FaceKey& key, const io::path_t& path, bool isSymbolMode)
 {
     if (!_init_ft()) {
         return false;
@@ -119,8 +121,8 @@ bool FontFaceFT::load(const FaceKey& key, const mu::io::path_t& path, bool isSym
     m_isSymbolMode = isSymbolMode;
 
     {
-        mu::io::File file(path);
-        if (!file.open(mu::io::IODevice::ReadOnly)) {
+        io::File file(path);
+        if (!file.open(io::IODevice::ReadOnly)) {
             return false;
         }
 
@@ -305,6 +307,7 @@ f26dot6_t FontFaceFT::glyphAdvance(glyph_idx_t idx) const
     }
 }
 
+#ifndef MUSE_MODULE_DRAW_USE_QTTEXTDRAW
 const msdfgen::Shape& FontFaceFT::glyphShape(glyph_idx_t idx) const
 {
     static const msdfgen::Shape null;
@@ -331,6 +334,8 @@ const msdfgen::Shape& FontFaceFT::glyphShape(glyph_idx_t idx) const
 
     return m_cache.insert(std::move(v)).first->second;
 }
+
+#endif
 
 f26dot6_t FontFaceFT::leading() const
 {

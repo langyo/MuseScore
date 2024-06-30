@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -117,7 +117,7 @@ void CanvasPreferencesModel::setScrollPagesOrientation(int orientation)
         return;
     }
 
-    notationConfiguration()->setCanvasOrientation(static_cast<mu::Orientation>(orientation));
+    notationConfiguration()->setCanvasOrientation(static_cast<muse::Orientation>(orientation));
 }
 
 void CanvasPreferencesModel::setLimitScrollArea(bool limit)
@@ -142,7 +142,7 @@ void CanvasPreferencesModel::setSelectionProximity(int proximity)
 
 void CanvasPreferencesModel::setupConnections()
 {
-    notationConfiguration()->canvasOrientation().ch.onReceive(this, [this](mu::Orientation) {
+    notationConfiguration()->canvasOrientation().ch.onReceive(this, [this](muse::Orientation) {
         emit scrollPagesOrientationChanged();
     });
 }

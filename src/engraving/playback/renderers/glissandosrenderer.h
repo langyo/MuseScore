@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -31,16 +31,16 @@ class Note;
 class GlissandosRenderer : public RenderBase<GlissandosRenderer>
 {
 public:
-    static const mpe::ArticulationTypeSet& supportedTypes();
+    static const muse::mpe::ArticulationTypeSet& supportedTypes();
 
-    static void doRender(const EngravingItem* item, const mpe::ArticulationType type, const RenderingContext& context,
-                         mpe::PlaybackEventList& result);
+    static void doRender(const EngravingItem* item, const muse::mpe::ArticulationType type, const RenderingContext& context,
+                         muse::mpe::PlaybackEventList& result);
 
 private:
-    static void renderDiscreteGlissando(const Note* note, const RenderingContext& context, mpe::PlaybackEventList& result);
-    static void renderContinuousGlissando(const Note* note, const RenderingContext& context, mpe::PlaybackEventList& result);
+    static void renderDiscreteGlissando(const Note* note, const RenderingContext& context, muse::mpe::PlaybackEventList& result);
+    static void renderContinuousGlissando(const Note* note, const RenderingContext& context, muse::mpe::PlaybackEventList& result);
 
-    static mpe::pitch_level_t pitchLevelStep(const mpe::ArticulationAppliedData& articulationData);
+    static muse::mpe::pitch_level_t pitchLevelStep(const muse::mpe::ArticulationAppliedData& articulationData);
 };
 }
 

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -38,7 +38,7 @@
 #include "abstractaudioresourceitem.h"
 
 namespace mu::playback {
-class InputResourceItem : public AbstractAudioResourceItem, public async::Asyncable
+class InputResourceItem : public AbstractAudioResourceItem, public muse::async::Asyncable
 {
     Q_OBJECT
 
@@ -70,9 +70,9 @@ private:
     QVariantMap buildVstMenuItem(const ResourceByVendorMap& resourcesByVendor) const;
     QVariantMap buildSoundFontsMenuItem(const ResourceByVendorMap& resourcesByVendor) const;
     QVariantMap buildMsBasicMenuItem(const muse::audio::AudioResourceMetaList& availableResources, bool isCurrentSoundFont,
-                                     const std::optional<midi::Program>& currentPreset) const;
-    QVariantMap buildSoundFontMenuItem(const String& soundFont, const muse::audio::AudioResourceMetaList& availableResources,
-                                       bool isCurrentSoundFont, const std::optional<midi::Program>& currentPreset) const;
+                                     const std::optional<muse::midi::Program>& currentPreset) const;
+    QVariantMap buildSoundFontMenuItem(const muse::String& soundFont, const muse::audio::AudioResourceMetaList& availableResources,
+                                       bool isCurrentSoundFont, const std::optional<muse::midi::Program>& currentPreset) const;
 
     void updateAvailableResources(const muse::audio::AudioResourceMetaList& availableResources);
 

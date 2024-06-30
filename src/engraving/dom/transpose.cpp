@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -32,6 +32,7 @@
 #include "pitchspelling.h"
 #include "score.h"
 #include "segment.h"
+#include "select.h"
 #include "staff.h"
 #include "stafftype.h"
 #include "undo.h"
@@ -411,7 +412,7 @@ bool Score::transpose(TransposeMode mode, TransposeDirection direction, Key trKe
         if (s->primaryStaff() && s->primaryStaff()->staffType(Fraction(0, 1))->group() == StaffGroup::PERCUSSION) {
             continue;
         }
-        if (mu::contains(sl, s)) {
+        if (muse::contains(sl, s)) {
             continue;
         }
         bool alreadyThere = false;
@@ -429,7 +430,9 @@ bool Score::transpose(TransposeMode mode, TransposeDirection direction, Key trKe
     for (Staff* s : sl) {
         track_idx_t idx = s->idx() * VOICES;
         for (voice_idx_t i = 0; i < VOICES; ++i) {
-            tracks.push_back(idx + i);
+            if (selectionFilter().canSelectVoice(i)) {
+                tracks.push_back(idx + i);
+            }
         }
     }
 
@@ -507,9 +510,9 @@ bool Score::transpose(TransposeMode mode, TransposeDirection direction, Key trKe
                 }
             }
         }
-        if (transposeChordNames) {
+        if (transposeChordNames && selectionFilter().isFiltered(SelectionFilterType::CHORD_SYMBOL)) {
             for (EngravingItem* e : segment->annotations()) {
-                if ((e->type() != ElementType::HARMONY) || (!mu::contains(tracks, e->track()))) {
+                if (!e->isHarmony() || (!muse::contains(tracks, e->track()))) {
                     continue;
                 }
                 // TODO also source interval should reflect modified key (f.ex. by prefer flat)
@@ -793,7 +796,7 @@ void Score::transpositionChanged(Part* part, Interval oldV, Fraction tickStart, 
         // TODO: special handling for linked staves within a score
         // could be useful for capo
         Score* score = ls->score();
-        if (mu::contains(scores, score)) {
+        if (muse::contains(scores, score)) {
             continue;
         }
         scores.insert(score);

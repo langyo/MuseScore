@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -27,7 +27,6 @@
 #include "importptb.h"
 
 #include "realfn.h"
-#include "translation.h"
 
 #include "engraving/types/typesconv.h"
 #include "engraving/types/symid.h"
@@ -48,20 +47,16 @@
 #include "engraving/dom/factory.h"
 #include "engraving/dom/fret.h"
 #include "engraving/dom/glissando.h"
-#include "engraving/dom/hairpin.h"
 #include "engraving/dom/harmony.h"
 #include "engraving/dom/instrchange.h"
 #include "engraving/dom/instrtemplate.h"
 #include "engraving/dom/keysig.h"
-#include "engraving/dom/letring.h"
 #include "engraving/dom/lyrics.h"
 #include "engraving/dom/masterscore.h"
 #include "engraving/dom/measure.h"
 #include "engraving/dom/measurebase.h"
 #include "engraving/dom/note.h"
 #include "engraving/dom/notedot.h"
-#include "engraving/dom/ottava.h"
-#include "engraving/dom/palmmute.h"
 #include "engraving/dom/part.h"
 #include "engraving/dom/rehearsalmark.h"
 #include "engraving/dom/rest.h"
@@ -78,13 +73,12 @@
 #include "engraving/dom/tie.h"
 #include "engraving/dom/timesig.h"
 #include "engraving/dom/tuplet.h"
-#include "engraving/dom/tremolobar.h"
 #include "engraving/dom/volta.h"
-#include "engraving/dom/vibrato.h"
 
 #include "log.h"
 
-using namespace mu::io;
+using namespace muse;
+using namespace muse::io;
 using namespace mu::engraving;
 
 namespace mu::iex::guitarpro {
@@ -958,7 +952,7 @@ void GuitarPro::createBend(Note* note, std::vector<PitchValue>& bendData)
         return;
     }
 
-    bool useStretchedBends = engravingConfiguration()->guitarProImportExperimental();
+    bool useStretchedBends = engravingConfiguration()->useStretchedBends();
 
     if (useStretchedBends) {
         Chord* chord = toChord(note->parent());
@@ -1559,33 +1553,33 @@ int GuitarPro::harmonicOvertone(Note* note, float harmonicValue, int harmonicTyp
 {
     int result{ 0 };
 
-    if (RealIsEqual(harmonicValue, 12.0f)) {
+    if (muse::RealIsEqual(harmonicValue, 12.0f)) {
         result = 12;
-    } else if (RealIsEqual(harmonicValue, 7.0f) || RealIsEqual(harmonicValue, 19.0f)) {
+    } else if (muse::RealIsEqual(harmonicValue, 7.0f) || muse::RealIsEqual(harmonicValue, 19.0f)) {
         result = 19;
-    } else if (RealIsEqual(harmonicValue, 5.0f) || RealIsEqual(harmonicValue, 24.0f)) {
+    } else if (muse::RealIsEqual(harmonicValue, 5.0f) || muse::RealIsEqual(harmonicValue, 24.0f)) {
         result = 24;
-    } else if (RealIsEqual(harmonicValue, 3.9f)
-               || RealIsEqual(harmonicValue, 4.0f)
-               || RealIsEqual(harmonicValue, 9.0f)
-               || RealIsEqual(harmonicValue, 16.0f)) {
+    } else if (muse::RealIsEqual(harmonicValue, 3.9f)
+               || muse::RealIsEqual(harmonicValue, 4.0f)
+               || muse::RealIsEqual(harmonicValue, 9.0f)
+               || muse::RealIsEqual(harmonicValue, 16.0f)) {
         result = 28;
-    } else if (RealIsEqual(harmonicValue, 3.2f)) {
+    } else if (muse::RealIsEqual(harmonicValue, 3.2f)) {
         result = 31;
-    } else if (RealIsEqual(harmonicValue, 2.7f)
-               || RealIsEqual(harmonicValue, 5.8f)
-               || RealIsEqual(harmonicValue, 9.6f)
-               || RealIsEqual(harmonicValue, 14.7f)
-               || RealIsEqual(harmonicValue, 21.7f)) {
+    } else if (muse::RealIsEqual(harmonicValue, 2.7f)
+               || muse::RealIsEqual(harmonicValue, 5.8f)
+               || muse::RealIsEqual(harmonicValue, 9.6f)
+               || muse::RealIsEqual(harmonicValue, 14.7f)
+               || muse::RealIsEqual(harmonicValue, 21.7f)) {
         result = 34;
-    } else if (RealIsEqual(harmonicValue, 2.3f)
-               || RealIsEqual(harmonicValue, 2.4f)
-               || RealIsEqual(harmonicValue, 8.2f)
-               || RealIsEqual(harmonicValue, 17.0f)) {
+    } else if (muse::RealIsEqual(harmonicValue, 2.3f)
+               || muse::RealIsEqual(harmonicValue, 2.4f)
+               || muse::RealIsEqual(harmonicValue, 8.2f)
+               || muse::RealIsEqual(harmonicValue, 17.0f)) {
         result = 36;
-    } else if (RealIsEqual(harmonicValue, 2.0f)) {
+    } else if (muse::RealIsEqual(harmonicValue, 2.0f)) {
         result = 38;
-    } else if (RealIsEqual(harmonicValue, 1.8f)) {
+    } else if (muse::RealIsEqual(harmonicValue, 1.8f)) {
         result = 40;
     }
 
@@ -2742,8 +2736,8 @@ bool GuitarPro3::read(IODevice* io)
                 }
 
                 slide = -1;
-                if (mu::contains(slides, static_cast<int>(track))) {
-                    slide = mu::take(slides, static_cast<int>(track));
+                if (muse::contains(slides, static_cast<int>(track))) {
+                    slide = muse::take(slides, static_cast<int>(track));
                 }
 
                 int len = readChar();
@@ -3093,7 +3087,7 @@ void GuitarPro::readTremoloBar(int /*track*/, Segment* /*segment*/)
 //   addMetaInfo
 //---------------------------------------------------------
 
-static void addMetaInfo(MasterScore* score, GuitarPro* gp)
+static void addMetaInfo(MasterScore* score, GuitarPro* gp, bool experimental)
 {
     std::vector<String> fieldNames = { gp->title, gp->subtitle, gp->artist,
                                        gp->album, gp->composer };
@@ -3101,52 +3095,60 @@ static void addMetaInfo(MasterScore* score, GuitarPro* gp)
     bool createTitleField
         = std::any_of(fieldNames.begin(), fieldNames.end(), [](const String& fieldName) { return !fieldName.isEmpty(); });
 
-    if (createTitleField) {
-        MeasureBase* m;
-        if (!score->measures()->first()) {
-            m = Factory::createVBox(score->dummy()->system());
-            m->setTick(Fraction(0, 1));
-            score->addMeasure(m, 0);
-        } else {
-            m = score->measures()->first();
-            if (!m->isVBox()) {
-                MeasureBase* mb = Factory::createVBox(score->dummy()->system());
-                mb->setTick(Fraction(0, 1));
-                score->addMeasure(mb, m);
-                m = mb;
-            }
+    if (!createTitleField && !experimental) {
+        return;
+    }
+
+    MeasureBase* m = nullptr;
+    if (!score->measures()->first()) {
+        m = Factory::createVBox(score->dummy()->system());
+        m->setTick(Fraction(0, 1));
+        score->addMeasure(m, 0);
+    } else {
+        m = score->measures()->first();
+        if (!m->isVBox()) {
+            MeasureBase* mb = Factory::createVBox(score->dummy()->system());
+            mb->setTick(Fraction(0, 1));
+            score->addMeasure(mb, m);
+            m = mb;
         }
-        if (!gp->title.isEmpty()) {
-            Text* s = Factory::createText(m, TextStyleType::TITLE);
-            s->setPlainText(gp->title);
-            m->add(s);
+    }
+    if (!gp->title.isEmpty() || experimental) {
+        Text* s = Factory::createText(m, TextStyleType::TITLE);
+        s->setPlainText(gp->title);
+        m->add(s);
+    }
+    if (!gp->subtitle.isEmpty() || !gp->artist.isEmpty() || !gp->album.isEmpty() || experimental) {
+        Text* s = Factory::createText(m, TextStyleType::SUBTITLE);
+        String str;
+        if (!gp->subtitle.isEmpty()) {
+            str.append(gp->subtitle);
         }
-        if (!gp->subtitle.isEmpty() || !gp->artist.isEmpty() || !gp->album.isEmpty()) {
-            Text* s = Factory::createText(m, TextStyleType::SUBTITLE);
-            String str;
-            if (!gp->subtitle.isEmpty()) {
-                str.append(gp->subtitle);
+        if (!gp->artist.isEmpty()) {
+            if (!str.isEmpty()) {
+                str.append(u'\n');
             }
-            if (!gp->artist.isEmpty()) {
-                if (!str.isEmpty()) {
-                    str.append(u'\n');
-                }
-                str.append(gp->artist);
-            }
-            if (!gp->album.isEmpty()) {
-                if (!str.isEmpty()) {
-                    str.append(u'\n');
-                }
-                str.append(gp->album);
-            }
-            s->setPlainText(str);
-            m->add(s);
+            str.append(gp->artist);
         }
-        if (!gp->composer.isEmpty()) {
-            Text* s = Factory::createText(m, TextStyleType::COMPOSER);
-            s->setPlainText(gp->composer);
-            m->add(s);
+        if (!gp->album.isEmpty()) {
+            if (!str.isEmpty()) {
+                str.append(u'\n');
+            }
+            str.append(gp->album);
         }
+        s->setPlainText(str);
+        m->add(s);
+    }
+    if (!gp->composer.isEmpty()) {
+        Text* s = Factory::createText(m, TextStyleType::COMPOSER);
+        s->setPlainText(gp->composer);
+        m->add(s);
+    }
+
+    //TODO: Temporary for experimental import, will be deleted later
+    if (experimental) {
+        Text* s = Factory::createText(score->dummy(), TextStyleType::LYRICIST);
+        m->add(s);
     }
 }
 
@@ -3253,7 +3255,7 @@ static void createLinkedTabs(MasterScore* score)
 //   importScore
 //---------------------------------------------------------
 
-static Err importScore(MasterScore* score, mu::io::IODevice* io, bool experimental = false)
+static Err importScore(MasterScore* score, muse::io::IODevice* io, bool experimental = false)
 {
     if (!io->open(IODevice::ReadOnly)) {
         return Err::FileOpenError;
@@ -3334,7 +3336,7 @@ static Err importScore(MasterScore* score, mu::io::IODevice* io, bool experiment
         return Err::NoError;
     }
 
-    addMetaInfo(score, gp);
+    addMetaInfo(score, gp, experimental);
 
     int idx = 0;
 
@@ -3372,7 +3374,7 @@ static Err importScore(MasterScore* score, mu::io::IODevice* io, bool experiment
 //   importGTP
 //---------------------------------------------------------
 
-Err importGTP(MasterScore* score, mu::io::IODevice* io, bool createLinkedTabForce, bool experimental)
+Err importGTP(MasterScore* score, muse::io::IODevice* io, bool createLinkedTabForce, bool experimental)
 {
     Err error = importScore(score, io, experimental);
 

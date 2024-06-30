@@ -40,10 +40,10 @@ public:
 
     FontDataKey() = default;
     FontDataKey(const std::string& fa)
-        : m_family(mu::strings::toLower(fa)), m_bold(false), m_italic(false) {}
+        : m_family(muse::strings::toLower(fa)), m_bold(false), m_italic(false) {}
 
     FontDataKey(const std::string& fa, bool bo, bool it)
-        : m_family(mu::strings::toLower(fa)), m_bold(bo), m_italic(it) {}
+        : m_family(muse::strings::toLower(fa)), m_bold(bo), m_italic(it) {}
 
     inline bool valid() const { return !m_family.empty(); }
 
@@ -84,7 +84,7 @@ inline FontDataKey dataKeyForFont(const Font& f)
 
 struct FontData {
     FontDataKey key;
-    mu::ByteArray data;
+    muse::ByteArray data;
 
     inline bool valid() const { return key.valid() && !data.empty(); }
 };
@@ -95,6 +95,8 @@ struct FaceKey {
     int pixelSize = 0;
 
     FaceKey() = default;
+    FaceKey(const FontDataKey& dk, Font::Type t, int ps)
+        : dataKey(dk), type(t), pixelSize(ps) {}
 
     inline bool operator==(const FaceKey& o) const
     {
@@ -125,11 +127,11 @@ inline int pixelSizeForFont(const Font& f)
 
 inline FaceKey faceKeyForFont(const Font& f)
 {
-    return FaceKey{ dataKeyForFont(f), f.type(), pixelSizeForFont(f) };
+    return FaceKey(dataKeyForFont(f), f.type(), pixelSizeForFont(f));
 }
 
 struct Sdf {
-    mu::ByteArray bitmap;
+    muse::ByteArray bitmap;
     uint32_t width = 0;
     uint32_t height = 0;
     float threshold = 0.;
@@ -137,7 +139,7 @@ struct Sdf {
 };
 
 struct GlyphImage {
-    mu::RectF rect;
+    muse::RectF rect;
     Sdf sdf;
 
     bool isNull() const { return rect.isNull(); }

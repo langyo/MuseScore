@@ -115,9 +115,10 @@ the video game: a tone poem</metaTag>
       </Part>
     <Staff id="1">
       <VBox>
-        <height>17.7353</height>
+        <height>4.14105</height>
         <Text>
           <style>title</style>
+          <offset x="0" y="-0.1505"/>
           <text><font size="22"/>Inferred Credits 1</text>
           </Text>
         <Text>
@@ -126,7 +127,6 @@ the video game: a tone poem</metaTag>
           </Text>
         <Text>
           <style>subtitle</style>
-          <offset x="0" y="11.4294"/>
           <text>from MUSESCORE: the musical: the graphic novel:
 the video game: a tone poem</text>
           </Text>
@@ -156,7 +156,6 @@ the video game: a tone poem</text>
             <durationType>eighth</durationType>
             <Lyrics>
               <syllabic>begin</syllabic>
-              <offset x="0" y="-1.71429"/>
               <text>ha</text>
               </Lyrics>
             <Note>
@@ -168,7 +167,6 @@ the video game: a tone poem</text>
             <durationType>eighth</durationType>
             <Lyrics>
               <syllabic>end</syllabic>
-              <offset x="0" y="-1.71429"/>
               <text>ha</text>
               </Lyrics>
             <Note>
@@ -189,7 +187,6 @@ the video game: a tone poem</text>
           <Chord>
             <durationType>quarter</durationType>
             <Lyrics>
-              <offset x="0" y="-1.71429"/>
               <text>nice.</text>
               </Lyrics>
             <StemDirection>up</StemDirection>

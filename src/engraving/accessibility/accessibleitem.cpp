@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -47,7 +47,7 @@ static QString readable(QString s)
 }
 
 AccessibleItem::AccessibleItem(EngravingItem* e, Role role)
-    : m_element(e), m_role(role)
+    : muse::Injectable(e->iocContext()), m_element(e), m_role(role)
 {
 }
 
@@ -176,6 +176,11 @@ QWindow* AccessibleItem::accessibleWindow() const
     return nullptr;
 }
 
+muse::modularity::ContextPtr AccessibleItem::iocContext() const
+{
+    return muse::Injectable::iocContext();
+}
+
 IAccessible::Role AccessibleItem::accessibleRole() const
 {
     return m_role;
@@ -198,9 +203,9 @@ QString AccessibleItem::accessibleName() const
                    .arg(!commandInfo.isEmpty() ? (commandInfo + "; ") : "")
                    .arg(!staffInfo.isEmpty() ? (staffInfo + "; ") : "")
                    .arg(m_element->screenReaderInfo().toQString())
-                   .arg(m_element->visible() ? "" : " " + qtrc("engraving", "invisible"))
+                   .arg(m_element->visible() ? "" : " " + muse::qtrc("engraving", "invisible"))
                    .arg(!barsAndBeats.isEmpty() ? ("; " + barsAndBeats) : "")
-                   .arg(root->isRangeSelection() ? ("; " + qtrc("engraving", "selected")) : "");
+                   .arg(root->isRangeSelection() ? ("; " + muse::qtrc("engraving", "selected")) : "");
 
     return readable(name);
 }
@@ -280,7 +285,7 @@ QString AccessibleItem::accessibleText(int startOffset, int endOffset) const
 
     TextCursor* textCursor = new TextCursor(toTextBase(m_element));
     auto startCoord = textCursor->positionToLocalCoord(startOffset);
-    if (startCoord.first == mu::nidx || startCoord.second == mu::nidx) {
+    if (startCoord.first == muse::nidx || startCoord.second == muse::nidx) {
         return QString();
     }
 
@@ -320,7 +325,7 @@ QString AccessibleItem::accessibleTextAtOffset(int offset, TextBoundaryType boun
 
     TextCursor* textCursor = new TextCursor(toTextBase(m_element));
     auto startCoord = textCursor->positionToLocalCoord(offset);
-    if (startCoord.first == mu::nidx || startCoord.second == mu::nidx) {
+    if (startCoord.first == muse::nidx || startCoord.second == muse::nidx) {
         return QString();
     }
 
@@ -429,12 +434,12 @@ bool AccessibleItem::accessibleIgnored() const
     return false;
 }
 
-mu::async::Channel<IAccessible::Property, mu::Val> AccessibleItem::accessiblePropertyChanged() const
+muse::async::Channel<IAccessible::Property, muse::Val> AccessibleItem::accessiblePropertyChanged() const
 {
     return m_accessiblePropertyChanged;
 }
 
-mu::async::Channel<IAccessible::State, bool> AccessibleItem::accessibleStateChanged() const
+muse::async::Channel<IAccessible::State, bool> AccessibleItem::accessibleStateChanged() const
 {
     return m_accessibleStateChanged;
 }

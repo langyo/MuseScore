@@ -21,13 +21,17 @@
  */
 #include "xmldom.h"
 
-#include "../thirdparty/tinyxml/tinyxml2.h"
+#ifdef SYSTEM_TINYXML
+#include <tinyxml2.h>
+#else
+#include "thirdparty/tinyxml/tinyxml2.h"
+#endif
 
 #include "log.h"
 
-using namespace mu;
+using namespace muse;
 
-struct mu::XmlDomData
+struct muse::XmlDomData
 {
     tinyxml2::XMLDocument doc;
     tinyxml2::XMLError err;

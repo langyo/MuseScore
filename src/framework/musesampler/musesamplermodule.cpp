@@ -33,10 +33,12 @@
 #include "internal/musesampleruiactions.h"
 #include "internal/musesampleractioncontroller.h"
 
-using namespace mu;
+#include "diagnostics/idiagnosticspathsregister.h"
+
+using namespace muse;
 using namespace muse::audio;
-using namespace mu::modularity;
-using namespace mu::musesampler;
+using namespace muse::modularity;
+using namespace muse::musesampler;
 
 std::string MuseSamplerModule::moduleName() const
 {
@@ -61,7 +63,7 @@ void MuseSamplerModule::resolveImports()
         synthResolver->registerResolver(AudioSourceType::MuseSampler, m_resolver);
     }
 
-    auto ar = ioc()->resolve<ui::IUiActionsRegister>(moduleName());
+    auto ar = ioc()->resolve<muse::ui::IUiActionsRegister>(moduleName());
     if (ar) {
         ar->reg(std::make_shared<MuseSamplerUiActions>());
     }
@@ -74,6 +76,14 @@ void MuseSamplerModule::onInit(const IApplication::RunMode& mode)
     }
 
     m_configuration->init();
-    m_actionController->init();
     m_resolver->init();
+    m_actionController->init([this]() {
+        return m_resolver->reloadMuseSampler();
+    });
+
+    auto pr = ioc()->resolve<muse::diagnostics::IDiagnosticsPathsRegister>(moduleName());
+    if (pr) {
+        pr->reg("musesampler", m_configuration->userLibraryPath());
+        pr->reg("musesampler fallback", m_configuration->fallbackLibraryPath());
+    }
 }

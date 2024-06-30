@@ -20,14 +20,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_MUSESAMPLER_IMUSESAMPLERCONFIGURATION_H
-#define MU_MUSESAMPLER_IMUSESAMPLERCONFIGURATION_H
+#ifndef MUSE_MUSESAMPLER_IMUSESAMPLERCONFIGURATION_H
+#define MUSE_MUSESAMPLER_IMUSESAMPLERCONFIGURATION_H
 
 #include "modularity/imoduleinterface.h"
 
 #include "io/path.h"
 
-namespace mu::musesampler {
+namespace muse::musesampler {
 class IMuseSamplerConfiguration : MODULE_EXPORT_INTERFACE
 {
     INTERFACE_ID(IMuseSamplerConfiguration)
@@ -35,9 +35,9 @@ class IMuseSamplerConfiguration : MODULE_EXPORT_INTERFACE
 public:
     virtual ~IMuseSamplerConfiguration() = default;
 
-    virtual mu::io::path_t userLibraryPath() const = 0;
-    virtual mu::io::path_t fallbackLibraryPath() const = 0;
+    virtual io::path_t userLibraryPath() const = 0;
+    virtual io::path_t fallbackLibraryPath() const = 0;
 };
 }
 
-#endif // MU_MUSESAMPLER_IMUSESAMPLERCONFIGURATION_H
+#endif // MUSE_MUSESAMPLER_IMUSESAMPLERCONFIGURATION_H

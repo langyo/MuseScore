@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -59,8 +59,8 @@ BendSettingsModel::BendSettingsModel(QObject* parent, IElementRepositoryService*
     : AbstractInspectorModel(parent, repository)
 {
     setModelType(InspectorModelType::TYPE_BEND);
-    setTitle(qtrc("inspector", "Bend"));
-    setIcon(ui::IconCode::Code::GUITAR_BEND);
+    setTitle(muse::qtrc("inspector", "Bend"));
+    setIcon(muse::ui::IconCode::Code::GUITAR_BEND);
 
     createProperties();
 }
@@ -165,8 +165,8 @@ void BendSettingsModel::loadBendCurve()
     m_releaseBend = bend->isReleaseBend();
     bool isSlightBend = bend->type() == GuitarBendType::SLIGHT_BEND;
 
-    QString startPointName = qtrc("inspector", "Start point");
-    QString endPointName = qtrc("inspector", "End point");
+    QString startPointName = muse::qtrc("inspector", "Start point");
+    QString endPointName = muse::qtrc("inspector", "End point");
 
     if (bend->type() == GuitarBendType::PRE_BEND) {
         m_bendCurve = { CurvePoint(0, 0, true),
@@ -192,7 +192,7 @@ void BendSettingsModel::loadBendCurve()
 EngravingItem* BendSettingsModel::item() const
 {
     for (EngravingItem* item : m_elementList) {
-        if (contains(ELEMENTS_TYPES, item->type())) {
+        if (muse::contains(ELEMENTS_TYPES, item->type())) {
             return item;
         }
     }

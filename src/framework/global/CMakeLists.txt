@@ -18,13 +18,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-set(MODULE global)
+declare_module(muse_global)
+set(MODULE_ALIAS muse::global)
 
 include(${CMAKE_CURRENT_LIST_DIR}/async/async.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/thirdparty/kors_logger/logger.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/thirdparty/kors_profiler/profiler/profiler.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/thirdparty/kors_modularity/modularity/modularity.cmake)
 
+find_package(TinyXml REQUIRED)
 set(MODULE_SRC
     ${MODULARITY_SRC}
     ${ASYNC_SRC}
@@ -66,8 +68,11 @@ set(MODULE_SRC
     ${CMAKE_CURRENT_LIST_DIR}/isysteminfo.h
     ${CMAKE_CURRENT_LIST_DIR}/configreader.cpp
     ${CMAKE_CURRENT_LIST_DIR}/configreader.h
+    ${CMAKE_CURRENT_LIST_DIR}/uuid.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/uuid.h
 
     ${KORS_MODULARITY_SRC}
+    ${CMAKE_CURRENT_LIST_DIR}/modularity/ioccontext.cpp
     ${CMAKE_CURRENT_LIST_DIR}/modularity/ioc.h
     ${CMAKE_CURRENT_LIST_DIR}/modularity/imoduleinterface.h
     ${CMAKE_CURRENT_LIST_DIR}/modularity/imodulesetup.h
@@ -118,9 +123,7 @@ set(MODULE_SRC
     ${CMAKE_CURRENT_LIST_DIR}/serialization/xmlstreamreader.h
     ${CMAKE_CURRENT_LIST_DIR}/serialization/xmlstreamwriter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/serialization/xmlstreamwriter.h
-    ${CMAKE_CURRENT_LIST_DIR}/thirdparty/tinyxml/tinyxml2.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/thirdparty/tinyxml/tinyxml2.h
-    ${CMAKE_CURRENT_LIST_DIR}/thirdparty/tinyxml/mu_patch.h
+    ${TINYXML_MODULE_SRC}
     ${CMAKE_CURRENT_LIST_DIR}/serialization/zipreader.cpp
     ${CMAKE_CURRENT_LIST_DIR}/serialization/zipreader.h
     ${CMAKE_CURRENT_LIST_DIR}/serialization/zipwriter.cpp
@@ -165,8 +168,8 @@ else()
         ${CMAKE_CURRENT_LIST_DIR}/api/filesystemapi.cpp
         ${CMAKE_CURRENT_LIST_DIR}/api/filesystemapi.h
 
-        ${CMAKE_CURRENT_LIST_DIR}/internal/application.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/internal/application.h
+        ${CMAKE_CURRENT_LIST_DIR}/internal/baseapplication.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/internal/baseapplication.h
         ${CMAKE_CURRENT_LIST_DIR}/internal/globalconfiguration.cpp
         ${CMAKE_CURRENT_LIST_DIR}/internal/globalconfiguration.h
         ${CMAKE_CURRENT_LIST_DIR}/internal/interactive.cpp
@@ -214,6 +217,11 @@ else()
         )
         find_library(AppKit NAMES AppKit)
         list(APPEND MODULE_LINK ${AppKit})
+    elseif(OS_IS_WIN)
+        set(MODULE_SRC ${MODULE_SRC}
+            ${CMAKE_CURRENT_LIST_DIR}/internal/platform/win/wininteractivehelper.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/internal/platform/win/wininteractivehelper.h
+        )
     endif()
 endif()
 
@@ -236,16 +244,22 @@ list(APPEND MODULE_INCLUDE
 list(APPEND MODULE_LINK
     ${Z_LIB}
 )
+list(APPEND MODULE_LINK ${TINYXML_MODULE_LINK})
+set(MODULE_DEF ${TINYXML_MODULE_DEF})
 
-if (MUE_ENABLE_CUSTOM_ALLOCATOR)
-    set(MODULE_DEF ${MODULE_DEF} -DMUE_ENABLE_CUSTOM_ALLOCATOR)
+if (MUSE_ENABLE_CUSTOM_ALLOCATOR)
+    set(MODULE_DEF ${MODULE_DEF} -DMUSE_ENABLE_CUSTOM_ALLOCATOR)
 endif()
 
 if (MUSE_MODULE_GLOBAL_LOGGER_DEBUGLEVEL)
     set(MODULE_DEF ${MODULE_DEF} -DMUSE_MODULE_GLOBAL_LOGGER_DEBUGLEVEL)
 endif()
 
-include(SetupModule)
+if (MUSE_MODULE_GLOBAL_MULTI_IOC)
+    set(MODULE_DEF ${MODULE_DEF} -DMUSE_MODULE_GLOBAL_MULTI_IOC)
+endif()
+
+setup_module()
 
 if (MUSE_MODULE_GLOBAL_TESTS)
     add_subdirectory(tests)

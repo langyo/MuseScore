@@ -31,7 +31,7 @@
 namespace muse::audio {
 class AudioConfiguration : public IAudioConfiguration
 {
-    Inject<mu::IGlobalConfiguration> globalConfiguration;
+    Inject<IGlobalConfiguration> globalConfiguration;
     Inject<io::IFileSystem> fileSystem;
 
 public:
@@ -70,6 +70,8 @@ public:
     async::Channel<io::paths_t> soundFontDirectoriesChanged() const override;
 
     io::path_t knownAudioPluginsFilePath() const override;
+
+    bool shouldMeasureInputLag() const override;
 
 private:
     async::Channel<io::paths_t> m_soundFontDirsChanged;

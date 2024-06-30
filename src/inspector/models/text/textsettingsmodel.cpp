@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -41,7 +41,7 @@ TextSettingsModel::TextSettingsModel(QObject* parent, IElementRepositoryService*
     : AbstractInspectorModel(parent, repository)
 {
     setSectionType(InspectorSectionType::SECTION_TEXT);
-    setTitle(qtrc("inspector", "Text"));
+    setTitle(muse::qtrc("inspector", "Text"));
     createProperties();
 
     isTextEditingChanged().onNotify(this, [this]() {
@@ -115,7 +115,7 @@ void TextSettingsModel::loadProperties()
     m_fontStyle->setIsEnabled(true);
 
     loadPropertyItem(m_fontSize, [](const QVariant& elementPropertyValue) -> QVariant {
-        return RealIsEqual(elementPropertyValue.toDouble(), mu::engraving::TextBase::UNDEFINED_FONT_SIZE)
+        return muse::RealIsEqual(elementPropertyValue.toDouble(), mu::engraving::TextBase::UNDEFINED_FONT_SIZE)
                ? QVariant() : elementPropertyValue.toDouble();
     });
 
@@ -199,7 +199,7 @@ void TextSettingsModel::onNotationChanged(const PropertyIdSet& changedProperyIds
         }
     }
 
-    if (mu::contains(changedProperyIds, Pid::PLACEMENT)) {
+    if (muse::contains(changedProperyIds, Pid::PLACEMENT)) {
         loadPropertyItem(m_textPlacement);
     }
 
@@ -433,10 +433,10 @@ bool TextSettingsModel::isTextEditingStarted() const
     return context()->currentNotation()->interaction()->isTextEditingStarted();
 }
 
-mu::async::Notification TextSettingsModel::isTextEditingChanged() const
+muse::async::Notification TextSettingsModel::isTextEditingChanged() const
 {
     IF_ASSERT_FAILED(context() && context()->currentNotation()) {
-        return mu::async::Notification();
+        return muse::async::Notification();
     }
 
     return context()->currentNotation()->interaction()->textEditingChanged();

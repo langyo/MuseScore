@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -38,7 +38,7 @@
 #include "log.h"
 
 using namespace mu;
-using namespace mu::io;
+using namespace muse::io;
 using namespace mu::engraving;
 
 const PropertyValue& MStyle::value(Sid idx) const
@@ -362,13 +362,13 @@ void MStyle::read(XmlReader& e, compat::ReadChordListHook* readChordListHook)
         } else if (tag == "pedalText" && m_version < 420) {
             // Ignore old default
             String pedText = e.readText();
-            if (pedText != "") {
+            if (!pedText.empty()) {
                 set(Sid::pedalText, pedText);
             }
         } else if (tag == "pedalContinueText" && m_version < 420 && e.readAsciiText() == "") {
             // Ignore old default
             String pedContText = e.readText();
-            if (pedContText != "") {
+            if (!pedContText.empty()) {
                 set(Sid::pedalText, pedContText);
             }
         } else if ((tag == "slurEndWidth"
@@ -482,7 +482,7 @@ const char* MStyle::valueName(const Sid i)
 
 Sid MStyle::styleIdx(const String& name)
 {
-    ByteArray ba = name.toAscii();
+    muse::ByteArray ba = name.toAscii();
     for (const StyleDef::StyleValue& st : StyleDef::styleValues) {
         if (st.name() == ba.constChar()) {
             return st.styleIdx();

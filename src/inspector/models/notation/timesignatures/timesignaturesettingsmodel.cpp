@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -31,8 +31,8 @@ TimeSignatureSettingsModel::TimeSignatureSettingsModel(QObject* parent, IElement
     : AbstractInspectorModel(parent, repository)
 {
     setModelType(InspectorModelType::TYPE_TIME_SIGNATURE);
-    setTitle(qtrc("inspector", "Time signature"));
-    setIcon(ui::IconCode::Code::TIME_SIGNATURE);
+    setTitle(muse::qtrc("inspector", "Time signature"));
+    setIcon(muse::ui::IconCode::Code::TIME_SIGNATURE);
     createProperties();
 }
 
@@ -67,11 +67,11 @@ void TimeSignatureSettingsModel::requestElements()
 void TimeSignatureSettingsModel::loadProperties()
 {
     loadPropertyItem(m_horizontalScale, [](const QVariant& elementPropertyValue) -> QVariant {
-        return DataFormatter::roundDouble(elementPropertyValue.value<QSizeF>().width()) * 100;
+        return muse::DataFormatter::roundDouble(elementPropertyValue.value<QSizeF>().width()) * 100;
     });
 
     loadPropertyItem(m_verticalScale, [](const QVariant& elementPropertyValue) -> QVariant {
-        return DataFormatter::roundDouble(elementPropertyValue.value<QSizeF>().height()) * 100;
+        return muse::DataFormatter::roundDouble(elementPropertyValue.value<QSizeF>().height()) * 100;
     });
 
     loadPropertyItem(m_shouldShowCourtesy);

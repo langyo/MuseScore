@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -40,7 +40,7 @@
 #include "auxsenditem.h"
 
 namespace mu::playback {
-class MixerChannelItem : public QObject, public async::Asyncable
+class MixerChannelItem : public QObject, public muse::async::Asyncable
 {
     Q_OBJECT
 
@@ -62,9 +62,9 @@ class MixerChannelItem : public QObject, public async::Asyncable
     Q_PROPERTY(bool muted READ muted WRITE setMuted NOTIFY mutedChanged)
     Q_PROPERTY(bool forceMute READ forceMute NOTIFY forceMuteChanged)
 
-    Q_PROPERTY(mu::ui::NavigationPanel * panel READ panel NOTIFY panelChanged)
+    Q_PROPERTY(muse::ui::NavigationPanel * panel READ panel NOTIFY panelChanged)
 
-    INJECT(IInteractive, interactive)
+    INJECT(muse::IInteractive, interactive)
     INJECT(context::IGlobalContext, context)
     INJECT(IPlaybackConfiguration, configuration)
 
@@ -102,9 +102,9 @@ public:
     bool muted() const;
     bool forceMute() const;
 
-    ui::NavigationPanel* panel() const;
+    muse::ui::NavigationPanel* panel() const;
     void setPanelOrder(int panelOrder);
-    void setPanelSection(ui::INavigationSection* section);
+    void setPanelSection(muse::ui::INavigationSection* section);
 
     void setOutputResourceItemCount(size_t count);
 
@@ -148,7 +148,7 @@ signals:
     void mutedChanged();
     void forceMuteChanged();
 
-    void panelChanged(ui::NavigationPanel* panel);
+    void panelChanged(muse::ui::NavigationPanel* panel);
 
     void inputParamsChanged(const muse::audio::AudioInputParams& params);
     void outputParamsChanged(const muse::audio::AudioOutputParams& params);
@@ -178,7 +178,7 @@ protected:
 
     muse::audio::AudioFxChainOrder resolveNewBlankOutputResourceItemOrder() const;
 
-    void openEditor(AbstractAudioResourceItem* item, const UriQuery& editorUri);
+    void openEditor(AbstractAudioResourceItem* item, const muse::UriQuery& editorUri);
     void closeEditor(AbstractAudioResourceItem* item);
 
     bool askAboutChangingSound();
@@ -203,7 +203,7 @@ protected:
     float m_leftChannelPressure = 0.0;
     float m_rightChannelPressure = 0.0;
 
-    ui::NavigationPanel* m_panel = nullptr;
+    muse::ui::NavigationPanel* m_panel = nullptr;
 
     bool m_outputResourceItemsLoading = false;
 };

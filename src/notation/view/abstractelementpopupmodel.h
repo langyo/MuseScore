@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2022 MuseScore BVBA and others
+ * Copyright (C) 2022 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -33,15 +33,16 @@
 #include "engraving/dom/engravingitem.h"
 
 namespace mu::notation {
-class AbstractElementPopupModel : public QObject, public async::Asyncable, public muse::actions::Actionable
+class AbstractElementPopupModel : public QObject, public muse::async::Asyncable, public muse::actions::Actionable
 {
     Q_OBJECT
 
-    INJECT(muse::actions::IActionsDispatcher, dispatcher)
-    INJECT(context::IGlobalContext, globalContext)
-
     Q_PROPERTY(PopupModelType modelType READ modelType CONSTANT)
     Q_PROPERTY(QRect itemRect READ itemRect NOTIFY itemRectChanged)
+
+public:
+    INJECT(muse::actions::IActionsDispatcher, dispatcher)
+    INJECT(context::IGlobalContext, globalContext)
 
 public:
     enum class PopupModelType {
@@ -68,8 +69,8 @@ signals:
     void itemRectChanged(QRect rect);
 
 protected:
-    PointF fromLogical(PointF point) const;
-    RectF fromLogical(RectF rect) const;
+    muse::PointF fromLogical(muse::PointF point) const;
+    muse::RectF fromLogical(muse::RectF rect) const;
 
     notation::INotationUndoStackPtr undoStack() const;
     void beginCommand();

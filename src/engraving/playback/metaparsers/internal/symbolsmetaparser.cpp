@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -25,8 +25,9 @@
 #include "dom/articulation.h"
 
 using namespace mu::engraving;
+using namespace muse;
 
-mu::mpe::ArticulationTypeSet SymbolsMetaParser::symbolToArticulations(SymId symId, OrnamentStyle ornamentStyle)
+mpe::ArticulationTypeSet SymbolsMetaParser::symbolToArticulations(SymId symId, OrnamentStyle ornamentStyle)
 {
     mpe::ArticulationTypeSet types;
 
@@ -172,6 +173,9 @@ mu::mpe::ArticulationTypeSet SymbolsMetaParser::symbolToArticulations(SymId symI
     case SymId::noteheadVoidWithX:
         types.emplace(mpe::ArticulationType::CrossNote);
         break;
+    case SymId::noteheadSlashX:
+        types.emplace(mpe::ArticulationType::CrossLargeNote);
+        break;
     case SymId::noteheadXOrnate:
     case SymId::noteheadXOrnateEllipse:
         types.emplace(mpe::ArticulationType::CrossOrnateNote);
@@ -210,15 +214,29 @@ mu::mpe::ArticulationTypeSet SymbolsMetaParser::symbolToArticulations(SymId symI
     case SymId::noteheadDiamondHalfOld:
         types.emplace(mpe::ArticulationType::DiamondNote);
         break;
+    case SymId::noteShapeMoonBlack:
+    case SymId::noteShapeMoonDoubleWhole:
+    case SymId::noteShapeMoonWhite:
+        types.emplace(mpe::ArticulationType::MoonNote);
+        break;
+    case SymId::noteheadTriangleLeftBlack:
+    case SymId::noteheadTriangleLeftWhite:
+        types.emplace(mpe::ArticulationType::TriangleLeftNote);
+        break;
+    case SymId::noteheadTriangleRightBlack:
+    case SymId::noteheadTriangleRightWhite:
+    case SymId::noteShapeTriangleRightWhite:
+    case SymId::noteShapeTriangleRightBlack:
+    case SymId::noteShapeTriangleRightDoubleWhole:
+        types.emplace(mpe::ArticulationType::TriangleRightNote);
+        break;
     case SymId::noteheadTriangleDownBlack:
     case SymId::noteheadTriangleDownDoubleWhole:
     case SymId::noteheadTriangleDownHalf:
     case SymId::noteheadTriangleDownWhite:
     case SymId::noteheadTriangleDownWhole:
-    case SymId::noteheadTriangleLeftBlack:
-    case SymId::noteheadTriangleLeftWhite:
-    case SymId::noteheadTriangleRightBlack:
-    case SymId::noteheadTriangleRightWhite:
+        types.emplace(mpe::ArticulationType::TriangleDownNote);
+        break;
     case SymId::noteheadTriangleUpBlack:
     case SymId::noteheadTriangleUpDoubleWhole:
     case SymId::noteheadTriangleUpHalf:
@@ -226,7 +244,10 @@ mu::mpe::ArticulationTypeSet SymbolsMetaParser::symbolToArticulations(SymId symI
     case SymId::noteheadTriangleUpRightWhite:
     case SymId::noteheadTriangleUpWhite:
     case SymId::noteheadTriangleUpWhole:
-        types.emplace(mpe::ArticulationType::TriangleNote);
+    case SymId::noteShapeTriangleUpBlack:
+    case SymId::noteShapeTriangleUpWhite:
+    case SymId::noteShapeTriangleUpDoubleWhole:
+        types.emplace(mpe::ArticulationType::TriangleUpNote);
         break;
     case SymId::noteheadTriangleRoundDownBlack:
     case SymId::noteheadTriangleRoundDownWhite:
@@ -246,6 +267,11 @@ mu::mpe::ArticulationTypeSet SymbolsMetaParser::symbolToArticulations(SymId symI
     case SymId::noteheadSlashHorizontalEnds:
     case SymId::noteheadSlashWhiteDoubleWhole:
         types.emplace(mpe::ArticulationType::SlashNote);
+        break;
+    case SymId::noteShapeSquareBlack:
+    case SymId::noteShapeSquareWhite:
+    case SymId::noteShapeSquareDoubleWhole:
+        types.emplace(mpe::ArticulationType::SquareNote);
         break;
     case SymId::noteheadSlashedWhole1:
     case SymId::noteheadSlashedHalf1:

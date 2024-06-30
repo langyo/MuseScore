@@ -28,7 +28,6 @@
 
 #include "log.h"
 
-using namespace mu;
 using namespace muse::draw;
 
 namespace muse::draw::comp {
@@ -592,22 +591,22 @@ static void fillDrawData(DrawDataPtr& dd, const comp::Data& cd)
     // collect objects (save order)
     std::vector<const DrawData::Item*> objs;
     for (const comp::Path& p : cd.paths) {
-        if (!mu::contains(objs, p.obj)) {
+        if (!muse::contains(objs, p.obj)) {
             objs.push_back(p.obj);
         }
     }
     for (const comp::Polygon& p : cd.polygons) {
-        if (!mu::contains(objs, p.obj)) {
+        if (!muse::contains(objs, p.obj)) {
             objs.push_back(p.obj);
         }
     }
     for (const comp::Text& p : cd.texts) {
-        if (!mu::contains(objs, p.obj)) {
+        if (!muse::contains(objs, p.obj)) {
             objs.push_back(p.obj);
         }
     }
     for (const comp::Pixmap& p : cd.pixmaps) {
-        if (!mu::contains(objs, p.obj)) {
+        if (!muse::contains(objs, p.obj)) {
             objs.push_back(p.obj);
         }
     }

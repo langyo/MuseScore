@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -433,7 +433,7 @@ void TDraw::draw(const Ambitus* item, Painter* painter)
     }
 
     // draw ledger lines (if not in a palette)
-    if (item->segment() && item->track() != mu::nidx) {
+    if (item->segment() && item->track() != muse::nidx) {
         Fraction tick = item->segment()->tick();
         Staff* staff = item->score()->staff(item->staffIdx());
         double lineDist = staff->lineDistance(tick);
@@ -448,7 +448,7 @@ void TDraw::draw(const Ambitus* item, Painter* painter)
             double xMin = ldata->topPos.x() - ledgerLineLength;
             double xMax = ldata->topPos.x() + item->headWidth() + ledgerLineLength;
             for (double y = -step; y >= ldata->topPos.y() - stepTolerance; y -= step) {
-                painter->drawLine(mu::PointF(xMin, y), mu::PointF(xMax, y));
+                painter->drawLine(PointF(xMin, y), PointF(xMax, y));
             }
         }
 
@@ -456,7 +456,7 @@ void TDraw::draw(const Ambitus* item, Painter* painter)
             double xMin = ldata->bottomPos.x() - ledgerLineLength;
             double xMax = ldata->bottomPos.x() + item->headWidth() + ledgerLineLength;
             for (double y = numOfLines * step; y <= ldata->bottomPos.y() + stepTolerance; y += step) {
-                painter->drawLine(mu::PointF(xMin, y), mu::PointF(xMax, y));
+                painter->drawLine(PointF(xMin, y), PointF(xMax, y));
             }
         }
     }
@@ -591,11 +591,11 @@ void TDraw::draw(const BagpipeEmbellishment* item, Painter* painter)
                             const double x1, const double x2, double y)
         {
             // draw the beams
-            painter->drawLine(mu::LineF(x1, y, x2, y));
+            painter->drawLine(LineF(x1, y, x2, y));
             y += spatium / 1.5;
-            painter->drawLine(mu::LineF(x1, y, x2, y));
+            painter->drawLine(LineF(x1, y, x2, y));
             y += spatium / 1.5;
-            painter->drawLine(mu::LineF(x1, y, x2, y));
+            painter->drawLine(LineF(x1, y, x2, y));
         };
 
         drawBeams(painter, data->spatium, dataBeam.x1, dataBeam.x2, dataBeam.y);
@@ -818,7 +818,7 @@ void TDraw::draw(const BarLine* item, Painter* painter)
     if (s && s->isEndBarLineType() && !item->score()->printing() && item->score()->showUnprintable()) {
         Measure* m = s->measure();
         if (m->isIrregular() && item->score()->markIrregularMeasures() && !m->isMMRest()) {
-            painter->setPen(EngravingItem::engravingConfiguration()->formattingMarksColor());
+            painter->setPen(item->configuration()->formattingMarksColor());
             Font f(u"Edwin", Font::Type::Text);
             f.setPointSizeF(12 * item->spatium() / SPATIUM20);
             f.setBold(true);
@@ -982,8 +982,8 @@ void TDraw::draw(const Box* item, Painter* painter)
         pen.setJoinStyle(PenJoinStyle::MiterJoin);
         pen.setCapStyle(PenCapStyle::SquareCap);
         pen.setColor(showHighlightedFrame
-                     ? Box::engravingConfiguration()->selectionColor()
-                     : Box::engravingConfiguration()->formattingMarksColor());
+                     ? item->configuration()->selectionColor()
+                     : item->configuration()->formattingMarksColor());
         pen.setDashPattern({ 1, 3 });
 
         painter->setBrush(BrushStyle::NoBrush);
@@ -1099,8 +1099,8 @@ void TDraw::draw(const ChordLine* item, Painter* painter)
         painter->drawPath(ldata->path);
     } else {
         painter->save();
-        painter->rotate((item->chordLineType() == ChordLineType::FALL ? 1 : -1) * ChordLine::WAVE_ANGEL);
-        item->drawSymbols(ChordLine::WAVE_SYMBOLS, painter);
+        painter->rotate((item->chordLineType() == ChordLineType::FALL ? 1 : -1) * 20);
+        item->drawSymbols({ SymId::wiggleVIbratoMediumSlower, SymId::wiggleVIbratoMediumSlower }, painter);
         painter->restore();
     }
 }
@@ -1165,7 +1165,7 @@ void TDraw::draw(const FiguredBass* item, Painter* painter)
     if (!item->score()->printing() && item->score()->showUnprintable()) {
         for (double len : ldata->lineLengths) {
             if (len > 0) {
-                painter->setPen(Pen(FiguredBass::engravingConfiguration()->formattingMarksColor(), 3));
+                painter->setPen(Pen(item->configuration()->formattingMarksColor(), 3));
                 painter->drawLine(0.0, -2, len, -2);              // -2: 2 rast. un. above digits
             }
         }
@@ -1912,7 +1912,7 @@ void TDraw::draw(const Image* item, Painter* painter)
                 painter->drawPixmap(PointF(0, 0), *item->rasterImage());
             } else {
                 Transform t = painter->worldTransform();
-                Size ss = Size(s.width() * t.m11(), s.height() * t.m22());
+                muse::Size ss = muse::Size(s.width() * t.m11(), s.height() * t.m22());
                 t.setMatrix(1.0, t.m12(), t.m13(), t.m21(), 1.0, t.m23(), t.m31(), t.m32(), t.m33());
                 painter->setWorldTransform(t);
                 if ((item->buffer().size() != ss || item->dirty()) && item->rasterImage() && !item->rasterImage()->isNull()) {
@@ -1931,14 +1931,14 @@ void TDraw::draw(const Image* item, Painter* painter)
 
     if (emptyImage) {
         painter->setBrush(BrushStyle::NoBrush);
-        painter->setPen(item->engravingConfiguration()->defaultColor());
+        painter->setPen(item->configuration()->defaultColor());
         painter->drawRect(ldata->bbox());
         painter->drawLine(0.0, 0.0, ldata->bbox().width(), ldata->bbox().height());
         painter->drawLine(ldata->bbox().width(), 0.0, 0.0, ldata->bbox().height());
     }
     if (item->selected() && !(item->score() && item->score()->printing())) {
         painter->setBrush(BrushStyle::NoBrush);
-        painter->setPen(item->engravingConfiguration()->selectionColor());
+        painter->setPen(item->configuration()->selectionColor());
         painter->drawRect(ldata->bbox());
     }
 }
@@ -1996,10 +1996,10 @@ void TDraw::draw(const Lasso* item, Painter* painter)
 {
     TRACE_DRAW_ITEM;
     const Lasso::LayoutData* ldata = item->ldata();
-    painter->setBrush(Brush(item->engravingConfiguration()->lassoColor()));
+    painter->setBrush(Brush(item->configuration()->lassoColor()));
     // always 2 pixel width
-    double w = 2.0 / painter->worldTransform().m11() * item->engravingConfiguration()->guiScaling();
-    painter->setPen(Pen(item->engravingConfiguration()->selectionColor(), w));
+    double w = 2.0 / painter->worldTransform().m11() * item->configuration()->guiScaling();
+    painter->setPen(Pen(item->configuration()->selectionColor(), w));
     painter->drawRect(ldata->bbox());
 }
 
@@ -2011,9 +2011,9 @@ void TDraw::draw(const LayoutBreak* item, Painter* painter)
         return;
     }
 
-    Pen pen(item->selected() ? item->engravingConfiguration()->selectionColor() : item->engravingConfiguration()->formattingMarksColor());
+    Pen pen(item->selected() ? item->configuration()->selectionColor() : item->configuration()->formattingMarksColor());
     if (item->score()->isPaletteScore()) {
-        pen.setColor(item->engravingConfiguration()->fontPrimaryColor());
+        pen.setColor(item->configuration()->fontPrimaryColor());
     }
     pen.setWidthF(item->lineWidth() / 2);
     pen.setJoinStyle(PenJoinStyle::MiterJoin);
@@ -2065,22 +2065,12 @@ void TDraw::draw(const LyricsLineSegment* item, Painter* painter)
 {
     TRACE_DRAW_ITEM;
 
-    if (item->numOfDashes() < 1) {               // nothing to draw
-        return;
-    }
-
     Pen pen(item->lyricsLine()->lyrics()->curColor());
     pen.setWidthF(item->lyricsLine()->lineWidth());
     pen.setCapStyle(PenCapStyle::FlatCap);
     painter->setPen(pen);
-    if (item->lyricsLine()->isEndMelisma()) {               // melisma
-        painter->drawLine(PointF(), item->pos2());
-    } else {                                          // dash(es)
-        double step  = item->pos2().x() / item->numOfDashes();
-        double x     = step * .5 - item->dashLength() * .5;
-        for (int i = 0; i < item->numOfDashes(); i++, x += step) {
-            painter->drawLine(PointF(x, 0.0), PointF(x + item->dashLength(), 0.0));
-        }
+    for (const LineF& dash : item->ldata()->dashes()) {
+        painter->drawLine(dash);
     }
 }
 
@@ -2212,7 +2202,7 @@ void TDraw::draw(const Note* item, Painter* painter)
 
     const Note::LayoutData* ldata = item->ldata();
 
-    auto config = item->engravingConfiguration();
+    auto config = item->configuration();
 
     bool negativeFret = item->negativeFretUsed() && item->staff()->isTabStaff(item->tick());
 
@@ -2460,7 +2450,7 @@ void TDraw::draw(const ShadowNote* item, Painter* painter)
     PointF ap(item->pagePos());
     painter->translate(ap);
     double lw = item->style().styleMM(Sid::stemWidth) * item->mag();
-    Pen pen(item->engravingConfiguration()->highlightSelectionColor(item->voice()), lw, PenStyle::SolidLine, PenCapStyle::FlatCap);
+    Pen pen(item->configuration()->highlightSelectionColor(item->voice()), lw, PenStyle::SolidLine, PenCapStyle::FlatCap);
     painter->setPen(pen);
 
     bool up = item->computeUp();
@@ -2594,7 +2584,7 @@ void TDraw::draw(const Spacer* item, Painter* painter)
         return;
     }
 
-    auto conf = item->engravingConfiguration();
+    auto conf = item->configuration();
 
     Pen pen(item->selected() ? conf->selectionColor() : conf->formattingMarksColor(), item->spatium()* 0.3);
 
@@ -2618,7 +2608,7 @@ void TDraw::draw(const StaffState* item, Painter* painter)
     }
 
     const StaffState::LayoutData* ldata = item->ldata();
-    auto conf = item->engravingConfiguration();
+    auto conf = item->configuration();
 
     Pen pen(item->selected() ? conf->selectionColor() : conf->formattingMarksColor(),
             ldata->lw, PenStyle::SolidLine, PenCapStyle::RoundCap, PenJoinStyle::RoundJoin);
@@ -2641,7 +2631,7 @@ void TDraw::draw(const StaffTypeChange* item, Painter* painter)
         return;
     }
 
-    auto conf = item->engravingConfiguration();
+    auto conf = item->configuration();
 
     double _spatium = item->style().spatium();
     double h  = _spatium * 2.5;

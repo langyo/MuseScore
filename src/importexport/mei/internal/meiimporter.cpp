@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -44,12 +44,14 @@
 #include "engraving/dom/lyrics.h"
 #include "engraving/dom/marker.h"
 #include "engraving/dom/measure.h"
+#include "engraving/dom/measurerepeat.h"
 #include "engraving/dom/note.h"
 #include "engraving/dom/ornament.h"
 #include "engraving/dom/ottava.h"
 #include "engraving/dom/part.h"
 #include "engraving/dom/pedal.h"
 #include "engraving/dom/playtechannotation.h"
+#include "engraving/dom/rehearsalmark.h"
 #include "engraving/dom/rest.h"
 #include "engraving/dom/score.h"
 #include "engraving/dom/segment.h"
@@ -71,6 +73,7 @@
 
 #include "thirdparty/pugixml.hpp"
 
+using namespace muse;
 using namespace mu;
 using namespace mu::iex::mei;
 using namespace mu::engraving;
@@ -86,7 +89,7 @@ using namespace mu::engraving;
  * Return false on error.
  */
 
-bool MeiImporter::read(const io::path_t& path)
+bool MeiImporter::read(const muse::io::path_t& path)
 {
     m_uids = UIDRegister::instance();
     m_uids->clear();
@@ -207,7 +210,7 @@ int MeiImporter::getVoiceIndex(int staffIdx, int layerN)
  * When reading tuplet, increase the ticks value to the corrected ratio, and not at all when reading grace notes.
  */
 
-ChordRest* MeiImporter::addChordRest(pugi::xml_node node, Measure* measure, int track, const libmei::Element& meiElement, int& ticks,
+ChordRest* MeiImporter::addChordRest(pugi::xml_node node, Measure* measure, int track, const libmei::Element& meiElement, Fraction& ticks,
                                      bool isRest)
 {
     IF_ASSERT_FAILED(measure) {
@@ -243,7 +246,7 @@ ChordRest* MeiImporter::addChordRest(pugi::xml_node node, Measure* measure, int 
     if (m_readingGraceNotes) {
         segment = m_score->dummy()->segment();
     } else {
-        segment = measure->getSegment(SegmentType::ChordRest, Fraction::fromTicks(ticks) + measure->tick());
+        segment = measure->getSegment(SegmentType::ChordRest, ticks + measure->tick());
     }
 
     ChordRest* chordRest = nullptr;
@@ -320,7 +323,7 @@ ChordRest* MeiImporter::addChordRest(pugi::xml_node node, Measure* measure, int 
     }
     // For grace notes, no tick advance
     if (!m_readingGraceNotes) {
-        ticks += chordTicks.ticks();
+        ticks += chordTicks;
         // Check if we have an AttBeamSecondary and read it for the next ChordRest
         if (beamSecondaryAtt) {
             m_beamBeginMode = Convert::breaksecFromMEI(beamSecondaryAtt->GetBreaksec(), warning);
@@ -443,6 +446,8 @@ EngravingItem* MeiImporter::addAnnotation(const libmei::Element& meiElement, Mea
         } else {
             item = Factory::createHarmony(chordRest->segment());
         }
+    } else if (meiElement.m_name == "reh") {
+        item = Factory::createRehearsalMark(chordRest->segment());
     } else if (meiElement.m_name == "tempo") {
         item = Factory::createTempoText(chordRest->segment());
     } else {
@@ -532,7 +537,7 @@ EngravingItem* MeiImporter::addToChordRest(const libmei::Element& meiElement, Me
         if (chordRest->isChord()) {
             item = Factory::createArpeggio(toChord(chordRest));
         }
-    } else if (meiElement.m_name == "artic") {
+    } else if (meiElement.m_name == "artic" || meiElement.m_name == "lv") {
         item = Factory::createArticulation(chordRest);
     } else {
         return nullptr;
@@ -577,7 +582,8 @@ ChordRest* MeiImporter::findStart(const libmei::Element& meiElement, Measure* me
         std::string startId = this->xmlIdFrom(startIdAtt->GetStartid());
         // The startid corresponding ChordRest should have been added to the m_startIdChordRests previously
         if (!m_startIdChordRests.count(startId) || !m_startIdChordRests.at(startId)) {
-            Convert::logs.push_back(String("Could not find element for @startid '%1'").arg(String::fromStdString(startIdAtt->GetStartid())));
+            Convert::logs.push_back(String("Could not find element for @startid '%1'").arg(String::fromStdString(
+                                                                                               startIdAtt->GetStartid())));
             return nullptr;
         }
         chordRest = m_startIdChordRests.at(startId);
@@ -1249,6 +1255,16 @@ bool MeiImporter::readSectionElements(pugi::xml_node parentNode)
 {
     bool success = true;
 
+    libmei::Section meiSection;
+    meiSection.Read(parentNode);
+
+    if (meiSection.HasRestart() && meiSection.GetRestart() == libmei::BOOLEAN_true) {
+        MeasureBase* lastMeasureBase = !m_score->measures()->empty() ? m_score->measures()->last() : nullptr;
+        if (lastMeasureBase) {
+            m_score->insertBox(ElementType::HBOX, lastMeasureBase);
+        }
+    }
+
     pugi::xpath_node_set elements = parentNode.select_nodes("./*");
     for (pugi::xpath_node xpathNode : elements) {
         std::string elementName = std::string(xpathNode.node().name());
@@ -1356,14 +1372,14 @@ bool MeiImporter::readMeasure(pugi::xml_node measureNode)
     }
     measure->setIrregular(measureSt.irregular);
 
-    int measureTicks = 0;
+    Fraction measureTicks(0, 1);
     success = success & this->readStaves(measureNode, measure, measureTicks);
     // Make sure we correct empty content because this would crash MuseScore
-    if (measureTicks == 0) {
-        measureTicks = m_currentTimeSig.ticks();
+    if (measureTicks.isZero()) {
+        measureTicks = m_currentTimeSig;
         LOGD() << "MeiImporter::readMeasure empty content in " << meiMeasure.GetN();
     }
-    measure->setTicks(Fraction::fromTicks(measureTicks));
+    measure->setTicks(measureTicks);
 
     success = success & this->readControlEvents(measureNode, measure);
 
@@ -1433,7 +1449,7 @@ bool MeiImporter::readSb(pugi::xml_node pbNode)
  * Lookup (and clear) the time signature and key signature maps to add them if necessary.
  */
 
-bool MeiImporter::readStaves(pugi::xml_node parentNode, Measure* measure, int& measureTicks)
+bool MeiImporter::readStaves(pugi::xml_node parentNode, Measure* measure, Fraction& measureTicks)
 {
     IF_ASSERT_FAILED(measure) {
         return false;
@@ -1502,7 +1518,7 @@ bool MeiImporter::readStaves(pugi::xml_node parentNode, Measure* measure, int& m
  * Relies on the m_lastChord pointer for adding grace notes to the correct ChordRest
  */
 
-bool MeiImporter::readLayers(pugi::xml_node parentNode, Measure* measure, int staffN, int& measureTicks)
+bool MeiImporter::readLayers(pugi::xml_node parentNode, Measure* measure, int staffN, Fraction& measureTicks)
 {
     IF_ASSERT_FAILED(measure) {
         return false;
@@ -1528,7 +1544,7 @@ bool MeiImporter::readLayers(pugi::xml_node parentNode, Measure* measure, int st
         meiLayer.Read(xpathNode.node());
 
         m_lastChord = nullptr;
-        int ticks = 0;
+        Fraction ticks;
         int track = staffN * VOICES + static_cast<int>(i);
         success = success && this->readElements(xpathNode.node(), measure, track, ticks);
         measureTicks = std::max(measureTicks, ticks);
@@ -1543,7 +1559,7 @@ bool MeiImporter::readLayers(pugi::xml_node parentNode, Measure* measure, int st
  * Read the layer content, including through a recursive call for nested elements.
  */
 
-bool MeiImporter::readElements(pugi::xml_node parentNode, Measure* measure, int track, int& ticks)
+bool MeiImporter::readElements(pugi::xml_node parentNode, Measure* measure, int track, Fraction& ticks)
 {
     IF_ASSERT_FAILED(measure) {
         return false;
@@ -1568,6 +1584,8 @@ bool MeiImporter::readElements(pugi::xml_node parentNode, Measure* measure, int 
             success = success && this->readMRest(xpathNode.node(), measure, track, ticks);
         } else if (elementName == "note") {
             success = success && this->readNote(xpathNode.node(), measure, track, ticks);
+        } else if (elementName == "mRpt") {
+            success = success && this->readMRpt(xpathNode.node(), measure, track, ticks);
         } else if (elementName == "rest" && !m_readingGraceNotes) {
             success = success && this->readRest(xpathNode.node(), measure, track, ticks);
         } else if (elementName == "space" && !m_readingGraceNotes) {
@@ -1631,7 +1649,7 @@ bool MeiImporter::readArtic(pugi::xml_node articNode, Chord* chord)
  * Set MuseScore flags based on custom `@type` values.
  */
 
-bool MeiImporter::readBeam(pugi::xml_node beamNode, Measure* measure, int track, int& ticks)
+bool MeiImporter::readBeam(pugi::xml_node beamNode, Measure* measure, int track, Fraction& ticks)
 {
     IF_ASSERT_FAILED(measure) {
         return false;
@@ -1659,7 +1677,7 @@ bool MeiImporter::readBeam(pugi::xml_node beamNode, Measure* measure, int track,
  * Set MuseScore TremoloType.
  */
 
-bool MeiImporter::readBTrem(pugi::xml_node bTremNode, Measure* measure, int track, int& ticks)
+bool MeiImporter::readBTrem(pugi::xml_node bTremNode, Measure* measure, int track, Fraction& ticks)
 {
     IF_ASSERT_FAILED(measure) {
         return false;
@@ -1682,7 +1700,7 @@ bool MeiImporter::readBTrem(pugi::xml_node bTremNode, Measure* measure, int trac
  * Read a chord and its content (note elements).
  */
 
-bool MeiImporter::readChord(pugi::xml_node chordNode, Measure* measure, int track, int& ticks)
+bool MeiImporter::readChord(pugi::xml_node chordNode, Measure* measure, int track, Fraction& ticks)
 {
     IF_ASSERT_FAILED(measure) {
         return false;
@@ -1691,7 +1709,7 @@ bool MeiImporter::readChord(pugi::xml_node chordNode, Measure* measure, int trac
     libmei::Chord meiChord;
     meiChord.Read(chordNode);
 
-    int chordTicks = ticks;
+    Fraction chordTicks = ticks;
 
     // Support for @grace without <graceGrp>
     this->readGracedAtt(meiChord);
@@ -1723,7 +1741,7 @@ bool MeiImporter::readChord(pugi::xml_node chordNode, Measure* measure, int trac
  * Read a clef.
  */
 
-bool MeiImporter::readClef(pugi::xml_node clefNode, Measure* measure, int track, int& ticks)
+bool MeiImporter::readClef(pugi::xml_node clefNode, Measure* measure, int track, Fraction& ticks)
 {
     IF_ASSERT_FAILED(measure) {
         return false;
@@ -1733,7 +1751,7 @@ bool MeiImporter::readClef(pugi::xml_node clefNode, Measure* measure, int track,
     libmei::Clef meiClef;
     meiClef.Read(clefNode);
 
-    Segment* segment = measure->getSegment(SegmentType::Clef, Fraction::fromTicks(ticks) + measure->tick());
+    Segment* segment = measure->getSegment(SegmentType::Clef, ticks + measure->tick());
     Clef* clef = Factory::createClef(segment);
     Convert::colorFromMEI(clef, meiClef);
     m_uids->reg(clef, meiClef.m_xmlId);
@@ -1755,7 +1773,7 @@ bool MeiImporter::readClef(pugi::xml_node clefNode, Measure* measure, int track,
  * Otherwise, only reset the flag and adding the grace notes will be performed in MeiImporter::addChordRest when the next <chord> / <note> is read
  */
 
-bool MeiImporter::readGraceGrp(pugi::xml_node graceGrpNode, Measure* measure, int track, int& ticks)
+bool MeiImporter::readGraceGrp(pugi::xml_node graceGrpNode, Measure* measure, int track, Fraction& ticks)
 {
     IF_ASSERT_FAILED(measure) {
         return false;
@@ -1789,7 +1807,7 @@ bool MeiImporter::readGraceGrp(pugi::xml_node graceGrpNode, Measure* measure, in
  * Read a mRest.
  */
 
-bool MeiImporter::readMRest(pugi::xml_node mRestNode, Measure* measure, int track, int& ticks)
+bool MeiImporter::readMRest(pugi::xml_node mRestNode, Measure* measure, int track, Fraction& ticks)
 {
     IF_ASSERT_FAILED(measure) {
         return false;
@@ -1800,7 +1818,7 @@ bool MeiImporter::readMRest(pugi::xml_node mRestNode, Measure* measure, int trac
 
     TDuration duration;
 
-    Segment* segment = measure->getSegment(SegmentType::ChordRest, Fraction::fromTicks(ticks) + measure->tick());
+    Segment* segment = measure->getSegment(SegmentType::ChordRest, ticks + measure->tick());
     Rest* rest = Factory::createRest(segment, TDuration(DurationType::V_MEASURE));
     Convert::colorFromMEI(rest, meiMRest);
     m_uids->reg(rest, meiMRest.m_xmlId);
@@ -1818,7 +1836,37 @@ bool MeiImporter::readMRest(pugi::xml_node mRestNode, Measure* measure, int trac
     }
 
     // The duration is the duration according to the timesig
-    ticks += rest->ticks().ticks();
+    ticks += rest->ticks();
+
+    return true;
+}
+
+/**
+ * Read a mRpt.
+ */
+
+bool MeiImporter::readMRpt(pugi::xml_node mRptNode, Measure* measure, int track, Fraction& ticks)
+{
+    IF_ASSERT_FAILED(measure) {
+        return false;
+    }
+
+    libmei::MRpt meiMRpt;
+    meiMRpt.Read(mRptNode);
+
+    if (meiMRpt.GetExpand() == libmei::BOOLEAN_true) {
+        LOGD() << "MeiImporter::readMRpt cannot expand measure repeats";
+    }
+
+    Segment* segment = measure->getSegment(SegmentType::ChordRest, ticks + measure->tick());
+    MeasureRepeat* measureRepeat = Factory::createMeasureRepeat(segment);
+    Convert::colorFromMEI(measureRepeat, meiMRpt);
+    m_uids->reg(measureRepeat, meiMRpt.m_xmlId);
+    measureRepeat->setTrack(track);
+    measureRepeat->setTicks(measure->ticks());
+    measureRepeat->setNumMeasures(1);
+    measure->setMeasureRepeatCount(1, track2staff(track));
+    segment->add(measureRepeat);
 
     return true;
 }
@@ -1827,7 +1875,7 @@ bool MeiImporter::readMRest(pugi::xml_node mRestNode, Measure* measure, int trac
  * Read a note.
  */
 
-bool MeiImporter::readNote(pugi::xml_node noteNode, Measure* measure, int track, int& ticks, Chord* chord)
+bool MeiImporter::readNote(pugi::xml_node noteNode, Measure* measure, int track, Fraction& ticks, Chord* chord)
 {
     IF_ASSERT_FAILED(measure) {
         return false;
@@ -1894,6 +1942,7 @@ bool MeiImporter::readNote(pugi::xml_node noteNode, Measure* measure, int track,
     note->setPitch(pitchSt.pitch, tpc1, pitchSt.tpc2);
 
     Accidental* accid = Factory::createAccidental(note);
+    Convert::colorFromMEI(accid, meiAccid);
     m_uids->reg(accid, meiAccid.m_xmlId);
     accid->setAccidentalType(pitchSt.accidType);
     //accid->setBracket(AccidentalBracket::BRACKET); // Not supported in MEI-Basic
@@ -1910,7 +1959,7 @@ bool MeiImporter::readNote(pugi::xml_node noteNode, Measure* measure, int track,
  * Read a rest.
  */
 
-bool MeiImporter::readRest(pugi::xml_node restNode, Measure* measure, int track, int& ticks)
+bool MeiImporter::readRest(pugi::xml_node restNode, Measure* measure, int track, Fraction& ticks)
 {
     IF_ASSERT_FAILED(measure) {
         return false;
@@ -1931,7 +1980,7 @@ bool MeiImporter::readRest(pugi::xml_node restNode, Measure* measure, int track,
  * Read a space.
  */
 
-bool MeiImporter::readSpace(pugi::xml_node spaceNode, Measure* measure, int track, int& ticks)
+bool MeiImporter::readSpace(pugi::xml_node spaceNode, Measure* measure, int track, Fraction& ticks)
 {
     IF_ASSERT_FAILED(measure) {
         return false;
@@ -1971,7 +2020,7 @@ bool MeiImporter::readSyl(pugi::xml_node sylNode, Lyrics* lyrics, Convert::textW
  * Read a tuplet.
  */
 
-bool MeiImporter::readTuplet(pugi::xml_node tupletNode, Measure* measure, int track, int& ticks)
+bool MeiImporter::readTuplet(pugi::xml_node tupletNode, Measure* measure, int track, Fraction& ticks)
 {
     IF_ASSERT_FAILED(measure) {
         return false;
@@ -1985,7 +2034,7 @@ bool MeiImporter::readTuplet(pugi::xml_node tupletNode, Measure* measure, int tr
     bool warning = false;
     bool success = true;
 
-    int startTicks = ticks;
+    Fraction startTicks = ticks;
     libmei::Tuplet meiTuplet;
     meiTuplet.Read(tupletNode);
 
@@ -2001,13 +2050,13 @@ bool MeiImporter::readTuplet(pugi::xml_node tupletNode, Measure* measure, int tr
 
     success = readElements(tupletNode, measure, track, ticks);
 
-    Fraction tupletTicks = Fraction::fromTicks(ticks - startTicks);
+    Fraction tupletTicks = ticks - startTicks;
 
     TDuration d;
     d.setVal((tupletTicks / m_tuplet->ratio().denominator()).ticks());
 
     m_tuplet->setBaseLen(d);
-    m_tuplet->setTick(Fraction::fromTicks(startTicks) + measure->tick());
+    m_tuplet->setTick(startTicks + measure->tick());
     m_tuplet->setTicks(tupletTicks);
 
     m_tuplet = nullptr;
@@ -2067,6 +2116,7 @@ bool MeiImporter::readVerse(pugi::xml_node verseNode, Chord* chord)
     }
 
     Lyrics* lyrics = Factory::createLyrics(chord);
+    m_uids->reg(lyrics, meiVerse.m_xmlId);
     Convert::colorFromMEI(lyrics, meiVerse);
 
     bool success = true;
@@ -2075,6 +2125,13 @@ bool MeiImporter::readVerse(pugi::xml_node verseNode, Chord* chord)
     pugi::xpath_node extender = verseNode.select_node("./syl[@con='u']");
     if (extender) {
         m_lyricExtenders[chord->track()][no] = std::make_pair(lyrics, nullptr);
+    }
+
+    // @place
+    if (meiVerse.HasPlace()) {
+        lyrics->setPlacement(meiVerse.GetPlace()
+                             == libmei::STAFFREL_above ? engraving::PlacementV::ABOVE : engraving::PlacementV::BELOW);
+        lyrics->setPropertyFlags(engraving::Pid::PLACEMENT, engraving::PropertyFlags::UNSTYLED);
     }
 
     // Aggregate the syllable into line blocks
@@ -2145,6 +2202,8 @@ bool MeiImporter::readControlEvents(pugi::xml_node parentNode, Measure* measure)
             } else {
                 success = success && this->readHarm(xpathNode.node(), measure);
             }
+        } else if (elementName == "lv") {
+            success = success && this->readLv(xpathNode.node(), measure);
         } else if (elementName == "mordent") {
             success = success && this->readMordent(xpathNode.node(), measure);
         } else if (elementName == "octave") {
@@ -2153,6 +2212,8 @@ bool MeiImporter::readControlEvents(pugi::xml_node parentNode, Measure* measure)
             success = success && this->readOrnam(xpathNode.node(), measure);
         } else if (elementName == "pedal") {
             success = success && this->readPedal(xpathNode.node(), measure);
+        } else if (elementName == "reh") {
+            success = success && this->readReh(xpathNode.node(), measure);
         } else if (elementName == "repeatMark") {
             success = success && this->readRepeatMark(xpathNode.node(), measure);
         } else if (elementName == "slur") {
@@ -2486,6 +2547,31 @@ bool MeiImporter::readHarm(pugi::xml_node harmNode, Measure* measure)
 }
 
 /**
+ * Read a lv.
+ */
+
+bool MeiImporter::readLv(pugi::xml_node lvNode, Measure* measure)
+{
+    IF_ASSERT_FAILED(measure) {
+        return false;
+    }
+
+    bool warning;
+    libmei::Lv meiLv;
+    meiLv.Read(lvNode);
+
+    Articulation* lv = static_cast<Articulation*>(this->addToChordRest(meiLv, measure));
+    if (!lv) {
+        // Warning message given in MeiImporter::addToChordRest
+        return true;
+    }
+
+    Convert::lvFromMEI(lv, meiLv, warning);
+
+    return true;
+}
+
+/**
  * Read a mordent.
  */
 
@@ -2583,6 +2669,35 @@ bool MeiImporter::readPedal(pugi::xml_node pedalNode, Measure* measure)
     }
 
     Convert::pedalFromMEI(pedal, meiPedal, warning);
+
+    return true;
+}
+
+/**
+ * Read a reh.
+ */
+
+bool MeiImporter::readReh(pugi::xml_node rehNode, Measure* measure)
+{
+    IF_ASSERT_FAILED(measure) {
+        return false;
+    }
+
+    libmei::Reh meiReh;
+    meiReh.Read(rehNode);
+
+    RehearsalMark* rehearsalMark = static_cast<RehearsalMark*>(this->addAnnotation(meiReh, measure));
+    if (!rehearsalMark) {
+        // Warning message given in MeiImporter::addAnnotation
+        return true;
+    }
+    Convert::colorFromMEI(rehearsalMark, meiReh);
+
+    StringList meiLines;
+    this->readLinesWithSmufl(rehNode, meiLines);
+
+    // text
+    rehearsalMark->setXmlText(meiLines.join(u"\n"));
 
     return true;
 }
@@ -3080,7 +3195,7 @@ void MeiImporter::addLayoutBreakToMeasure(Measure* measure, LayoutBreakType layo
 
     LayoutBreak* layoutBreak = Factory::createLayoutBreak(measure);
     layoutBreak->setLayoutBreakType(layoutBreakType);
-    layoutBreak->setTrack(mu::nidx); // this are system elements
+    layoutBreak->setTrack(muse::nidx); // this are system elements
     measure->add(layoutBreak);
 }
 

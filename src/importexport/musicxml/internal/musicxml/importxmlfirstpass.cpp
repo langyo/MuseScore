@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -27,15 +27,37 @@
 namespace mu::engraving {
 // TODO: move somewhere else
 
-static const std::vector<String> vocalInstrumentNames = { u"Voice",
-                                                          u"Soprano",
-                                                          u"Mezzo-Soprano",
-                                                          u"Alto",
-                                                          u"Tenor",
-                                                          u"Baritone",
-                                                          u"Bass",
-                                                          u"Women",
-                                                          u"Men" };
+static const std::vector<String> vocalInstrumentNames = {
+    u"Voice",
+    u"Soprano",
+    u"Mezzo-Soprano",
+    u"Alto",
+    u"Tenor",
+    u"Baritone",
+    u"Bass",
+    u"Women",
+    u"Men"
+};
+
+static const std::vector<String> percussionInstrumentNames = {
+    u"Percussion",
+    u"Timpani",
+    u"Glockenspiel",
+    u"Xylophone",
+    u"Vibraphone",
+    u"Marimba",
+    u"Bell",
+    u"Drum"
+    u"Cymbal",
+    u"Triangle",
+    u"Claves",
+    u"Wood Blocks",
+    u"Tambourine",
+    u"Finger Snap",
+    u"Hand Clap",
+    u"Slap",
+    u"Stamp"
+};
 
 MusicXmlPart::MusicXmlPart(String id, String name)
     : m_id(id), m_name(name)
@@ -66,12 +88,12 @@ Fraction MusicXmlPart::measureDuration(size_t i) const
 
 String MusicXmlPart::toString() const
 {
-    auto res = String(u"part id '%1' name '%2' print %3 abbr '%4' print %5 maxStaff %6\n")
-               .arg(m_id, m_name).arg(m_printName).arg(m_abbr).arg(m_printAbbr, m_maxStaff);
+    String res = String(u"part id '%1' name '%2' print %3 abbr '%4' print %5 maxStaff %6\n")
+                 .arg(m_id, m_name).arg(m_printName).arg(m_abbr).arg(m_printAbbr, m_maxStaff);
 
-    for (VoiceList::const_iterator i = voicelist.cbegin(); i != voicelist.cend(); ++i) {
+    for (const auto& p : voicelist) {
         res += String(u"voice %1 map staff data %2\n")
-               .arg(String::number(i->first + 1), i->second.toString());
+               .arg(String::number(p.first + 1), p.second.toString());
     }
 
     for (size_t i = 0; i < m_measureNumbers.size(); ++i) {
@@ -138,7 +160,7 @@ int MusicXmlPart::staffNumberToIndex(const int staffNumber) const
 {
     if (m_staffNumberToIndex.size() == 0) {
         return staffNumber - 1;
-    } else if (mu::contains(m_staffNumberToIndex, staffNumber)) {
+    } else if (muse::contains(m_staffNumberToIndex, staffNumber)) {
         return m_staffNumberToIndex.at(staffNumber);
     } else {
         return -1;
@@ -149,6 +171,16 @@ bool MusicXmlPart::isVocalStaff() const
 {
     return std::find(vocalInstrumentNames.begin(), vocalInstrumentNames.end(), m_name) != vocalInstrumentNames.end()
            || m_hasLyrics;
+}
+
+bool MusicXmlPart::isPercussionStaff() const
+{
+    for (const String& name : percussionInstrumentNames) {
+        if (m_name.contains(name)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 //---------------------------------------------------------

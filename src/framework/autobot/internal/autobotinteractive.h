@@ -19,14 +19,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_AUTOBOT_AUTOBOTINTERACTIVE_H
-#define MU_AUTOBOT_AUTOBOTINTERACTIVE_H
+#ifndef MUSE_AUTOBOT_AUTOBOTINTERACTIVE_H
+#define MUSE_AUTOBOT_AUTOBOTINTERACTIVE_H
 
 #include <memory>
 
 #include "iinteractive.h"
 
-namespace mu::autobot {
+namespace muse::autobot {
 class AutobotInteractive : public IInteractive
 {
 public:
@@ -71,7 +71,7 @@ public:
                  int defBtn = int(Button::NoButton), const Options& options = {}) const override;
 
     // progress
-    Ret showProgress(const std::string& title, mu::Progress* progress) const override;
+    Ret showProgress(const std::string& title, Progress* progress) const override;
 
     // files
     io::path_t selectOpeningFile(const QString& title, const io::path_t& dir, const std::vector<std::string>& filter) override;
@@ -107,6 +107,10 @@ public:
     Ret openUrl(const std::string& url) const override;
     Ret openUrl(const QUrl& url) const override;
 
+    Ret isAppExists(const std::string& appIdentifier) const override;
+    Ret canOpenApp(const Uri& uri) const override;
+    async::Promise<Ret> openApp(const Uri& uri) const override;
+
     Ret revealInFileBrowser(const io::path_t& filePath) const override;
 
     // AutobotInteractive
@@ -122,4 +126,4 @@ private:
 using AutobotInteractivePtr = std::shared_ptr<AutobotInteractive>;
 }
 
-#endif // MU_AUTOBOT_AUTOBOTINTERACTIVE_H
+#endif // MUSE_AUTOBOT_AUTOBOTINTERACTIVE_H

@@ -28,8 +28,18 @@
         </midi-instrument>
       </score-part>
     <score-part id="P2">
-      <part-name>B♭ Clarinet</part-name>
-      <part-abbreviation>B♭ Cl.</part-abbreviation>
+      <part-name>Bb Clarinet</part-name>
+      <part-name-display>
+        <display-text>B</display-text>
+        <accidental-text>flat</accidental-text>
+        <display-text> Clarinet</display-text>
+        </part-name-display>
+      <part-abbreviation>Bb Cl.</part-abbreviation>
+      <part-abbreviation-display>
+        <display-text>B</display-text>
+        <accidental-text>flat</accidental-text>
+        <display-text> Cl.</display-text>
+        </part-abbreviation-display>
       <score-instrument id="P2-I1">
         <instrument-name>B♭ Clarinet</instrument-name>
         </score-instrument>
@@ -129,7 +139,7 @@
         </note>
       </measure>
     <measure number="5">
-      <direction placement="above">
+      <direction placement="above" system="only-top">
         <direction-type>
           <words>System</words>
           </direction-type>
@@ -157,7 +167,7 @@
         <voice>1</voice>
         <type>whole</type>
         </note>
-      <direction placement="above">
+      <direction placement="above" system="only-top">
         <direction-type>
           <bracket type="stop" number="1" line-end="down" end-length="15"/>
           </direction-type>

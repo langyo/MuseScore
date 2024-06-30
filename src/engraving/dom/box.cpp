@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -126,7 +126,7 @@ void Box::endEdit(EditData&)
 //   gripsPositions
 //---------------------------------------------------------
 
-std::vector<mu::PointF> HBox::gripsPositions(const EditData&) const
+std::vector<PointF> HBox::gripsPositions(const EditData&) const
 {
     RectF r(abbox());
     return { PointF(r.right(), r.top() + r.height() * .5) };
@@ -368,7 +368,7 @@ EngravingItem* Box::drop(EditData& data)
             }
             break;
         }
-        lb->setTrack(mu::nidx);                 // these are system elements
+        lb->setTrack(muse::nidx);                 // these are system elements
         lb->setParent(this);
         score()->undoAddElement(lb);
         return lb;

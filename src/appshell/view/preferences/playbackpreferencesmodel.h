@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -33,14 +33,14 @@
 #include "playback/iplaybackconfiguration.h"
 
 namespace mu::appshell {
-class PlaybackPreferencesModel : public QObject, public async::Asyncable
+class PlaybackPreferencesModel : public QObject, public muse::async::Asyncable
 {
     Q_OBJECT
 
     INJECT(muse::audio::IAudioConfiguration, audioConfiguration)
-    INJECT(midi::IMidiConfiguration, midiConfiguration)
-    INJECT(midi::IMidiOutPort, midiOutPort)
-    INJECT(midi::IMidiInPort, midiInPort)
+    INJECT(muse::midi::IMidiConfiguration, midiConfiguration)
+    INJECT(muse::midi::IMidiOutPort, midiOutPort)
+    INJECT(muse::midi::IMidiInPort, midiInPort)
     INJECT(playback::IPlaybackConfiguration, playbackConfiguration)
 
     Q_PROPERTY(int currentAudioApiIndex READ currentAudioApiIndex WRITE setCurrentAudioApiIndex NOTIFY currentAudioApiIndexChanged)
@@ -101,10 +101,10 @@ signals:
     void muteHiddenInstrumentsChanged(bool mute);
 
 private:
-    midi::MidiDeviceID midiInputDeviceId(int index) const;
-    midi::MidiDeviceID midiOutputDeviceId(int index) const;
+    muse::midi::MidiDeviceID midiInputDeviceId(int index) const;
+    muse::midi::MidiDeviceID midiOutputDeviceId(int index) const;
 
-    void showMidiError(const midi::MidiDeviceID& deviceId, const std::string& text) const;
+    void showMidiError(const muse::midi::MidiDeviceID& deviceId, const std::string& text) const;
 };
 }
 

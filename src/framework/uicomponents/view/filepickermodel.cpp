@@ -22,10 +22,10 @@
 
 #include "filepickermodel.h"
 
-using namespace mu::uicomponents;
+using namespace muse::uicomponents;
 
 FilePickerModel::FilePickerModel(QObject* parent)
-    : QObject(parent)
+    : QObject(parent), muse::Injectable(muse::iocCtxForQmlObject(this))
 {
 }
 

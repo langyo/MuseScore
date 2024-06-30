@@ -20,12 +20,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_UICOMPONENTS_MENUVIEW_H
-#define MU_UICOMPONENTS_MENUVIEW_H
+#ifndef MUSE_UICOMPONENTS_MENUVIEW_H
+#define MUSE_UICOMPONENTS_MENUVIEW_H
 
 #include "popupview.h"
 
-namespace mu::uicomponents {
+namespace muse::uicomponents {
 class MenuView : public PopupView
 {
     Q_OBJECT
@@ -63,6 +63,7 @@ private:
     void componentComplete() override;
 
     void updateGeometry() override;
+    void updateContentPosition() override;
 
     QRect viewGeometry() const override;
 
@@ -78,4 +79,4 @@ private:
 };
 }
 
-#endif // MU_UICOMPONENTS_MENUVIEW_H
+#endif // MUSE_UICOMPONENTS_MENUVIEW_H

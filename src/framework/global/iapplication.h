@@ -19,14 +19,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_GLOBAL_IAPPLICATION_H
-#define MU_GLOBAL_IAPPLICATION_H
+#ifndef MUSE_GLOBAL_IAPPLICATION_H
+#define MUSE_GLOBAL_IAPPLICATION_H
 
 #include <string>
 
 #include "modularity/imoduleinterface.h"
 
 #include "types/version.h"
+#include "modularity/ioc.h"
 
 #ifndef NO_QT_SUPPORT
 class QObject;
@@ -34,7 +35,7 @@ class QEvent;
 class QWindow;
 #endif
 
-namespace mu {
+namespace muse {
 class IApplication : MODULE_EXPORT_INTERFACE
 {
     INTERFACE_ID(IApplication)
@@ -55,11 +56,15 @@ public:
     virtual String build() const = 0;
     virtual String revision() const = 0;
 
-    virtual void setRunMode(const RunMode& mode) = 0;
     virtual RunMode runMode() const = 0;
     virtual bool noGui() const = 0;
 
+    virtual void perform() = 0;
+    virtual void finish() = 0;
     virtual void restart() = 0;
+
+    virtual const modularity::ContextPtr iocContext() const = 0;
+    virtual modularity::ModulesIoC* ioc() const = 0;
 
 #ifndef NO_QT_SUPPORT
     virtual QWindow* focusWindow() const = 0;
@@ -68,8 +73,4 @@ public:
 };
 }
 
-namespace muse {
-using IApplication = mu::IApplication;
-}
-
-#endif // MU_GLOBAL_IAPPLICATION_H
+#endif // MUSE_GLOBAL_IAPPLICATION_H

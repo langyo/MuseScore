@@ -32,8 +32,8 @@
 
 #include "dev/multiinstancesdevmodel.h"
 
-using namespace mu::mi;
-using namespace mu::modularity;
+using namespace muse::mi;
+using namespace muse::modularity;
 
 static void multiinstances_init_qrc()
 {
@@ -54,12 +54,12 @@ void MultiInstancesModule::registerExports()
 
 void MultiInstancesModule::resolveImports()
 {
-    auto ir = ioc()->resolve<ui::IInteractiveUriRegister>(moduleName());
+    auto ir = ioc()->resolve<muse::ui::IInteractiveUriRegister>(moduleName());
     if (ir) {
-        ir->registerQmlUri(Uri("musescore://devtools/multiinstances/info"), "MuseScore/MultiInstances/MultiInstancesDevDialog.qml");
+        ir->registerQmlUri(Uri("muse://devtools/multiinstances/info"), "Muse/MultiInstances/MultiInstancesDevDialog.qml");
     }
 
-    auto ar = ioc()->resolve<ui::IUiActionsRegister>(moduleName());
+    auto ar = ioc()->resolve<muse::ui::IUiActionsRegister>(moduleName());
     if (ar) {
         ar->reg(std::make_shared<MultiInstancesUiActions>());
     }
@@ -67,7 +67,7 @@ void MultiInstancesModule::resolveImports()
 
 void MultiInstancesModule::registerUiTypes()
 {
-    qmlRegisterType<MultiInstancesDevModel>("MuseScore.MultiInstances", 1, 0, "MultiInstancesDevModel");
+    qmlRegisterType<MultiInstancesDevModel>("Muse.MultiInstances", 1, 0, "MultiInstancesDevModel");
 }
 
 void MultiInstancesModule::registerResources()

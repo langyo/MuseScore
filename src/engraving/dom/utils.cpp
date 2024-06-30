@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -266,6 +266,11 @@ BeatType Score::tick2beatType(const Fraction& tick) const
     }
 
     return timeSig.rtick2beatType(rtick);
+}
+
+void Score::checkChordList()
+{
+    m_chordList.checkChordList(configuration()->appDataPath(), style());
 }
 
 //---------------------------------------------------------
@@ -1162,7 +1167,7 @@ SymIdList timeSigSymIdsFromString(const String& string)
 
     SymIdList list;
     for (size_t i = 0; i < string.size(); ++i) {
-        SymId sym = mu::value(dict, string.at(i), SymId::noSym);
+        SymId sym = muse::value(dict, string.at(i), SymId::noSym);
         if (sym != SymId::noSym) {
             list.push_back(sym);
         }
@@ -1199,7 +1204,7 @@ double yStaffDifference(const System* system1, staff_idx_t staffIdx1, const Syst
 bool allowRemoveWhenRemovingStaves(EngravingItem* item, staff_idx_t startStaff, staff_idx_t endStaff)
 {
     // Sanity checks
-    if (!item || item->staffIdx() == mu::nidx || startStaff == mu::nidx || endStaff == mu::nidx) {
+    if (!item || item->staffIdx() == muse::nidx || startStaff == muse::nidx || endStaff == muse::nidx) {
         return false;
     }
 
@@ -1229,7 +1234,7 @@ bool allowRemoveWhenRemovingStaves(EngravingItem* item, staff_idx_t startStaff, 
 bool moveDownWhenAddingStaves(EngravingItem* item, staff_idx_t startStaff, staff_idx_t endStaff)
 {
     // Sanity checks
-    if (!item || item->staffIdx() == mu::nidx || startStaff == mu::nidx || endStaff == mu::nidx) {
+    if (!item || item->staffIdx() == muse::nidx || startStaff == muse::nidx || endStaff == muse::nidx) {
         return false;
     }
 

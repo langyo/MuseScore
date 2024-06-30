@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -273,8 +273,6 @@ class ChordList : public std::map<int, ChordDescription>
 {
     OBJECT_ALLOCATOR(engraving, ChordList)
 
-    INJECT(IEngravingConfiguration, configuration)
-
 public:
     std::list<ChordFont> fonts;
     std::list<RenderAction> renderListRoot;
@@ -289,20 +287,19 @@ public:
     void configureAutoAdjust(double emag = 1.0, double eadjust = 0.0, double mmag = 1.0, double madjust = 0.0);
     double position(const StringList& names, ChordTokenClass ctc) const;
 
-    bool read(const String&);
-    bool read(io::IODevice* device);
+    void checkChordList(const muse::io::path_t& appDataPath, const MStyle& style);
+    bool read(const muse::io::path_t& appDataPath, const String& name);
+    bool read(muse::io::IODevice* device);
     bool write(const String&) const;
-    bool write(io::IODevice* device) const;
+    bool write(muse::io::IODevice* device) const;
     bool loaded() const;
     void unload();
 
     const ChordDescription* description(int id) const;
-    ChordSymbol symbol(const String& s) const { return mu::value(m_symbols, s); }
+    ChordSymbol symbol(const String& s) const { return muse::value(m_symbols, s); }
 
     void setCustomChordList(bool t) { m_customChordList = t; }
     bool customChordList() const { return m_customChordList; }
-
-    void checkChordList(const MStyle& style);
 
 private:
 

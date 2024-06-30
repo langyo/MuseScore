@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,6 +24,7 @@
 #include "log.h"
 #include "translation.h"
 
+using namespace muse;
 using namespace mu::instrumentsscene;
 using namespace mu::notation;
 
@@ -86,8 +87,8 @@ void InstrumentSettingsModel::resetAllFormatting()
         return;
     }
 
-    std::string title = mu::trc("instruments", "Are you sure you want to reset all formatting?");
-    std::string body = mu::trc("instruments", "This action can not be undone");
+    std::string title = muse::trc("instruments", "Are you sure you want to reset all formatting?");
+    std::string body = muse::trc("instruments", "This action can not be undone");
 
     IInteractive::Button button = interactive()->question(title, body, {
         IInteractive::Button::No,

@@ -25,7 +25,7 @@
 #include "progress.h"
 #include "log.h"
 
-using namespace mu::ui;
+using namespace muse::ui;
 
 ProgressDialogModel::ProgressDialogModel(QObject* parent)
     : QObject(parent)
@@ -54,11 +54,11 @@ QString ProgressDialogModel::statusMessage() const
 
 void ProgressDialogModel::load(const QVariant& progressObj)
 {
-    IF_ASSERT_FAILED(progressObj.canConvert<mu::Progress*>()) {
+    IF_ASSERT_FAILED(progressObj.canConvert<Progress*>()) {
         return;
     }
 
-    m_progress = progressObj.value<mu::Progress*>();
+    m_progress = progressObj.value<Progress*>();
     IF_ASSERT_FAILED(m_progress) {
         return;
     }

@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_UI_IINTERACTIVEPROVIDER_H
-#define MU_UI_IINTERACTIVEPROVIDER_H
+#ifndef MUSE_UI_IINTERACTIVEPROVIDER_H
+#define MUSE_UI_IINTERACTIVEPROVIDER_H
 
 #include "global/modularity/imoduleinterface.h"
 #include "global/iinteractive.h"
@@ -30,7 +30,7 @@
 
 class QWindow;
 
-namespace mu::ui {
+namespace muse::ui {
 class IInteractiveProvider : MODULE_EXPORT_INTERFACE
 {
     INTERFACE_ID(ILaunchProvider)
@@ -52,7 +52,7 @@ public:
                               const IInteractive::ButtonDatas& buttons = {}, int defBtn = int(IInteractive::Button::NoButton),
                               const IInteractive::Options& options = {}) = 0;
 
-    virtual Ret showProgress(const std::string& title, mu::Progress* progress) = 0;
+    virtual Ret showProgress(const std::string& title, Progress* progress) = 0;
 
     virtual RetVal<io::path_t> selectOpeningFile(const std::string& title, const io::path_t& dir,
                                                  const std::vector<std::string>& filter) = 0;
@@ -80,4 +80,4 @@ public:
 };
 }
 
-#endif // MU_UI_IINTERACTIVEPROVIDER_H
+#endif // MUSE_UI_IINTERACTIVEPROVIDER_H

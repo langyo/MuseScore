@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -60,20 +60,24 @@ public:
     void setDrawCircledTip(bool arg) { m_drawCircledTip = arg; }
     double circledTipRadius() const { return m_circledTipRadius; }
     void setCircledTipRadius(double r) { m_circledTipRadius = r; }
-    mu::PointF circledTip() const { return m_circledTip; }
-    void setCircledTip(const mu::PointF& p) { m_circledTip = p; }
+    PointF circledTip() const { return m_circledTip; }
+    void setCircledTip(const PointF& p) { m_circledTip = p; }
 
     EngravingItem* propertyDelegate(Pid) override;
 
     int gripsCount() const override;
-    std::vector<mu::PointF> gripsPositions(const EditData& = EditData()) const override;
+    std::vector<PointF> gripsPositions(const EditData& = EditData()) const override;
 
     std::unique_ptr<ElementGroup> getDragGroup(std::function<bool(const EngravingItem*)> isDragged) override;
 
-    Dynamic* findStartDynamic() const;
-    Dynamic* findEndDynamic() const;
+    bool hasVoiceApplicationProperties() const override { return spanner()->hasVoiceApplicationProperties(); }
+
+    EngravingItem* findElementToSnapBefore() const;
+    EngravingItem* findElementToSnapAfter() const;
 
 private:
+    TextBase* findStartDynamicOrExpression() const;
+    TextBase* findEndDynamicOrExpression() const;
 
     void startEditDrag(EditData&) override;
     void editDrag(EditData&) override;
@@ -84,7 +88,7 @@ private:
     EngravingItem* drop(EditData&) override;
 
     bool m_drawCircledTip = false;
-    mu::PointF m_circledTip;
+    PointF m_circledTip;
     double m_circledTipRadius = 0.0;
 };
 
@@ -162,6 +166,22 @@ public:
 
     PointF linePos(Grip grip, System** system) const override;
 
+    bool hasVoiceApplicationProperties() const override { return true; }
+
+    void reset() override;
+
+    void setApplyToVoice(VoiceApplication v) { m_applyToVoice = v; }
+    VoiceApplication applyToVoice() const { return m_applyToVoice; }
+    void setDirection(DirectionV v) { m_direction = v; }
+    DirectionV direction() const { return m_direction; }
+    void setCenterBetweenStaves(AutoOnOff v) { m_centerBetweenStaves = v; }
+    AutoOnOff centerBetweenStaves() const { return m_centerBetweenStaves; }
+
+    bool snapToItemBefore() const { return m_snapToItemBefore; }
+    void setSnapToItemBefore(bool v) { m_snapToItemBefore = v; }
+    bool snapToItemAfter() const { return m_snapToItemAfter; }
+    void setSnapToItemAfter(bool v) { m_snapToItemAfter = v; }
+
 private:
 
     Sid getPropertyStyle(Pid) const override;
@@ -176,6 +196,13 @@ private:
 
     Spatium m_hairpinHeight;
     Spatium m_hairpinContHeight;
+
+    VoiceApplication m_applyToVoice = VoiceApplication::ALL_VOICE_IN_INSTRUMENT;
+    DirectionV m_direction = DirectionV::AUTO;
+    AutoOnOff m_centerBetweenStaves = AutoOnOff::AUTO;
+
+    bool m_snapToItemBefore = true;
+    bool m_snapToItemAfter = true;
 };
 } // namespace mu::engraving
 

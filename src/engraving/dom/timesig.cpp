@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -304,19 +304,19 @@ String TimeSig::accessibleInfo() const
     String timeSigString;
     switch (timeSigType()) {
     case TimeSigType::FOUR_FOUR:
-        timeSigString = mtrc("engraving/timesig", "Common time");
+        timeSigString = muse::mtrc("engraving/timesig", "Common time");
         break;
     case TimeSigType::ALLA_BREVE:
-        timeSigString = mtrc("engraving/timesig", "Cut time");
+        timeSigString = muse::mtrc("engraving/timesig", "Cut time");
         break;
     case TimeSigType::CUT_BACH:
-        timeSigString = mtrc("engraving/timesig", "Cut time (Bach)");
+        timeSigString = muse::mtrc("engraving/timesig", "Cut time (Bach)");
         break;
     case TimeSigType::CUT_TRIPLE:
-        timeSigString = mtrc("engraving/timesig", "Cut triple time (9/8)");
+        timeSigString = muse::mtrc("engraving/timesig", "Cut triple time (9/8)");
         break;
     default:
-        timeSigString = mtrc("engraving/timesig", "%1/%2 time").arg(numerator(), denominator());
+        timeSigString = muse::mtrc("engraving/timesig", "%1/%2 time").arg(numerator(), denominator());
     }
     return String(u"%1: %2").arg(EngravingItem::accessibleInfo(), timeSigString);
 }

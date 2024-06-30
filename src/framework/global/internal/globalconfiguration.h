@@ -19,21 +19,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_GLOBAL_GLOBALCONFIGURATION_H
-#define MU_GLOBAL_GLOBALCONFIGURATION_H
+#ifndef MUSE_GLOBAL_GLOBALCONFIGURATION_H
+#define MUSE_GLOBAL_GLOBALCONFIGURATION_H
 
 #include "../iglobalconfiguration.h"
 
 #include "modularity/ioc.h"
 #include "../iapplication.h"
 
-namespace mu {
-class GlobalConfiguration : public IGlobalConfiguration
+namespace muse {
+class GlobalConfiguration : public IGlobalConfiguration, public Injectable
 {
-    Inject<IApplication> application;
+    Inject<IApplication> application{ this };
 
 public:
-    GlobalConfiguration() = default;
+    GlobalConfiguration(const modularity::ContextPtr& ctx)
+        : Injectable(ctx) {}
 
     void init();
 
@@ -70,4 +71,4 @@ private:
 };
 }
 
-#endif // MU_GLOBAL_GLOBALCONFIGURATION_H
+#endif // MUSE_GLOBAL_GLOBALCONFIGURATION_H

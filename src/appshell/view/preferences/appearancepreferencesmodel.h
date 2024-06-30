@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,11 +30,11 @@
 #include "async/asyncable.h"
 
 namespace mu::appshell {
-class AppearancePreferencesModel : public QObject, public async::Asyncable
+class AppearancePreferencesModel : public QObject, public muse::async::Asyncable
 {
     Q_OBJECT
 
-    INJECT(ui::IUiConfiguration, uiConfiguration)
+    INJECT(muse::ui::IUiConfiguration, uiConfiguration)
     INJECT(notation::INotationConfiguration, notationConfiguration)
     INJECT(engraving::IEngravingConfiguration, engravingConfiguration)
 
@@ -137,8 +137,8 @@ signals:
     void invertScoreColorChanged();
 
 private:
-    ui::ThemeInfo currentTheme() const;
-    ui::ThemeList allThemes() const;
+    muse::ui::ThemeInfo currentTheme() const;
+    muse::ui::ThemeList allThemes() const;
 };
 }
 

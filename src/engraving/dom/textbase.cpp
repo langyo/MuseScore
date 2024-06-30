@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -42,6 +42,7 @@
 #include "accessibility/accessibleitem.h"
 #endif
 
+#include "barline.h"
 #include "box.h"
 #include "instrumentname.h"
 #include "measure.h"
@@ -184,7 +185,7 @@ std::pair<size_t, size_t> TextCursor::positionToLocalCoord(int position) const
 {
     const TextBase::LayoutData* ldata = m_text->ldata();
     IF_ASSERT_FAILED(ldata) {
-        return { mu::nidx, mu::nidx };
+        return { muse::nidx, muse::nidx };
     }
 
     int currentPosition = 0;
@@ -199,7 +200,7 @@ std::pair<size_t, size_t> TextCursor::positionToLocalCoord(int position) const
         }
     }
 
-    return { mu::nidx, mu::nidx };
+    return { muse::nidx, muse::nidx };
 }
 
 int TextCursor::currentPosition() const
@@ -348,7 +349,7 @@ void TextCursor::changeSelectionFormat(FormatId id, const FormatValue& val)
         }
     }
 
-    EngravingItem::renderer()->layoutText1(m_text);
+    m_text->renderer()->layoutText1(m_text);
 }
 
 const CharFormat TextCursor::selectedFragmentsFormat() const
@@ -617,8 +618,6 @@ bool TextCursor::set(const PointF& p, TextCursor::MoveMode mode)
     if (!m_text->ldata()->bbox().contains(pt)) {
         return false;
     }
-    size_t oldRow    = m_row;
-    size_t oldColumn = m_column;
 
 //      if (_text->_layout.empty())
 //            _text->_layout.append(TextBlock());
@@ -638,13 +637,12 @@ bool TextCursor::set(const PointF& p, TextCursor::MoveMode mode)
     }
     m_column = curLine().column(pt.x(), m_text);
 
-    if (oldRow != m_row || oldColumn != m_column) {
-        m_text->score()->setUpdateAll();
-        if (mode == TextCursor::MoveMode::MoveAnchor) {
-            clearSelection();
-        }
-        updateCursorFormat();
+    m_text->score()->setUpdateAll();
+    if (mode == TextCursor::MoveMode::MoveAnchor) {
+        clearSelection();
     }
+    updateCursorFormat();
+
     return true;
 }
 
@@ -742,20 +740,30 @@ int TextCursor::position(int row, int column) const
 //---------------------------------------------------------
 //   TextFragment
 //---------------------------------------------------------
-
-TextFragment::TextFragment()
-{
-}
-
 TextFragment::TextFragment(const String& s)
 {
     text = s;
 }
 
 TextFragment::TextFragment(TextCursor* cursor, const String& s)
+    : TextFragment(s)
 {
     format = *cursor->format();
-    text = s;
+}
+
+TextFragment::TextFragment(const TextFragment& f)
+{
+    text = f.text;
+    format = f.format;
+    pos = f.pos;
+}
+
+TextFragment& TextFragment::operator =(const TextFragment& f)
+{
+    text = f.text;
+    format = f.format;
+    pos = f.pos;
+    return *this;
 }
 
 //---------------------------------------------------------
@@ -834,7 +842,7 @@ void TextFragment::draw(Painter* p, const TextBase* t) const
 //   drawTextWorkaround
 //---------------------------------------------------------
 
-void TextBase::drawTextWorkaround(Painter* p, Font& f, const mu::PointF& pos, const String& text)
+void TextBase::drawTextWorkaround(Painter* p, Font& f, const PointF& pos, const String& text)
 {
     double mm = p->worldTransform().m11();
     if (!(MScore::pdfPrinting) && (mm < 1.0) && f.bold() && !(f.underline() || f.strike())) {
@@ -872,9 +880,15 @@ Font TextFragment::font(const TextBase* t) const
     String family;
     Font::Type fontType = Font::Type::Unknown;
     if (format.fontFamily() == "ScoreText") {
-        if (t->isDynamic() || t->textStyleType() == TextStyleType::OTTAVA || t->textStyleType() == TextStyleType::HARP_PEDAL_DIAGRAM
-            || t->textStyleType() == TextStyleType::TUPLET || t->textStyleType() == TextStyleType::PEDAL || t->isStringTunings()
-            || t->textStyleType() == TextStyleType::REPEAT_LEFT || t->textStyleType() == TextStyleType::REPEAT_RIGHT) {
+        if (t->isDynamic()
+            || t->isStringTunings()
+            || t->textStyleType() == TextStyleType::OTTAVA
+            || t->textStyleType() == TextStyleType::HARP_PEDAL_DIAGRAM
+            || t->textStyleType() == TextStyleType::TUPLET
+            || t->textStyleType() == TextStyleType::PEDAL
+            || t->textStyleType() == TextStyleType::REPEAT_LEFT
+            || t->textStyleType() == TextStyleType::REPEAT_RIGHT
+            ) {
             std::string fontName = engravingFonts()->fontByName(t->style().styleSt(Sid::MusicalSymbolFont).toStdString())->family();
             family = String::fromStdString(fontName);
             fontType = Font::Type::MusicSymbol;
@@ -978,7 +992,7 @@ void TextBlock::draw(Painter* p, const TextBase* t) const
 
 void TextBlock::layout(const TextBase* t)
 {
-    m_bbox        = RectF();
+    m_shape.clear();
     double x      = 0.0;
     m_lineSpacing = 0.0;
     double lm     = 0.0;
@@ -1003,8 +1017,10 @@ void TextBlock::layout(const TextBase* t)
         }
         break;
         case ElementType::MEASURE: {
+            // ignore courtesy keysig, timesig, but fall back if needed
             Measure* m = toMeasure(e);
-            layoutWidth = m->ldata()->bbox().width();
+            const BarLine* bl = m->endBarLine();
+            layoutWidth = bl ? bl->segment()->x() + bl->ldata()->bbox().width() : m->width();
         }
         break;
         default:
@@ -1014,7 +1030,7 @@ void TextBlock::layout(const TextBase* t)
 
     if (m_fragments.empty()) {
         FontMetrics fm = t->fontMetrics();
-        m_bbox.setRect(0.0, -fm.ascent(), 1.0, fm.descent());
+        m_shape.add(RectF(0.0, -fm.ascent(), 1.0, fm.descent()), t);
         m_lineSpacing = fm.lineSpacing();
     } else if (m_fragments.size() == 1 && m_fragments.front().text.isEmpty()) {
         auto fi = m_fragments.begin();
@@ -1035,7 +1051,7 @@ void TextBlock::layout(const TextBase* t)
         }
 
         RectF temp(0.0, -fm.ascent(), 1.0, fm.descent());
-        m_bbox |= temp;
+        m_shape.add(temp, t);
         m_lineSpacing = std::max(m_lineSpacing, fm.lineSpacing());
     } else {
         const auto fiLast = --m_fragments.end();
@@ -1062,12 +1078,13 @@ void TextBlock::layout(const TextBase* t)
                 x += w;
             }
 
-            m_bbox   |= fm.tightBoundingRect(f.text).translated(f.pos);
+            m_shape.add(fm.tightBoundingRect(f.text).translated(f.pos), t);
             Font font = f.font(t);
             if (font.type() == Font::Type::MusicSymbol || font.type() == Font::Type::MusicSymbolText) {
                 // SEMI-HACK: Music fonts can have huge linespacing because of tall symbols, so instead of using the
                 // font linespacing value we just use the height of the individual fragment with some added margin
-                m_lineSpacing = std::max(m_lineSpacing, 1.25 * m_bbox.height());
+
+                m_lineSpacing = std::max(m_lineSpacing, 1.25 * m_shape.bbox().height());
             } else {
                 m_lineSpacing = std::max(m_lineSpacing, fm.lineSpacing());
             }
@@ -1081,12 +1098,13 @@ void TextBlock::layout(const TextBase* t)
     AlignH alignH = t->align().horizontal;
     bool dynamicAlwaysCentered = t->isDynamic() && t->getProperty(Pid::CENTER_ON_NOTEHEAD).toBool();
 
+    RectF bbox = m_shape.bbox();
     if (alignH == AlignH::HCENTER || dynamicAlwaysCentered) {
-        rx = (layoutWidth - (m_bbox.left() + m_bbox.right())) * .5;
+        rx = (layoutWidth - (bbox.left() + bbox.right())) * .5;
     } else if (alignH == AlignH::LEFT) {
-        rx = -m_bbox.left();
+        rx = -bbox.left();
     } else if (alignH == AlignH::RIGHT) {
-        rx = layoutWidth - m_bbox.right();
+        rx = layoutWidth - bbox.right();
     }
 
     rx += lm;
@@ -1094,7 +1112,7 @@ void TextBlock::layout(const TextBase* t)
     for (TextFragment& f : m_fragments) {
         f.pos.rx() += rx;
     }
-    m_bbox.translate(rx, 0.0);
+    m_shape.translate(PointF(rx, 0.0));
 }
 
 //---------------------------------------------------------
@@ -1137,7 +1155,7 @@ double TextBlock::xpos(size_t column, const TextBase* t) const
             }
         }
     }
-    return m_bbox.x();
+    return m_shape.bbox().x();
 }
 
 //---------------------------------------------------------
@@ -1189,7 +1207,8 @@ RectF TextBlock::boundingRect(int col1, int col2, const TextBase* t) const
 {
     double x1 = xpos(col1, t);
     double x2 = xpos(col2, t);
-    return RectF(x1, m_bbox.y(), x2 - x1, m_bbox.height());
+    const RectF& bbox = m_shape.bbox();
+    return RectF(x1, bbox.y(), x2 - x1, bbox.height());
 }
 
 //---------------------------------------------------------
@@ -1596,7 +1615,7 @@ TextBlock TextBlock::split(int column, TextCursor* cursor)
 
 static String toSymbolXml(Char c)
 {
-    static std::shared_ptr<IEngravingFontsProvider> provider = modularity::ioc()->resolve<IEngravingFontsProvider>("engraving");
+    static std::shared_ptr<IEngravingFontsProvider> provider = muse::modularity::globalIoc()->resolve<IEngravingFontsProvider>("engraving");
 
     SymId symId = provider->fallbackFont()->fromCode(c.unicode());
     return u"<sym>" + String::fromAscii(SymNames::nameForSymId(symId).ascii()) + u"</sym>";
@@ -1687,6 +1706,10 @@ TextBase::TextBase(const TextBase& st)
     m_paddingWidth                = st.m_paddingWidth;
     m_frameRound                  = st.m_frameRound;
 
+    m_applyToVoice = st.m_applyToVoice;
+    m_direction = st.m_direction;
+    m_centerBetweenStaves = st.m_centerBetweenStaves;
+
     size_t n = m_elementStyle->size() + TEXT_STYLE_SIZE;
     delete[] m_propertyFlagsList;
     m_propertyFlagsList = new PropertyFlags[n];
@@ -1707,7 +1730,7 @@ TextBase::~TextBase()
 
 void TextBase::drawSelection(Painter* p, const RectF& r) const
 {
-    Brush bg(engravingConfiguration()->selectionColor());
+    Brush bg(configuration()->selectionColor());
     p->setCompositionMode(CompositionMode::HardLight);
     p->setBrush(bg);
     p->setNoPen();
@@ -1854,7 +1877,8 @@ void TextBase::createBlocks(LayoutData* ldata) const
                         CharFormat fmt = *cursor.format(); // save format
 
                         //char32_t code = score()->scoreFont()->symCode(id);
-                        char32_t code = id == SymId::space ? static_cast<char32_t>(' ') : engravingFonts()->fallbackFont()->symCode(id);
+                        char32_t code = id
+                                        == SymId::space ? static_cast<char32_t>(' ') : score()->engravingFonts()->fallbackFont()->symCode(id);
                         cursor.format()->setFontFamily(u"ScoreText");
                         insert(&cursor, code, ldata);
                         cursor.setFormat(fmt); // restore format
@@ -2306,6 +2330,30 @@ RectF TextBase::pageRectangle() const
     return abbox();
 }
 
+void TextBase::computeHighResShape(const FontMetrics& fontMetrics)
+{
+    Shape& highResShape = mutldata()->highResShape.mut_value();
+    highResShape.clear();
+    highResShape.elements().reserve(m_text.size());
+
+    for (const TextBlock& block : ldata()->blocks) {
+        double x = 0;
+        for (const TextFragment& fragment : block.fragments()) {
+            x += fragment.pos.x();
+            size_t textSize = fragment.text.size();
+            for (size_t i = 0; i < textSize; ++i) {
+                Char character = fragment.text.at(i);
+                RectF characterBoundingRect = fontMetrics.tightBoundingRect(fragment.text.at(i));
+                characterBoundingRect.translate(x, 0.0);
+                highResShape.add(characterBoundingRect);
+                if (i + 1 < textSize) {
+                    x += fontMetrics.horizontalAdvance(character);
+                }
+            }
+        }
+    }
+}
+
 //---------------------------------------------------------
 //   dragTo
 //---------------------------------------------------------
@@ -2635,7 +2683,7 @@ bool TextBase::validateText(String& s)
     }
 
     String ss = u"<data>" + d + u"</data>\n";
-    ByteArray ba = ss.toUtf8();
+    muse::ByteArray ba = ss.toUtf8();
     XmlReader xml(ba);
     while (xml.readNextStartElement()) {
         // LOGD("  token %d <%s>", int(xml.tokenType()), muPrintable(xml.name().toString()));
@@ -2644,8 +2692,9 @@ bool TextBase::validateText(String& s)
         s = d;
         return true;
     }
-    LOGD("xml error at line %lld column %lld: %s", xml.lineNumber(), xml.columnNumber(), muPrintable(xml.errorString()));
-    LOGD("text: |%s|", muPrintable(ss));
+    LOGD() << "xml error at line " << xml.lineNumber() << " column " << xml.columnNumber()
+           << ": " << xml.errorString();
+    LOGD() << "text: |" << ss << "|";
     return false;
 }
 
@@ -2738,6 +2787,12 @@ PropertyValue TextBase::getProperty(Pid propertyId) const
         return xmlText();
     case Pid::TEXT_LINKED_TO_MASTER:
         return isTextLinkedToMaster();
+    case Pid::DIRECTION:
+        return direction();
+    case Pid::CENTER_BETWEEN_STAVES:
+        return centerBetweenStaves();
+    case Pid::APPLY_TO_VOICE:
+        return applyToVoice();
     default:
         return EngravingItem::getProperty(propertyId);
     }
@@ -2806,6 +2861,15 @@ bool TextBase::setProperty(Pid pid, const PropertyValue& v)
         }
         setTextLinkedToMaster(v.toBool());
         break;
+    case Pid::DIRECTION:
+        setDirection(v.value<DirectionV>());
+        break;
+    case Pid::CENTER_BETWEEN_STAVES:
+        setCenterBetweenStaves(v.value<AutoOnOff>());
+        break;
+    case Pid::APPLY_TO_VOICE:
+        setApplyToVoice(v.value<VoiceApplication>());
+        break;
     default:
         rv = EngravingItem::setProperty(pid, v);
         break;
@@ -2847,6 +2911,12 @@ PropertyValue TextBase::propertyDefault(Pid id) const
         return static_cast<int>(VerticalAlignment::AlignNormal);
     case Pid::TEXT_LINKED_TO_MASTER:
         return true;
+    case Pid::DIRECTION:
+        return DirectionV::AUTO;
+    case Pid::CENTER_BETWEEN_STAVES:
+        return AutoOnOff::AUTO;
+    case Pid::APPLY_TO_VOICE:
+        return VoiceApplication::ALL_VOICE_IN_INSTRUMENT;
     default:
         for (const auto& p : *textStyle(TextStyleType::DEFAULT)) {
             if (p.pid == id) {
@@ -2993,7 +3063,7 @@ void TextBase::notifyAboutTextCursorChanged()
 #ifndef ENGRAVING_NO_ACCESSIBILITY
     using namespace muse::accessibility;
     if (accessible()) {
-        accessible()->accessiblePropertyChanged().send(IAccessible::Property::TextCursor, Val());
+        accessible()->accessiblePropertyChanged().send(IAccessible::Property::TextCursor, muse::Val());
     }
 #endif
 }
@@ -3004,7 +3074,7 @@ void TextBase::notifyAboutTextInserted(int startPosition, int endPosition, const
     using namespace muse::accessibility;
     if (accessible()) {
         auto range = IAccessible::TextRange(startPosition, endPosition, text);
-        accessible()->accessiblePropertyChanged().send(IAccessible::Property::TextInsert, Val::fromQVariant(range.toMap()));
+        accessible()->accessiblePropertyChanged().send(IAccessible::Property::TextInsert, muse::Val::fromQVariant(range.toMap()));
     }
 #else
     UNUSED(startPosition);
@@ -3019,7 +3089,7 @@ void TextBase::notifyAboutTextRemoved(int startPosition, int endPosition, const 
     using namespace muse::accessibility;
     if (accessible()) {
         auto range = IAccessible::TextRange(startPosition, endPosition, text);
-        accessible()->accessiblePropertyChanged().send(IAccessible::Property::TextRemove, Val::fromQVariant(range.toMap()));
+        accessible()->accessiblePropertyChanged().send(IAccessible::Property::TextRemove, muse::Val::fromQVariant(range.toMap()));
     }
 #else
     UNUSED(startPosition);
@@ -3236,14 +3306,14 @@ void TextBase::drawEditMode(Painter* p, EditData& ed, double currentViewScaling)
     }
 
     p->translate(-pos);
-    p->setPen(Pen(engravingConfiguration()->formattingMarksColor(), 2.0 / currentViewScaling)); // 2 pixel pen size
+    p->setPen(Pen(configuration()->formattingMarksColor(), 2.0 / currentViewScaling)); // 2 pixel pen size
     p->setBrush(BrushStyle::NoBrush);
 
     double m = spatium();
     RectF r = canvasBoundingRect().adjusted(-m, -m, m, m);
 
     p->drawRect(r);
-    pen = Pen(engravingConfiguration()->defaultColor(), 0.0);
+    pen = Pen(configuration()->defaultColor(), 0.0);
 }
 
 //---------------------------------------------------------
@@ -3445,7 +3515,7 @@ void TextBase::undoChangeProperty(Pid id, const PropertyValue& v, PropertyFlags 
         Pid::TEXT_SCRIPT_ALIGN
     };
 
-    if (!mu::contains(CHARACTER_SPECIFIC_PROPERTIES, id)) {
+    if (!muse::contains(CHARACTER_SPECIFIC_PROPERTIES, id)) {
         EngravingItem::undoChangeProperty(id, v, ps);
         return;
     }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -37,14 +37,10 @@ class PageSettings : public QDialog, private Ui::PageSettingsBase
     Q_OBJECT
 
     INJECT(mu::context::IGlobalContext, globalContext)
-    INJECT(mu::IGlobalConfiguration, configuration)
+    INJECT(muse::IGlobalConfiguration, configuration)
 
 public:
     explicit PageSettings(QWidget* parent = 0);
-
-#ifdef MU_QT5_COMPAT
-    PageSettings(const PageSettings&);
-#endif
 
 public slots:
     void accept();

@@ -1,11 +1,11 @@
 ﻿/*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -39,6 +39,8 @@
 using namespace mu;
 #endif
 
+using namespace muse;
+
 namespace mu::engraving {
 //---------------------------------------------------------
 //   musicXMLImportErrorDialog
@@ -50,11 +52,11 @@ namespace mu::engraving {
 #ifndef MUSICXML_NO_INTERACTIVE
 static IInteractive::Button musicXMLImportErrorDialog(const String& text, const String& detailedText)
 {
-    auto interactive = modularity::ioc()->resolve<IInteractive>("musicxml");
+    auto interactive = modularity::fixmeIoc()->resolve<IInteractive>("musicxml");
 
     std::string msg = text.toStdString();
     msg += '\n';
-    msg += trc("iex_musicxml", "Do you want to try to load this file anyway?");
+    msg += muse::trc("iex_musicxml", "Do you want to try to load this file anyway?");
     msg += '\n';
     msg += '\n';
     msg += detailedText.toStdString();
@@ -69,34 +71,6 @@ static IInteractive::Button musicXMLImportErrorDialog(const String& text, const 
 }
 
 #endif
-
-static void updateNamesForAccidentals(Instrument* inst)
-{
-    auto replace = [](String name) {
-        name = name.replace(std::regex(
-                                R"(((?:^|\s)([A-Ga-g]|[Uu][Tt]|[Dd][Oo]|[Rr][EeÉé]|[MmSsTt][Ii]|[FfLl][Aa]|[Ss][Oo][Ll]))b(?=\s|$))"),
-                            String::fromStdString(R"($1♭)"));
-
-        name = name.replace(std::regex(
-                                R"(((?:^|\s)([A-Ga-g]|[Uu][Tt]|[Dd][Oo]|[Rr][EeÉé]|[MmSsTt][Ii]|[FfLl][Aa]|[Ss][Oo][Ll]))#(?=\s|$))"),
-                            String::fromStdString(R"($1♯)"));
-
-        return name;
-    };
-    // change staff names from simple text (eg 'Eb') to text using accidental symbols (eg 'E♭')
-
-    // Instrument::longNames() is const af so we need to make a deep copy, update it, and then set it again
-    StaffNameList longNamesCopy = inst->longNames();
-    for (StaffName& sn : longNamesCopy) {
-        sn.setName(replace(sn.name()));
-    }
-    StaffNameList shortNamesCopy = inst->shortNames();
-    for (StaffName& sn : shortNamesCopy) {
-        sn.setName(replace(sn.name()));
-    }
-    inst->setLongNames(longNamesCopy);
-    inst->setShortNames(shortNamesCopy);
-}
 
 //---------------------------------------------------------
 //   importMusicXMLfromBuffer
@@ -123,7 +97,6 @@ Err importMusicXMLfromBuffer(Score* score, const String& /*name*/, const ByteArr
     for (const Part* part : score->parts()) {
         for (const auto& pair : part->instruments()) {
             pair.second->updateInstrumentId();
-            updateNamesForAccidentals(pair.second);
         }
     }
 
@@ -132,8 +105,8 @@ Err importMusicXMLfromBuffer(Score* score, const String& /*name*/, const ByteArr
     if (!(pass1_errors.isEmpty() && pass2_errors.isEmpty())) {
 #ifndef MUSICXML_NO_INTERACTIVE
         if (!MScore::noGui) {
-            const String text = mtrc("iex_musicxml", "%n error(s) found, import may be incomplete.",
-                                     nullptr, int(pass1_errors.size() + pass2_errors.size()));
+            const String text = muse::mtrc("iex_musicxml", "%n error(s) found, import may be incomplete.",
+                                           nullptr, int(pass1_errors.size() + pass2_errors.size()));
             if (musicXMLImportErrorDialog(text, pass1.errors() + pass2.errors()) != IInteractive::Button::Yes) {
                 res = Err::UserAbort;
             }

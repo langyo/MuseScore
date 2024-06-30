@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -26,9 +26,10 @@
 
 #include "log.h"
 
+using namespace muse;
+using namespace muse::uicomponents;
+using namespace muse::async;
 using namespace mu::instrumentsscene;
-using namespace mu::uicomponents;
-using namespace mu::async;
 using namespace mu::notation;
 
 namespace mu::instrumentsscene {
@@ -164,7 +165,7 @@ void InstrumentsOnScoreListModel::loadOrders()
     m_scoreOrders = repository()->orders();
 
     const ScoreOrder& custom = customOrder();
-    if (m_scoreOrders.empty() || !mu::contains(m_scoreOrders, custom)) {
+    if (m_scoreOrders.empty() || !muse::contains(m_scoreOrders, custom)) {
         m_scoreOrders.push_back(custom);
     }
 
@@ -172,7 +173,7 @@ void InstrumentsOnScoreListModel::loadOrders()
     ScoreOrder currentOrder = notation ? notation->parts()->scoreOrder() : m_scoreOrders[0];
     bool orderCustomized = currentOrder.customized;
 
-    if (!mu::contains(m_scoreOrders, currentOrder)) {
+    if (!muse::contains(m_scoreOrders, currentOrder)) {
         currentOrder.customized = false;
         m_scoreOrders.push_back(currentOrder);
     }
@@ -193,13 +194,13 @@ void InstrumentsOnScoreListModel::loadOrders()
 
 int InstrumentsOnScoreListModel::resolveInstrumentSequenceNumber(const String& instrumentId) const
 {
-    const InstrumentTemplateList& templates = repository()->instrumentTemplates();
-    for (const InstrumentTemplate* templ : templates) {
-        if (templ->id == instrumentId) {
-            return templ->sequenceOrder;
-        }
+    const InstrumentTemplate& templ = repository()->instrumentTemplate(instrumentId);
+    if (templ.isValid()) {
+        return templ.sequenceOrder;
     }
-    return templates.size();
+
+    const InstrumentTemplateList& allTemplates = repository()->instrumentTemplates();
+    return static_cast<int>(allTemplates.size());
 }
 
 void InstrumentsOnScoreListModel::addInstruments(const QStringList& instrumentIdList)
@@ -209,7 +210,7 @@ void InstrumentsOnScoreListModel::addInstruments(const QStringList& instrumentId
     ItemList items = this->items();
 
     for (const QString& id : instrumentIdList) {
-        const InstrumentTemplate& templ = repository()->instrumentTemplate(id.toStdString());
+        const InstrumentTemplate& templ = repository()->instrumentTemplate(id);
         if (!templ.isValid()) {
             continue;
         }

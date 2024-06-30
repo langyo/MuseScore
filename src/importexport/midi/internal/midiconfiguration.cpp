@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -28,6 +28,7 @@
 #include "midiimport/importmidi_operations.h"
 
 using namespace mu;
+using namespace muse;
 using namespace mu::iex::midi;
 
 static const Settings::Key SHORTEST_NOTE_KEY("iex_midi", "io/midi/shortestNote");
@@ -51,7 +52,7 @@ void MidiConfiguration::setMidiShortestNote(int ticks)
     settings()->setSharedValue(SHORTEST_NOTE_KEY, Val(ticks));
 }
 
-void MidiConfiguration::setMidiImportOperationsFile(const std::optional<io::path_t>& filePath) const
+void MidiConfiguration::setMidiImportOperationsFile(const std::optional<muse::io::path_t>& filePath) const
 {
     if (filePath) {
         midiImportOperations.setOperationsFile(filePath.value().toQString());

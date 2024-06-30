@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -53,7 +53,7 @@ public:
         qreal xOffset = 0.;
         qreal yOffset = 0.;
         qreal scaling = 0.;
-        std::function<PointF(const PointF&)> fromLogical;
+        std::function<muse::PointF(const muse::PointF&)> fromLogical;
     };
 
     void paint(muse::draw::Painter& painter, const NotationViewContext& ctx);
@@ -64,7 +64,7 @@ private:
 
     INotationPtr m_notation;
     qreal m_width = 0;
-    RectF m_rect;
+    muse::RectF m_rect;
 };
 }
 

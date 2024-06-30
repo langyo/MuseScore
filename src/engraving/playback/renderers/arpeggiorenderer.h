@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -31,15 +31,15 @@ class Chord;
 class ArpeggioRenderer : public RenderBase<ArpeggioRenderer>
 {
 public:
-    static const mpe::ArticulationTypeSet& supportedTypes();
+    static const muse::mpe::ArticulationTypeSet& supportedTypes();
 
-    static void doRender(const EngravingItem* item, const mpe::ArticulationType preferredType, const RenderingContext& context,
-                         mpe::PlaybackEventList& result);
+    static void doRender(const EngravingItem* item, const muse::mpe::ArticulationType preferredType, const RenderingContext& context,
+                         muse::mpe::PlaybackEventList& result);
 
 private:
-    static bool isDirectionUp(const mpe::ArticulationType type);
-    static mpe::usecs_t timestampOffsetStep(const RenderingContext& context, int stepCount);
-    static std::map<mpe::pitch_level_t, NominalNoteCtx> arpeggioNotes(const Chord* chord, const RenderingContext& ctx);
+    static bool isDirectionUp(const muse::mpe::ArticulationType type);
+    static muse::mpe::usecs_t timestampOffsetStep(const RenderingContext& context, int stepCount);
+    static std::map<muse::mpe::pitch_level_t, NominalNoteCtx> arpeggioNotes(const Chord* chord, const RenderingContext& ctx);
 };
 }
 

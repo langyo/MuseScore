@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -27,11 +27,13 @@
 
 #include "modularity/ioc.h"
 #include "musesampler/imusesamplerinfo.h"
+#include "audio/iaudioconfiguration.h"
 
 namespace mu::playback {
-class PlaybackConfiguration : public IPlaybackConfiguration, public async::Asyncable
+class PlaybackConfiguration : public IPlaybackConfiguration, public muse::async::Asyncable
 {
-    INJECT(musesampler::IMuseSamplerInfo, musesamplerInfo)
+    INJECT(muse::musesampler::IMuseSamplerInfo, musesamplerInfo)
+    INJECT(muse::audio::IAudioConfiguration, audioConfiguration)
 
 public:
     void init();
@@ -49,22 +51,22 @@ public:
 
     bool isMixerSectionVisible(MixerSectionType sectionType) const override;
     void setMixerSectionVisible(MixerSectionType sectionType, bool visible) override;
-    async::Channel<MixerSectionType, bool> isMixerSectionVisibleChanged() const override;
+    muse::async::Channel<MixerSectionType, bool> isMixerSectionVisibleChanged() const override;
 
     bool isAuxSendVisible(muse::audio::aux_channel_idx_t index) const override;
     void setAuxSendVisible(muse::audio::aux_channel_idx_t index, bool visible) override;
-    async::Channel<muse::audio::aux_channel_idx_t, bool> isAuxSendVisibleChanged() const override;
+    muse::async::Channel<muse::audio::aux_channel_idx_t, bool> isAuxSendVisibleChanged() const override;
 
     bool isAuxChannelVisible(muse::audio::aux_channel_idx_t index) const override;
     void setAuxChannelVisible(muse::audio::aux_channel_idx_t index, bool visible) const override;
-    async::Channel<muse::audio::aux_channel_idx_t, bool> isAuxChannelVisibleChanged() const override;
+    muse::async::Channel<muse::audio::aux_channel_idx_t, bool> isAuxChannelVisibleChanged() const override;
 
     muse::audio::gain_t defaultAuxSendValue(muse::audio::aux_channel_idx_t index, muse::audio::AudioSourceType sourceType,
-                                            const String& instrumentSoundId) const override;
+                                            const muse::String& instrumentSoundId) const override;
 
     bool muteHiddenInstruments() const override;
     void setMuteHiddenInstruments(bool mute) override;
-    async::Channel<bool> muteHiddenInstrumentsChanged() const override;
+    muse::async::Channel<bool> muteHiddenInstrumentsChanged() const override;
 
     const SoundProfileName& basicSoundProfileName() const override;
     const SoundProfileName& museSoundProfileName() const override;
@@ -74,17 +76,22 @@ public:
     bool soundPresetsMultiSelectionEnabled() const override;
     void setSoundPresetsMultiSelectionEnabled(bool enabled) override;
 
-    bool needToShowChangeSoundWarning() const override;
-    void setNeedToShowChangeSoundWarning(bool show) override;
+    bool needToShowResetSoundFlagsWhenChangeSoundWarning() const override;
+    void setNeedToShowResetSoundFlagsWhenChangeSoundWarning(bool show) override;
+
+    bool needToShowResetSoundFlagsWhenChangePlaybackProfileWarning() const override;
+    void setNeedToShowResetSoundFlagsWhenChangePlaybackProfileWarning(bool show) override;
+
+    bool shouldMeasureInputLag() const override;
 
 private:
     const SoundProfileName& fallbackSoundProfileStr() const;
 
-    async::Channel<muse::audio::aux_channel_idx_t, bool> m_isAuxSendVisibleChanged;
-    async::Channel<muse::audio::aux_channel_idx_t, bool> m_isAuxChannelVisibleChanged;
-    async::Channel<MixerSectionType, bool> m_isMixerSectionVisibleChanged;
+    muse::async::Channel<muse::audio::aux_channel_idx_t, bool> m_isAuxSendVisibleChanged;
+    muse::async::Channel<muse::audio::aux_channel_idx_t, bool> m_isAuxChannelVisibleChanged;
+    muse::async::Channel<MixerSectionType, bool> m_isMixerSectionVisibleChanged;
 
-    async::Channel<bool> m_muteHiddenInstrumentsChanged;
+    muse::async::Channel<bool> m_muteHiddenInstrumentsChanged;
 };
 }
 

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,10 +24,9 @@
 #define MU_ENGRAVING_APIV1_EXCERPT_H
 
 #include <QQmlEngine>
+#include <QQmlListProperty>
 
 #include "engraving/dom/excerpt.h"
-
-#include "extensions/api/qmllistproperty.h"
 
 namespace mu::engraving::apiv1 {
 class Score;
@@ -100,11 +99,11 @@ extern Excerpt* excerptWrap(mu::engraving::Excerpt* e);
 //---------------------------------------------------------
 
 template<typename T, class Container>
-class QmlExcerptsListAccess : public muse::extensions::api::QmlListProperty<T>
+class QmlExcerptsListAccess : public QQmlListProperty<T>
 {
 public:
     QmlExcerptsListAccess(QObject* obj, Container& container)
-        : muse::extensions::api::QmlListProperty<T>(obj, &container, &count, &at) {}
+        : QQmlListProperty<T>(obj, &container, &count, &at) {}
 
     static qsizetype count(QQmlListProperty<T>* l)
     {

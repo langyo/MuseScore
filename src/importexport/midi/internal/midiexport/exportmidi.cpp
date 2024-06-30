@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -59,7 +59,7 @@ void ExportMidi::writeHeader(const CompatMidiRendererInternal::Context& context)
     for (auto& track1: m_midiFile.tracks()) {
         Staff* staff  = m_score->staff(staffIdx);
 
-        ByteArray partName = staff->partName().toUtf8();
+        muse::ByteArray partName = staff->partName().toUtf8();
         size_t len = partName.size() + 1;
         unsigned char* data = new unsigned char[len];
 

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -147,7 +147,7 @@ void InstrumentChange::setupInstrument(const Instrument* instrument)
         }
 
         //: The text of an "instrument change" marking. It is an instruction to the player to switch to another instrument.
-        const String newInstrChangeText = mtrc("engraving", "To %1").arg(instrument->trackName());
+        const String newInstrChangeText = muse::mtrc("engraving", "To %1").arg(instrument->trackName());
         undoChangeProperty(Pid::TEXT, TextBase::plainToXmlText(newInstrChangeText));
     }
 }

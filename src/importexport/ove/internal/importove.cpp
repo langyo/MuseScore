@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -78,7 +78,7 @@
 namespace ove {
 static std::shared_ptr<mu::iex::ove::IOveConfiguration> configuration()
 {
-    return mu::modularity::ioc()->resolve<mu::iex::ove::IOveConfiguration>("iex_ove");
+    return muse::modularity::globalIoc()->resolve<mu::iex::ove::IOveConfiguration>("iex_ove");
 }
 }
 
@@ -735,7 +735,7 @@ void OveToMScore::convertTrackElements(int track)
                     }
 
                     if (y_off != 0) {
-                        ottava->setOffset(mu::PointF(0, y_off * m_score->style().spatium()));
+                        ottava->setOffset(muse::PointF(0, y_off * m_score->style().spatium()));
                     }
 
                     ottava->setTick(Fraction::fromTicks(absTick));

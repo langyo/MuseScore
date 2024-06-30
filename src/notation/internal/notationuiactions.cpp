@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -29,7 +29,8 @@
 
 using namespace mu;
 using namespace mu::notation;
-using namespace mu::ui;
+using namespace muse;
+using namespace muse::ui;
 using namespace muse::actions;
 
 static const ActionCode NOTE_INPUT_ACTION_CODE("note-input");
@@ -1365,7 +1366,7 @@ const UiActionList NotationUiActions::m_actions = {
     UiAction("nonuplet",
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_ANY,
-             TranslatableString("action", "&Nontuplet"),
+             TranslatableString("action", "&Nonuplet"),
              TranslatableString("action", "Enter tuplet: nonuplet")
              ),
     UiAction("tuplet-dialog",
@@ -2415,43 +2416,43 @@ const UiActionList NotationUiActions::m_engravingDebuggingActions = {
     UiAction("show-element-bounding-rects",
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_NOTATION_OPENED,
-             TranslatableString::untranslatable("Show element bounding rectangles"),
+             TranslatableString("action", "Show element bounding rectangles"),
              Checkable::Yes
              ),
     UiAction("color-element-shapes",
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_NOTATION_OPENED,
-             TranslatableString::untranslatable("Color element shapes"),
+             TranslatableString("action", "Color element shapes"),
              Checkable::Yes
              ),
     UiAction("show-segment-shapes",
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_NOTATION_OPENED,
-             TranslatableString::untranslatable("Show segment shapes"),
+             TranslatableString("action", "Show segment shapes"),
              Checkable::Yes
              ),
     UiAction("color-segment-shapes",
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_NOTATION_OPENED,
-             TranslatableString::untranslatable("Color segment shapes"),
+             TranslatableString("action", "Color segment shapes"),
              Checkable::Yes
              ),
     UiAction("show-skylines",
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_NOTATION_OPENED,
-             TranslatableString::untranslatable("Show skylines"),
+             TranslatableString("action", "Show skylines"),
              Checkable::Yes
              ),
     UiAction("show-system-bounding-rects",
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_NOTATION_OPENED,
-             TranslatableString::untranslatable("Show system bounding rectangles"),
+             TranslatableString("action", "Show system bounding rectangles"),
              Checkable::Yes
              ),
     UiAction("show-corrupted-measures",
              mu::context::UiCtxNotationOpened,
              mu::context::CTX_NOTATION_OPENED,
-             TranslatableString::untranslatable("Show corrupted measures"),
+             TranslatableString("action", "Show corrupted measures"),
              Checkable::Yes
              ),
     UiAction("edit-strings",
@@ -2593,12 +2594,12 @@ bool NotationUiActions::actionChecked(const UiAction& act) const
     return false;
 }
 
-mu::async::Channel<ActionCodeList> NotationUiActions::actionEnabledChanged() const
+muse::async::Channel<ActionCodeList> NotationUiActions::actionEnabledChanged() const
 {
     return m_actionEnabledChanged;
 }
 
-mu::async::Channel<ActionCodeList> NotationUiActions::actionCheckedChanged() const
+muse::async::Channel<ActionCodeList> NotationUiActions::actionCheckedChanged() const
 {
     return m_actionCheckedChanged;
 }
@@ -2698,7 +2699,7 @@ SymbolId NotationUiActions::actionArticulationSymbolId(const ActionCode& actionC
     return symbolId;
 }
 
-const mu::ui::ToolConfig& NotationUiActions::defaultNoteInputBarConfig()
+const muse::ui::ToolConfig& NotationUiActions::defaultNoteInputBarConfig()
 {
     static ToolConfig config;
     if (!config.isValid()) {

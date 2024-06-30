@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2022 MuseScore BVBA and others
+ * Copyright (C) 2022 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -25,7 +25,7 @@
 #include "log.h"
 
 using namespace mu::notation;
-using namespace mu::midi;
+using namespace muse::midi;
 
 void PianoKeyboardController::init()
 {
@@ -53,7 +53,7 @@ KeyState PianoKeyboardController::keyState(piano_key_t key) const
     return KeyState::None;
 }
 
-mu::async::Notification PianoKeyboardController::keyStatesChanged() const
+muse::async::Notification PianoKeyboardController::keyStatesChanged() const
 {
     return m_keyStatesChanged;
 }
@@ -146,9 +146,9 @@ void PianoKeyboardController::sendNoteOn(piano_key_t key)
         return;
     }
 
-    mu::midi::Event ev;
-    ev.setMessageType(mu::midi::Event::MessageType::ChannelVoice10);
-    ev.setOpcode(mu::midi::Event::Opcode::NoteOn);
+    muse::midi::Event ev;
+    ev.setMessageType(muse::midi::Event::MessageType::ChannelVoice10);
+    ev.setOpcode(muse::midi::Event::Opcode::NoteOn);
     ev.setNote(key);
     ev.setVelocity(80);
 
@@ -162,9 +162,9 @@ void PianoKeyboardController::sendNoteOff(piano_key_t key)
         return;
     }
 
-    mu::midi::Event ev;
-    ev.setMessageType(mu::midi::Event::MessageType::ChannelVoice10);
-    ev.setOpcode(mu::midi::Event::Opcode::NoteOff);
+    muse::midi::Event ev;
+    ev.setMessageType(muse::midi::Event::MessageType::ChannelVoice10);
+    ev.setOpcode(muse::midi::Event::Opcode::NoteOff);
     ev.setNote(key);
 
     notation->midiInput()->onMidiEventReceived(ev);

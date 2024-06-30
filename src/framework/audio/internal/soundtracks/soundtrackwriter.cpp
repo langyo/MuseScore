@@ -34,16 +34,17 @@
 
 #include "log.h"
 
-using namespace mu;
+using namespace muse;
 using namespace muse::audio;
 using namespace muse::audio::soundtrack;
 
 static constexpr int PREPARE_STEP = 0;
 static constexpr int ENCODE_STEP = 1;
 
-SoundTrackWriter::SoundTrackWriter(const io::path_t& destination, const SoundTrackFormat& format, const msecs_t totalDuration,
-                                   IAudioSourcePtr source)
-    : m_source(std::move(source))
+SoundTrackWriter::SoundTrackWriter(const io::path_t& destination, const SoundTrackFormat& format,
+                                   const msecs_t totalDuration, IAudioSourcePtr source,
+                                   const modularity::ContextPtr& iocCtx)
+    : muse::Injectable(iocCtx), m_source(std::move(source))
 {
     if (!m_source) {
         return;
@@ -104,7 +105,7 @@ Ret SoundTrackWriter::write()
         return make_ret(Err::ErrorEncode);
     }
 
-    return make_ok();
+    return muse::make_ok();
 }
 
 void SoundTrackWriter::abort()
@@ -112,7 +113,7 @@ void SoundTrackWriter::abort()
     m_isAborted = true;
 }
 
-mu::Progress SoundTrackWriter::progress()
+Progress SoundTrackWriter::progress()
 {
     return m_progress;
 }
@@ -164,7 +165,7 @@ Ret SoundTrackWriter::generateAudioData()
         return make_ret(Err::NoAudioToExport);
     }
 
-    return make_ok();
+    return muse::make_ok();
 }
 
 void SoundTrackWriter::sendStepProgress(int step, int64_t current, int64_t total)

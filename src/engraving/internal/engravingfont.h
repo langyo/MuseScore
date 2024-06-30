@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -38,7 +38,7 @@
 #include "style/styledef.h"
 #include "types/symid.h"
 
-namespace mu {
+namespace muse {
 class JsonObject;
 }
 
@@ -49,12 +49,13 @@ class Painter;
 namespace mu::engraving {
 class Shape;
 
-class EngravingFont : public IEngravingFont
+class EngravingFont : public IEngravingFont, public muse::Injectable
 {
-    INJECT_STATIC(muse::draw::IFontProvider, fontProvider)
-    INJECT_STATIC(IEngravingFontsProvider, engravingFonts)
+    muse::Inject<muse::draw::IFontProvider> fontProvider = { this };
+    muse::Inject<IEngravingFontsProvider> engravingFonts = { this };
 public:
-    EngravingFont(const std::string& name, const std::string& family, const io::path_t& filePath);
+    EngravingFont(const std::string& name, const std::string& family, const muse::io::path_t& filePath,
+                  const muse::modularity::ContextPtr& iocCtx);
     EngravingFont(const EngravingFont& other);
 
     const std::string& name() const override;
@@ -70,13 +71,13 @@ public:
     bool isValid(SymId id) const override;
 
     RectF bbox(SymId id, double mag) const override;
-    RectF bbox(SymId id, const mu::SizeF&) const override;
+    RectF bbox(SymId id, const SizeF&) const override;
     RectF bbox(const SymIdList& s, double mag) const override;
-    RectF bbox(const SymIdList& s, const mu::SizeF& mag) const override;
+    RectF bbox(const SymIdList& s, const SizeF& mag) const override;
     Shape shape(const SymIdList& s, double mag) const override;
-    Shape shape(const SymIdList& s, const mu::SizeF& mag) const override;
+    Shape shape(const SymIdList& s, const SizeF& mag) const override;
     Shape shapeWithCutouts(SymId id, double mag) override;
-    Shape shapeWithCutouts(SymId id, const mu::SizeF& mag) override;
+    Shape shapeWithCutouts(SymId id, const SizeF& mag) override;
 
     double width(SymId id, double mag) const override;
     double width(const SymIdList&, double mag) const override;
@@ -104,7 +105,7 @@ private:
         Shape shapeWithCutouts;
         double advance = 0.0;
 
-        std::map<SmuflAnchorId, mu::PointF> smuflAnchors;
+        std::map<SmuflAnchorId, PointF> smuflAnchors;
         SymIdList subSymbolIds;
 
         bool isValid() const
@@ -118,10 +119,10 @@ private:
         }
     };
 
-    void loadGlyphsWithAnchors(const JsonObject& glyphsWithAnchors);
+    void loadGlyphsWithAnchors(const muse::JsonObject& glyphsWithAnchors);
     void loadComposedGlyphs();
-    void loadStylisticAlternates(const JsonObject& glyphsWithAlternatesObject);
-    void loadEngravingDefaults(const JsonObject& engravingDefaultsObject);
+    void loadStylisticAlternates(const muse::JsonObject& glyphsWithAlternatesObject);
+    void loadEngravingDefaults(const muse::JsonObject& engravingDefaultsObject);
     void computeMetrics(Sym& sym, const Smufl::Code& code);
 
     void constructShapeWithCutouts(Shape& shape, SymId id);
@@ -137,7 +138,7 @@ private:
 
     std::string m_name;
     std::string m_family;
-    io::path_t m_fontPath;
+    muse::io::path_t m_fontPath;
 
     std::unordered_map<Sid, PropertyValue> m_engravingDefaults;
     double m_textEnclosureThickness = 0;

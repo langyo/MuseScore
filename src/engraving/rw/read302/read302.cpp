@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -55,7 +55,7 @@ using namespace mu::engraving::compat;
 bool Read302::readScore302(Score* score, XmlReader& e, ReadContext& ctx)
 {
     while (e.readNextStartElement()) {
-        ctx.setTrack(mu::nidx);
+        ctx.setTrack(muse::nidx);
         const AsciiStringView tag(e.name());
         if (tag == "Staff") {
             read400::StaffRead::readStaff(score, e, ctx);
@@ -95,13 +95,11 @@ bool Read302::readScore302(Score* score, XmlReader& e, ReadContext& ctx)
 
             ReadStyleHook::readStyleTag(score, e);
 
-            // if (_layoutMode == LayoutMode::FLOAT || _layoutMode == LayoutMode::SYSTEM) {
-            if (score->layoutOptions().isMode(LayoutMode::FLOAT)) {
-                // style should not change spatium in
-                // float mode
+            if (ctx.overrideSpatium()) {
+                ctx.setOriginalSpatium(score->style().spatium());
                 score->style().set(Sid::spatium, sp);
             }
-            score->m_engravingFont = engravingFonts()->fontByName(score->style().styleSt(Sid::MusicalSymbolFont).toStdString());
+            score->m_engravingFont = score->engravingFonts()->fontByName(score->style().styleSt(Sid::MusicalSymbolFont).toStdString());
         } else if (tag == "copyright" || tag == "rights") {
             score->setMetaTag(u"copyright", Text::readXmlText(e, score));
         } else if (tag == "movement-number") {
@@ -203,8 +201,8 @@ bool Read302::readScore302(Score* score, XmlReader& e, ReadContext& ctx)
         }
     }
     ctx.reconnectBrokenConnectors();
-    if (e.error() != XmlStreamReader::NoError) {
-        if (e.error() == XmlStreamReader::CustomError) {
+    if (e.error() != muse::XmlStreamReader::NoError) {
+        if (e.error() == muse::XmlStreamReader::CustomError) {
             LOGE() << e.errorString();
         } else {
             LOGE() << String(u"XML read error at line %1, column %2: %3").arg(e.lineNumber(), e.columnNumber())
@@ -256,6 +254,10 @@ bool Read302::readScore302(Score* score, XmlReader& e, ReadContext& ctx)
 Err Read302::readScore(Score* score, XmlReader& e, ReadInOutData* out)
 {
     ReadContext ctx(score);
+    if (out && out->overriddenSpatium.has_value()) {
+        ctx.setSpatium(out->overriddenSpatium.value());
+        ctx.setOverrideSpatium(true);
+    }
 
     DEFER {
         if (out) {
@@ -271,10 +273,14 @@ Err Read302::readScore(Score* score, XmlReader& e, ReadInOutData* out)
             score->setMscoreRevision(e.readInt(nullptr, 16));
         } else if (tag == "Score") {
             if (!readScore302(score, e, ctx)) {
-                if (e.error() == XmlStreamReader::CustomError) {
+                if (e.error() == muse::XmlStreamReader::CustomError) {
                     return Err::FileCriticallyCorrupted;
                 }
                 return Err::FileBadFormat;
+            }
+
+            if (ctx.overrideSpatium() && out) {
+                out->originalSpatium = ctx.originalSpatium();
             }
         } else if (tag == "Revision") {
             e.skipCurrentElement();

@@ -21,10 +21,10 @@
  */
 #include "qmllauncher.h"
 
-using namespace mu::ui;
+using namespace muse::ui;
 
-QmlLauncher::QmlLauncher(QObject* parent)
-    : QObject(parent)
+QmlLauncher::QmlLauncher(QObject* parent, const modularity::ContextPtr& iocCtx)
+    : QObject(parent), Injectable(iocCtx)
 {
 }
 

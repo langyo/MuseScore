@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_UICOMPONENTS_POPUPVIEWCLOSECONTROLLER_H
-#define MU_UICOMPONENTS_POPUPVIEWCLOSECONTROLLER_H
+#ifndef MUSE_UICOMPONENTS_POPUPVIEWCLOSECONTROLLER_H
+#define MUSE_UICOMPONENTS_POPUPVIEWCLOSECONTROLLER_H
 
 #include <QObject>
 #include <QQuickItem>
@@ -33,16 +33,16 @@
 #include "ui/imainwindow.h"
 #include "ui/iinteractiveprovider.h"
 
-namespace mu::uicomponents {
-class PopupViewCloseController : public QObject, public async::Asyncable
+namespace muse::uicomponents {
+class PopupViewCloseController : public QObject, public muse::Injectable, public async::Asyncable
 {
     Q_OBJECT
 
-    INJECT(ui::IMainWindow, mainWindow)
-    INJECT(ui::IInteractiveProvider, interactiveProvider)
+    muse::Inject<ui::IMainWindow> mainWindow = { this };
+    muse::Inject<ui::IInteractiveProvider> interactiveProvider = { this };
 
 public:
-    explicit PopupViewCloseController(QObject* parent = nullptr);
+    explicit PopupViewCloseController(const muse::modularity::ContextPtr& iocCtx, QObject* parent = nullptr);
     ~PopupViewCloseController() override = default;
 
     void init();
@@ -89,4 +89,4 @@ private:
 };
 }
 
-#endif // MU_UICOMPONENTS_POPUPVIEWCLOSECONTROLLER_H
+#endif // MUSE_UICOMPONENTS_POPUPVIEWCLOSECONTROLLER_H

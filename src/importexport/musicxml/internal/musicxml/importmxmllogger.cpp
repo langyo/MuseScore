@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -26,12 +26,14 @@
 
 #include "log.h"
 
+using namespace muse;
+
 namespace mu::engraving {
 //---------------------------------------------------------
 //   xmlLocation
 //---------------------------------------------------------
 
-static String xmlLocation(const XmlStreamReader* xmlreader)
+static String xmlLocation(const muse::XmlStreamReader* xmlreader)
 {
     String loc;
     if (xmlreader) {
@@ -74,7 +76,7 @@ static void to_xml_log(MxmlLogger::Level level, const String& text, const XmlStr
  Log debug (function) trace.
  */
 
-void MxmlLogger::logDebugTrace(const String& trace, const XmlStreamReader* xmlreader)
+void MxmlLogger::logDebugTrace(const String& trace, const muse::XmlStreamReader* xmlreader)
 {
     if (m_level <= Level::MXML_TRACE) {
         to_xml_log(Level::MXML_TRACE, trace, xmlreader);

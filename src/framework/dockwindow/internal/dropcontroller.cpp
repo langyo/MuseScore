@@ -88,8 +88,8 @@ static bool isPointAllowedForDrop(const QPoint& point, const DropDestination& dr
 
 using namespace muse::dock;
 
-DropController::DropController(KDDockWidgets::DropArea* dropArea)
-    : KDDockWidgets::DropIndicatorOverlayInterface(dropArea)
+DropController::DropController(KDDockWidgets::DropArea* dropArea, const modularity::ContextPtr& iocCtx)
+    : KDDockWidgets::DropIndicatorOverlayInterface(dropArea), Injectable(iocCtx)
 {
     KDDockWidgets::DragController::instance()->setResolveDropAreaFunc([](const QPoint& globalPos) -> KDDockWidgets::DropArea* {
         for (auto mainWindow : KDDockWidgets::DockRegistry::self()->mainwindows()) {
@@ -181,7 +181,7 @@ void DropController::updateToolBarOrientation(DockToolBarView* draggedToolBar, c
         return;
     }
 
-    mu::Orientation orientation = mu::Orientation::Horizontal;
+    muse::Orientation orientation = muse::Orientation::Horizontal;
 
     if (!dropDestination.isValid()) {
         draggedToolBar->setOrientation(static_cast<Qt::Orientation>(orientation));
@@ -191,11 +191,11 @@ void DropController::updateToolBarOrientation(DockToolBarView* draggedToolBar, c
     switch (dropDestination.dock->location()) {
     case Location::Left:
     case Location::Right:
-        orientation = mu::Orientation::Vertical;
+        orientation = muse::Orientation::Vertical;
         break;
     case Location::Top:
     case Location::Bottom:
-        orientation = mu::Orientation::Horizontal;
+        orientation = muse::Orientation::Horizontal;
         break;
     case Location::Center:
     case Location::Undefined:

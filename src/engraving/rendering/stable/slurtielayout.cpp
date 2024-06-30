@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -54,7 +54,7 @@ using namespace mu::engraving::rendering::stable;
 
 void SlurTieLayout::layout(Slur* item, LayoutContext& ctx)
 {
-    if (item->track2() == mu::nidx) {
+    if (item->track2() == muse::nidx) {
         item->setTrack2(item->track());
     }
 
@@ -227,7 +227,7 @@ SpannerSegment* SlurTieLayout::layoutSystem(Slur* item, System* system, LayoutCo
         // this is the first call to layoutSystem,
         // processing the first line segment
         //
-        if (item->track2() == mu::nidx) {
+        if (item->track2() == muse::nidx) {
             item->setTrack2(item->track());
         }
         if (item->startCR() == 0 || item->startCR()->measure() == 0) {
@@ -924,7 +924,7 @@ void SlurTieLayout::slurPos(Slur* item, SlurTiePos* sp, LayoutContext& ctx)
     }
 
     /// adding extra space above slurs for notes in circles
-    if (Slur::engravingConfiguration()->enableExperimentalFretCircle() && item->staff()->staffType()->isCommonTabStaff()) {
+    if (item->configuration()->enableExperimentalFretCircle() && item->staff()->staffType()->isCommonTabStaff()) {
         auto adjustSlur = [](Chord* ch, PointF& coord, bool up) {
             const Fraction halfFraction = Fraction(1, 2);
             if (ch && ch->ticks() >= halfFraction) {
@@ -1742,7 +1742,7 @@ void SlurTieLayout::adjustX(TieSegment* tieSegment, SlurTiePos& sPos, Grip start
         ElementType::LEDGER_LINE
     };
     chordShape.remove_if([&](ShapeElement& s) {
-        return !s.item() || s.item() == note || mu::contains(IGNORED_TYPES, s.item()->type()) || (s.item()->isNoteDot() && ignoreDot);
+        return !s.item() || s.item() == note || muse::contains(IGNORED_TYPES, s.item()->type()) || (s.item()->isNoteDot() && ignoreDot);
     });
 
     const double arcSideMargin = 0.3 * spatium;
@@ -2112,7 +2112,7 @@ void SlurTieLayout::computeBezier(TieSegment* tieSeg, PointF shoulderOffset)
     const PointF tieEnd = tieSeg->ups(Grip::END).p + tieSeg->ups(Grip::END).off;
 
     PointF tieEndNormalized = tieEnd - tieStart;  // normalize to zero
-    if (RealIsNull(tieEndNormalized.x())) {
+    if (muse::RealIsNull(tieEndNormalized.x())) {
         return;
     }
 
@@ -2435,7 +2435,7 @@ void SlurTieLayout::computeMidThickness(SlurTieSegment* slurTieSeg, double slurT
     const double minTieThickness = mag * (0.15 * slurTieSeg->spatium() - slurTieSeg->style().styleMM(Sid::SlurEndWidth));
     const double normalThickness = mag * (slurTieSeg->style().styleMM(Sid::SlurMidWidth) - slurTieSeg->style().styleMM(Sid::SlurEndWidth));
 
-    bool invalid = RealIsEqualOrMore(minTieLength, shortTieLimit);
+    bool invalid = muse::RealIsEqualOrMore(minTieLength, shortTieLimit);
 
     double finalThickness;
     if (slurTieLengthInSp > shortTieLimit || invalid) {

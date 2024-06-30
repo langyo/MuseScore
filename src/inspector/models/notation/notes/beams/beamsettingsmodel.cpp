@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -31,7 +31,7 @@ BeamSettingsModel::BeamSettingsModel(QObject* parent, IElementRepositoryService*
     : AbstractInspectorModel(parent, repository)
 {
     setModelType(InspectorModelType::TYPE_BEAM);
-    setTitle(qtrc("inspector", "Beam"));
+    setTitle(muse::qtrc("inspector", "Beam"));
 
     m_beamModesModel = new BeamModesModel(this, repository);
     m_beamModesModel->init();
@@ -114,17 +114,17 @@ void BeamSettingsModel::onNotationChanged(const PropertyIdSet& changedPropertyId
 
 void BeamSettingsModel::loadProperties(const mu::engraving::PropertyIdSet& propertyIdSet)
 {
-    if (mu::contains(propertyIdSet, Pid::VISIBLE)) {
+    if (muse::contains(propertyIdSet, Pid::VISIBLE)) {
         loadPropertyItem(m_isBeamHidden, [](const QVariant& isVisible) -> QVariant {
             return !isVisible.toBool();
         });
     }
 
-    if (mu::contains(propertyIdSet, Pid::GROW_LEFT)) {
+    if (muse::contains(propertyIdSet, Pid::GROW_LEFT)) {
         loadPropertyItem(m_featheringHeightLeft, formatDoubleFunc);
     }
 
-    if (mu::contains(propertyIdSet, Pid::GROW_RIGHT)) {
+    if (muse::contains(propertyIdSet, Pid::GROW_RIGHT)) {
         loadPropertyItem(m_featheringHeightRight, formatDoubleFunc);
     }
 
@@ -136,7 +136,7 @@ void BeamSettingsModel::loadProperties(const mu::engraving::PropertyIdSet& prope
 
     loadPropertyItem(m_stemDirection);
     loadPropertyItem(m_crossStaffMove);
-    updateisCrossStaffMoveAvailable();
+    updateIsCrossStaffMoveAvailable();
 }
 
 void BeamSettingsModel::loadBeamHeightProperties()
@@ -248,7 +248,7 @@ void BeamSettingsModel::updateFeatheringMode(const qreal left, const qreal right
     }
 }
 
-void BeamSettingsModel::updateisCrossStaffMoveAvailable()
+void BeamSettingsModel::updateIsCrossStaffMoveAvailable()
 {
     bool available = true;
     for (EngravingItem* item : m_elementList) {
@@ -261,7 +261,7 @@ void BeamSettingsModel::updateisCrossStaffMoveAvailable()
         }
     }
 
-    setisCrossStaffMoveAvailable(available);
+    setIsCrossStaffMoveAvailable(available);
 }
 
 bool BeamSettingsModel::isBeamHeightLocked() const
@@ -345,7 +345,7 @@ void BeamSettingsModel::setFeatheringMode(BeamTypes::FeatheringMode featheringMo
     emit featheringModeChanged(featheringMode);
 }
 
-void BeamSettingsModel::setisCrossStaffMoveAvailable(bool isCrossStaffMoveAvailable)
+void BeamSettingsModel::setIsCrossStaffMoveAvailable(bool isCrossStaffMoveAvailable)
 {
     if (m_isCrossStaffMoveAvailable == isCrossStaffMoveAvailable) {
         return;

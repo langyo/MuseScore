@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_MPE_ARTICULATIONSPROFILEEDITORMODEL_H
-#define MU_MPE_ARTICULATIONSPROFILEEDITORMODEL_H
+#ifndef MUSE_MPE_ARTICULATIONSPROFILEEDITORMODEL_H
+#define MUSE_MPE_ARTICULATIONSPROFILEEDITORMODEL_H
 
 #include <QObject>
 #include <QList>
@@ -33,7 +33,7 @@
 #include "iarticulationprofilesrepository.h"
 #include "articulationpatternitem.h"
 
-namespace mu::mpe {
+namespace muse::mpe {
 class ArticulationsProfileEditorModel : public QObject
 {
     Q_OBJECT
@@ -111,4 +111,4 @@ private:
 };
 }
 
-#endif // MU_MPE_ARTICULATIONSPROFILEEDITORMODEL_H
+#endif // MUSE_MPE_ARTICULATIONSPROFILEEDITORMODEL_H

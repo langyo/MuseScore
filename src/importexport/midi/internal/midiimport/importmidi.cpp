@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -1273,9 +1273,9 @@ Err importMidi(MasterScore* score, const QString& name)
         }
         catch (QString errorText) {
             if (!MScore::noGui) {
-                MessageBox::warning(mu::trc("iex_midi", "Import MIDI"),
-                                    mu::qtrc("iex_midi", "Import failed: %1").arg(errorText).toStdString(),
-                                    { MessageBox::Ok });
+                MessageBox(score->iocContext()).warning(muse::trc("iex_midi", "Import MIDI"),
+                                                        muse::qtrc("iex_midi", "Import failed: %1").arg(errorText).toStdString(),
+                                                        { MessageBox::Ok });
             }
             fp.close();
             LOGD("importMidi: bad file format");

@@ -20,17 +20,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_UICOMPONENTS_DIALOGVIEW_H
-#define MU_UICOMPONENTS_DIALOGVIEW_H
+#ifndef MUSE_UICOMPONENTS_DIALOGVIEW_H
+#define MUSE_UICOMPONENTS_DIALOGVIEW_H
 
 #include <QEventLoop>
 
 #include "popupview.h"
+#include "modularity/ioc.h"
+#include "global/iapplication.h"
 
-namespace mu::uicomponents {
+namespace muse::uicomponents {
 class DialogView : public PopupView
 {
     Q_OBJECT
+
+    Inject<muse::IApplication> application = { this };
 
 public:
     explicit DialogView(QQuickItem* parent = nullptr);
@@ -45,6 +49,7 @@ public:
 
 private:
     bool isDialog() const override;
+    void beforeOpen() override;
     void onHidden() override;
 
     QScreen* resolveScreen() const override;
@@ -57,4 +62,4 @@ private:
 };
 }
 
-#endif // MU_UICOMPONENTS_DIALOGVIEW_H
+#endif // MUSE_UICOMPONENTS_DIALOGVIEW_H

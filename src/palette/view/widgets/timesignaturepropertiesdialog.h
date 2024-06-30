@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -34,22 +34,15 @@ class TimeSig;
 }
 
 namespace mu::palette {
-//---------------------------------------------------------
-//   TimeSigProperties
-//---------------------------------------------------------
-
 class TimeSignaturePropertiesDialog : public QDialog, public Ui::TimeSigProperties
 {
     Q_OBJECT
 
     INJECT(mu::context::IGlobalContext, globalContext)
-    INJECT(mu::ui::IUiConfiguration, uiConfiguration)
+    INJECT(muse::ui::IUiConfiguration, uiConfiguration)
 
 public:
     TimeSignaturePropertiesDialog(QWidget* parent = nullptr);
-#ifdef MU_QT5_COMPAT
-    TimeSignaturePropertiesDialog(const TimeSignaturePropertiesDialog& other);
-#endif
     ~TimeSignaturePropertiesDialog() override;
 
 private slots:

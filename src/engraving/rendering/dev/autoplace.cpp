@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,6 +30,7 @@
 #include "dom/system.h"
 #include "dom/measure.h"
 
+using namespace muse;
 using namespace mu::engraving;
 using namespace mu::engraving::rendering::dev;
 
@@ -40,6 +41,8 @@ void Autoplace::autoplaceSegmentElement(const EngravingItem* item, EngravingItem
     if (ldata->autoplace.offsetChanged != OffsetChange::NONE) {
         rebase = rebaseOffset(item, ldata);
     }
+
+    const double minSkylineHorizontalClearance = item->style().styleMM(Sid::skylineMinHorizontalClearance) * item->mag();
 
     if (item->autoplace() && item->explicitParent()) {
         const Segment* s = toSegment(item->explicitParent());
@@ -53,7 +56,7 @@ void Autoplace::autoplaceSegmentElement(const EngravingItem* item, EngravingItem
         staff_idx_t si = item->staffIdxOrNextVisible();
 
         // if there's no good staff for this object, obliterate it
-        ldata->setIsSkipDraw(si == mu::nidx);
+        ldata->setIsSkipDraw(si == muse::nidx);
         const_cast<EngravingItem*>(item)->setSelectable(!ldata->isSkipDraw());
         if (ldata->isSkipDraw()) {
             return;
@@ -64,23 +67,23 @@ void Autoplace::autoplaceSegmentElement(const EngravingItem* item, EngravingItem
         double minDistance = item->minDistance().val() * sp;
 
         SysStaff* ss = m->system()->staff(si);
-        RectF r = item->ldata()->bbox().translated(m->pos() + s->pos() + item->pos());
+        Shape shape = item->ldata()->shape().translate(m->pos() + s->pos() + item->pos());
+        RectF r = shape.bbox();
 
         // Adjust bbox Y pos for staffType offset
-        if (item->staffType()) {
-            double stYOffset = item->staffType()->yoffset().val() * sp;
-            r.translate(0.0, stYOffset);
-        }
+        shape.translate(item->staffOffset());
 
-        SkylineLine sk(!above);
-        double d;
-        if (above) {
-            sk.add(r.x(), r.bottom(), r.width());
-            d = sk.minDistance(ss->skyline().north());
-        } else {
-            sk.add(r.x(), r.top(), r.width());
-            d = ss->skyline().south().minDistance(sk);
-        }
+        SkylineLine& staffSkyline = above ? ss->skyline().north() : ss->skyline().south();
+
+        SkylineLine filteredSkyline = staffSkyline.getFilteredCopy([item](const ShapeElement& shapeEl) {
+            const EngravingItem* shapeItem = shapeEl.item();
+            return shapeItem && shapeItem->parent() == item->parent()
+                   && (item->isDynamic() || item->isExpression())
+                   && (shapeItem->isDynamic() || shapeItem->isExpression());
+        });
+
+        double d = above ? filteredSkyline.minDistanceToShapeAbove(shape, minSkylineHorizontalClearance)
+                   : filteredSkyline.minDistanceToShapeBelow(shape, minSkylineHorizontalClearance);
 
         if (d > -minDistance) {
             double yd = d + minDistance;
@@ -90,16 +93,17 @@ void Autoplace::autoplaceSegmentElement(const EngravingItem* item, EngravingItem
             if (ldata->autoplace.offsetChanged != OffsetChange::NONE) {
                 // user moved element within the skyline
                 // we may need to adjust minDistance, yd, and/or offset
-                bool inStaff = above ? r.bottom() + rebase > 0.0 : r.top() + rebase < item->staff()->staffHeight();
+                bool inStaff = above ? r.bottom() + rebase > 0.0 : r.top() + rebase < item->staff()->staffHeight(item->tick());
                 if (rebaseMinDistance(item, ldata, minDistance, yd, sp, rebase, above, inStaff)) {
-                    r.translate(0.0, rebase);
+                    shape.translate(PointF(0.0, rebase));
                 }
             }
             ldata->moveY(yd);
-            r.translate(PointF(0.0, yd));
+            shape.translate(PointF(0.0, yd));
         }
+
         if (add && item->addToSkyline()) {
-            ss->skyline().add(r);
+            staffSkyline.add(shape);
         }
     }
     setOffsetChanged(item, ldata, false);
@@ -123,7 +127,7 @@ void Autoplace::autoplaceMeasureElement(const EngravingItem* item, EngravingItem
         staff_idx_t si = item->staffIdxOrNextVisible();
 
         // if there's no good staff for this object, obliterate it
-        ldata->setIsSkipDraw(si == mu::nidx);
+        ldata->setIsSkipDraw(si == muse::nidx);
         const_cast<EngravingItem*>(item)->setSelectable(!ldata->isSkipDraw());
         if (ldata->isSkipDraw()) {
             return;
@@ -134,7 +138,7 @@ void Autoplace::autoplaceMeasureElement(const EngravingItem* item, EngravingItem
 
         SysStaff* ss = m->system()->staff(si);
         // shape rather than bbox is good for tuplets especially
-        Shape sh = item->shape().translate(m->pos() + item->pos());
+        Shape sh = item->shape().translate(m->pos() + item->pos() + item->staffOffset());
 
         SkylineLine sk(!above);
         double d;
@@ -154,7 +158,7 @@ void Autoplace::autoplaceMeasureElement(const EngravingItem* item, EngravingItem
             if (ldata->autoplace.offsetChanged != OffsetChange::NONE) {
                 // user moved element within the skyline
                 // we may need to adjust minDistance, yd, and/or offset
-                bool inStaff = above ? sh.bottom() + rebase > 0.0 : sh.top() + rebase < item->staff()->staffHeight();
+                bool inStaff = above ? sh.bottom() + rebase > 0.0 : sh.top() + rebase < item->staff()->staffHeight(item->tick());
                 if (rebaseMinDistance(item, ldata, minDistance, yd, sp, rebase, above, inStaff)) {
                     sh.translateY(rebase);
                 }
@@ -196,7 +200,7 @@ void Autoplace::autoplaceSpannerSegment(const SpannerSegment* item, EngravingIte
         sl.add(sh.translate(item->pos()));
         double yd = 0.0;
         staff_idx_t stfIdx = item->systemFlag() ? item->staffIdxOrNextVisible() : item->staffIdx();
-        if (stfIdx == mu::nidx) {
+        if (stfIdx == muse::nidx) {
             ldata->setIsSkipDraw(true);
             return;
         } else {
@@ -213,12 +217,12 @@ void Autoplace::autoplaceSpannerSegment(const SpannerSegment* item, EngravingIte
                 yd = d + md;
             }
         }
-        if (yd != 0.0) {
+        if (!RealIsNull(yd)) {
             if (ldata->offsetChanged() != OffsetChange::NONE) {
                 // user moved element within the skyline
                 // we may need to adjust minDistance, yd, and/or offset
                 double adj = item->pos().y() + rebase;
-                bool inStaff = above ? sh.bottom() + adj > 0.0 : sh.top() + adj < item->staff()->staffHeight();
+                bool inStaff = above ? sh.bottom() + adj > 0.0 : sh.top() + adj < item->staff()->staffHeight(item->tick());
                 rebaseMinDistance(item, ldata, md, yd, sp, rebase, above, inStaff);
             }
             ldata->moveY(yd);
@@ -252,7 +256,7 @@ double Autoplace::rebaseOffset(const EngravingItem* item, EngravingItem::LayoutD
         // TODO: refactor to take advantage of existing cmdFlip() algorithms
         // TODO: adjustPlacement() (from read206.cpp) on read for 3.0 as well
         RectF r = ldata->bbox().translated(ldata->autoplace.changedPos);
-        double staffHeight = item->staff()->staffHeight();
+        double staffHeight = item->staff()->staffHeight(item->tick());
         const EngravingItem* e = item->isSpannerSegment() ? toSpannerSegment(item)->spanner() : item;
         bool multi = e->isSpanner() && toSpanner(e)->spannerSegments().size() > 1;
         bool above = e->placeAbove();
@@ -369,7 +373,7 @@ void Autoplace::doAutoplace(const Articulation* item, Articulation::LayoutData* 
 
         SysStaff* ss = m->system()->staff(si);
 
-        Shape thisShape = item->shape().translate(item->chordRest()->pos() + m->pos() + s->pos() + item->pos());
+        Shape thisShape = item->shape().translate(item->chordRest()->pos() + m->pos() + s->pos() + item->pos() + item->staffOffset());
 
         for (const ShapeElement& shapeEl : thisShape.elements()) {
             RectF r = shapeEl;
@@ -378,10 +382,10 @@ void Autoplace::doAutoplace(const Articulation* item, Articulation::LayoutData* 
             bool above = item->up();
             SkylineLine sk(!above);
             if (above) {
-                sk.add(r.x(), r.bottom(), r.width());
+                sk.add(shapeEl);
                 d = sk.minDistance(ss->skyline().north());
             } else {
-                sk.add(r.x(), r.top(), r.width());
+                sk.add(shapeEl);
                 d = ss->skyline().south().minDistance(sk);
             }
 

@@ -32,8 +32,8 @@
 
 #include "log.h"
 
-using namespace mu;
-using namespace mu::async;
+using namespace muse;
+using namespace muse::async;
 using namespace muse::audio;
 
 TrackSequence::TrackSequence(const TrackSequenceId id)
@@ -99,11 +99,13 @@ RetVal2<TrackId, AudioParams> TrackSequence::addTrack(const std::string& trackNa
     };
 
     EventTrackPtr trackPtr = std::make_shared<EventTrack>();
+    EventAudioSourcePtr source = std::make_shared<EventAudioSource>(newId, playbackData, onOffStreamReceived);
+
     trackPtr->id = newId;
     trackPtr->name = trackName;
     trackPtr->setPlaybackData(playbackData);
-    trackPtr->inputHandler = std::make_shared<EventAudioSource>(newId, playbackData, onOffStreamReceived);
-    trackPtr->outputHandler = mixer()->addChannel(newId, trackPtr->inputHandler).val;
+    trackPtr->inputHandler = source;
+    trackPtr->outputHandler = mixer()->addChannel(newId, source).val;
     trackPtr->setInputParams(requiredParams.in);
     trackPtr->setOutputParams(requiredParams.out);
 

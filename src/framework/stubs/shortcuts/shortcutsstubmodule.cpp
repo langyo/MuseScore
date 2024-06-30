@@ -30,8 +30,8 @@
 
 #include "ui/iuiengine.h"
 
-using namespace mu::shortcuts;
-using namespace mu::modularity;
+using namespace muse::shortcuts;
+using namespace muse::modularity;
 
 static void shortcuts_init_qrc()
 {
@@ -58,8 +58,4 @@ void ShortcutsModule::registerResources()
 
 void ShortcutsModule::registerUiTypes()
 {
-    std::shared_ptr<ui::IUiEngine> ui = ioc()->resolve<ui::IUiEngine>(moduleName());
-    if (ui) {
-        ui->addSourceImportPath(shortcuts_QML_IMPORT);
-    }
 }

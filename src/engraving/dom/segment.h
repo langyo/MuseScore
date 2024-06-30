@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -102,6 +102,8 @@ public:
 
     void setScore(Score*) override;
 
+    inline bool isActive() const { return !isTimeTickType() && enabled() && visible(); }
+
     Segment* next() const { return m_next; }
     Segment* next(SegmentType) const;
     Segment* nextActive() const;
@@ -134,7 +136,7 @@ public:
     Segment* prev1(SegmentType) const;
     Segment* prev1MM(SegmentType) const;
 
-    Segment* nextCR(track_idx_t track = mu::nidx, bool sameStaff = false) const;
+    Segment* nextCR(track_idx_t track = muse::nidx, bool sameStaff = false) const;
 
     ChordRest* nextChordRest(track_idx_t track, bool backwards = false) const;
 
@@ -155,7 +157,7 @@ public:
     System* system() const { return toSystem(explicitParent()->explicitParent()); }
     double x() const override { return ldata()->pos().x(); }
 
-    mu::RectF contentRect() const;
+    RectF contentRect() const;
 
     void insertStaff(staff_idx_t staff);
     void removeStaff(staff_idx_t staff);
@@ -203,6 +205,7 @@ public:
     std::vector<EngravingItem*> findAnnotations(ElementType type, track_idx_t minTrack, track_idx_t maxTrack) const;
     bool hasElements() const;
     bool hasElements(track_idx_t minTrack, track_idx_t maxTrack) const;
+    bool hasElements(staff_idx_t staffIdx) const;
     bool allElementsInvisible() const;
 
     Spatium extraLeadingSpace() const { return m_extraLeadingSpace; }
@@ -223,8 +226,8 @@ public:
 
     EngravingItem* firstInNextSegments(staff_idx_t activeStaff);   //<
     EngravingItem* lastInPrevSegments(staff_idx_t activeStaff);     //<
-    EngravingItem* firstElement(staff_idx_t staff);                //<  These methods are used for navigation
-    EngravingItem* lastElement(staff_idx_t staff);                 //<  for next-element and prev-element
+    EngravingItem* firstElementForNavigation(staff_idx_t staff);                //<  These methods are used for navigation
+    EngravingItem* lastElementForNavigation(staff_idx_t staff);                 //<  for next-element and prev-element
     EngravingItem* firstElementOfSegment(Segment* s, staff_idx_t activeStaff);
     EngravingItem* nextElementOfSegment(Segment* s, EngravingItem* e, staff_idx_t activeStaff);
     EngravingItem* prevElementOfSegment(Segment* s, EngravingItem* e, staff_idx_t activeStaff);
@@ -240,6 +243,8 @@ public:
     EngravingItem* nextElement(staff_idx_t activeStaff);
     using EngravingItem::prevElement;
     EngravingItem* prevElement(staff_idx_t activeStaff);
+
+    EngravingItem* firstElement(staff_idx_t staffIdx) const;
 
     std::vector<Shape> shapes() { return m_shapes; }
     const std::vector<Shape>& shapes() const { return m_shapes; }
@@ -282,7 +287,7 @@ public:
     bool isTimeTickType() const { return m_segmentType == SegmentType::TimeTick; }
     bool isRightAligned() const { return isClefType() || isBreathType(); }
 
-    bool canWriteSpannerStartEnd(track_idx_t track) const;
+    bool canWriteSpannerStartEnd(track_idx_t track, const Spanner* spanner) const;
 
     Fraction shortestChordRest() const;
     void computeCrossBeamType(Segment* nextSeg);
@@ -330,58 +335,6 @@ private:
 
     CrossBeamType m_crossBeamType; // Will affect segment-to-segment horizontal spacing
 };
-
-//---------------------------------------------------------
-//   nextActive
-//---------------------------------------------------------
-
-inline Segment* Segment::nextActive() const
-{
-    Segment* ns = next();
-    while (ns && !(ns->enabled() && ns->visible())) {
-        ns = ns->next();
-    }
-    return ns;
-}
-
-//---------------------------------------------------------
-//   nextEnabled
-//---------------------------------------------------------
-
-inline Segment* Segment::nextEnabled() const
-{
-    Segment* ns = next();
-    while (ns && !ns->enabled()) {
-        ns = ns->next();
-    }
-    return ns;
-}
-
-//---------------------------------------------------------
-//   prevActive
-//---------------------------------------------------------
-
-inline Segment* Segment::prevActive() const
-{
-    Segment* ps = prev();
-    while (ps && !(ps->enabled() && ps->visible())) {
-        ps = ps->prev();
-    }
-    return ps;
-}
-
-//---------------------------------------------------------
-//   prevEnabled
-//---------------------------------------------------------
-
-inline Segment* Segment::prevEnabled() const
-{
-    Segment* ps = prev();
-    while (ps && !ps->enabled()) {
-        ps = ps->prev();
-    }
-    return ps;
-}
 } // namespace mu::engraving
 
 #ifndef NO_QT_SUPPORT

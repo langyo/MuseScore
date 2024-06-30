@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,8 +30,9 @@
 using namespace mu::context;
 using namespace mu::instrumentsscene;
 using namespace mu::notation;
-using namespace mu::ui;
-using namespace mu::uicomponents;
+using namespace muse;
+using namespace muse::ui;
+using namespace muse::uicomponents;
 using namespace muse::actions;
 
 static const ActionCode SET_INSTRUMENTS_ORDER_CODE("set-instruments-order");
@@ -86,11 +87,11 @@ void InstrumentsPanelContextMenuModel::loadInstrumentOrders()
     m_orders = instrumentsRepository()->orders();
 
     const ScoreOrder& custom = customOrder();
-    if (m_orders.empty() || !mu::contains(m_orders, custom)) {
+    if (m_orders.empty() || !muse::contains(m_orders, custom)) {
         m_orders.push_back(custom);
     }
 
-    if (!mu::contains(m_orders, currentOrder)) {
+    if (!muse::contains(m_orders, currentOrder)) {
         currentOrder.customized = false;
         m_orders.push_back(currentOrder);
     }

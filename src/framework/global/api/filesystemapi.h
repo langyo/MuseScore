@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_API_FILESYSTEMAPI_H
-#define MU_API_FILESYSTEMAPI_H
+#ifndef MUSE_API_FILESYSTEMAPI_H
+#define MUSE_API_FILESYSTEMAPI_H
 
 #include <QString>
 
@@ -30,12 +30,13 @@
 #include "modularity/ioc.h"
 #include "global/io/ifilesystem.h"
 
-namespace mu::api {
+namespace muse::api {
 class FileSystemApi : public ApiObject
 {
     Q_OBJECT
 
-    INJECT(io::IFileSystem, fileSystem)
+    muse::GlobalInject<io::IFileSystem> fileSystem;
+
 public:
     FileSystemApi(IApiEngine* e);
 
@@ -64,4 +65,4 @@ public:
 };
 }
 
-#endif // MU_API_FILESYSTEMAPI_H
+#endif // MUSE_API_FILESYSTEMAPI_H

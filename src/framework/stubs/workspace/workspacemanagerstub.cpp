@@ -22,8 +22,8 @@
 #include "workspacemanagerstub.h"
 #include "workspacestub.h"
 
-using namespace mu::workspace;
-using namespace mu;
+using namespace muse::workspace;
+using namespace muse;
 
 IWorkspacePtr WorkspaceManagerStub::defaultWorkspace() const
 {

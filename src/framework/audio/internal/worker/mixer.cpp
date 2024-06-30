@@ -29,9 +29,9 @@
 
 #include "log.h"
 
-using namespace mu;
+using namespace muse;
 using namespace muse::audio;
-using namespace mu::async;
+using namespace muse::async;
 
 static constexpr size_t DEFAULT_AUX_BUFFER_SIZE = 1024;
 
@@ -53,7 +53,7 @@ IAudioSourcePtr Mixer::mixedSource()
     return shared_from_this();
 }
 
-RetVal<MixerChannelPtr> Mixer::addChannel(const TrackId trackId, IAudioSourcePtr source)
+RetVal<MixerChannelPtr> Mixer::addChannel(const TrackId trackId, ITrackAudioInputPtr source)
 {
     ONLY_AUDIO_WORKER_THREAD;
 
@@ -65,7 +65,33 @@ RetVal<MixerChannelPtr> Mixer::addChannel(const TrackId trackId, IAudioSourcePtr
         return result;
     }
 
-    m_trackChannels.emplace(trackId, std::make_shared<MixerChannel>(trackId, std::move(source), m_sampleRate));
+    MixerChannelPtr channel = std::make_shared<MixerChannel>(trackId, std::move(source), m_sampleRate);
+    std::weak_ptr<MixerChannel> channelWeakPtr = channel;
+
+    m_nonMutedTrackCount++;
+
+    channel->mutedChanged().onNotify(this, [this, channelWeakPtr]() {
+        MixerChannelPtr channel = channelWeakPtr.lock();
+        if (!channel) {
+            return;
+        }
+
+        if (channel->muted()) {
+            if (m_nonMutedTrackCount != 0) {
+                m_nonMutedTrackCount--;
+            }
+            return;
+        }
+
+        m_nonMutedTrackCount++;
+
+        ITrackAudioInputPtr source = std::static_pointer_cast<ITrackAudioInput>(channel->source());
+        if (source) {
+            source->seek(currentTime());
+        }
+    });
+
+    m_trackChannels.emplace(trackId, channel);
 
     result.val = m_trackChannels[trackId];
     result.ret = make_ret(Ret::Code::Ok);
@@ -99,11 +125,15 @@ Ret Mixer::removeChannel(const TrackId trackId)
     auto search = m_trackChannels.find(trackId);
 
     if (search != m_trackChannels.end() && search->second) {
+        if (m_nonMutedTrackCount != 0) {
+            m_nonMutedTrackCount--;
+        }
+
         m_trackChannels.erase(trackId);
         return make_ret(Ret::Code::Ok);
     }
 
-    bool removed = mu::remove_if(m_auxChannelInfoList, [trackId](const AuxChannelInfo& aux) {
+    bool removed = muse::remove_if(m_auxChannelInfoList, [trackId](const AuxChannelInfo& aux) {
         return aux.channel->trackId() == trackId;
     });
 
@@ -219,7 +249,12 @@ void Mixer::processTrackChannels(size_t outBufferSize, size_t samplesPerChannel,
         std::map<TrackId, std::future<std::vector<float> > > futures;
 
         for (const auto& pair : m_trackChannels) {
-            if (filterTracks && !mu::contains(m_tracksToProcessWhenIdle, pair.second->trackId())) {
+            if (filterTracks && !muse::contains(m_tracksToProcessWhenIdle, pair.second->trackId())) {
+                continue;
+            }
+
+            if (pair.second->muted()) {
+                pair.second->notifyNoAudioSignal();
                 continue;
             }
 
@@ -232,7 +267,12 @@ void Mixer::processTrackChannels(size_t outBufferSize, size_t samplesPerChannel,
         }
     } else {
         for (const auto& pair : m_trackChannels) {
-            if (filterTracks && !mu::contains(m_tracksToProcessWhenIdle, pair.second->trackId())) {
+            if (filterTracks && !muse::contains(m_tracksToProcessWhenIdle, pair.second->trackId())) {
+                continue;
+            }
+
+            if (pair.second->muted()) {
+                pair.second->notifyNoAudioSignal();
                 continue;
             }
 
@@ -243,7 +283,7 @@ void Mixer::processTrackChannels(size_t outBufferSize, size_t samplesPerChannel,
 
 bool Mixer::useMultithreading() const
 {
-    if (m_trackChannels.size() < m_minTrackCountForMultithreading) {
+    if (m_nonMutedTrackCount < m_minTrackCountForMultithreading) {
         return false;
     }
 
@@ -513,4 +553,14 @@ void Mixer::notifyNoAudioSignal()
 void Mixer::notifyAboutAudioSignalChanges(const audioch_t audioChannelNumber, const float linearRms) const
 {
     m_audioSignalNotifier.updateSignalValues(audioChannelNumber, linearRms, dsp::dbFromSample(linearRms));
+}
+
+msecs_t Mixer::currentTime() const
+{
+    if (m_clocks.empty()) {
+        return 0;
+    }
+
+    IClockPtr clock = *m_clocks.begin();
+    return clock->currentTime();
 }

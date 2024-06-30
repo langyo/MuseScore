@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_UI_UIENGINE_H
-#define MU_UI_UIENGINE_H
+#ifndef MUSE_UI_UIENGINE_H
+#define MUSE_UI_UIENGINE_H
 
 #include <QObject>
 #include <memory>
@@ -35,12 +35,11 @@
 
 #include "languages/ilanguagesservice.h"
 
-namespace mu::ui {
-class UiEngine : public QObject, public IUiEngine
+namespace muse::ui {
+class QmlApiEngine;
+class UiEngine : public QObject, public IUiEngine, public Injectable
 {
     Q_OBJECT
-
-    INJECT(muse::languages::ILanguagesService, languagesService)
 
     Q_PROPERTY(api::ThemeApi * theme READ theme NOTIFY themeChanged)
     Q_PROPERTY(QmlToolTip * tooltip READ tooltip CONSTANT)
@@ -50,8 +49,10 @@ class UiEngine : public QObject, public IUiEngine
     // for internal use
     Q_PROPERTY(InteractiveProvider * _interactiveProvider READ interactiveProvider_property CONSTANT)
 
+    GlobalInject<languages::ILanguagesService> languagesService;
+
 public:
-    UiEngine();
+    UiEngine(const modularity::ContextPtr& iocCtx);
     ~UiEngine() override;
 
     void init();
@@ -64,6 +65,10 @@ public:
 
     Q_INVOKABLE Qt::KeyboardModifiers keyboardModifiers() const;
     Q_INVOKABLE Qt::LayoutDirection currentLanguageLayoutDirection() const;
+
+    Q_INVOKABLE QColor colorWithAlphaF(const QColor& src, float alpha /* 0 - 1 */) const;
+    Q_INVOKABLE QColor blendColors(const QColor& c1, const QColor& c2) const;
+    Q_INVOKABLE QColor blendColors(const QColor& c1, const QColor& c2, float alpha) const;
 
     // IUiEngine
     void updateTheme() override;
@@ -86,6 +91,7 @@ signals:
 private:
 
     QQmlApplicationEngine* m_engine = nullptr;
+    QmlApiEngine* m_apiEngine = nullptr;
     QStringList m_sourceImportPaths;
     api::ThemeApi* m_theme = nullptr;
     QmlTranslation* m_translation = nullptr;
@@ -96,4 +102,4 @@ private:
 };
 }
 
-#endif // MU_UI_UIENGINE_H
+#endif // MUSE_UI_UIENGINE_H

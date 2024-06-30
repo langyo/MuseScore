@@ -30,7 +30,7 @@
 
 #include "log.h"
 
-using namespace mu;
+using namespace muse;
 using namespace muse::audio;
 using namespace muse::audio::synth;
 
@@ -41,12 +41,13 @@ static const Settings::Key AUDIO_API_KEY("audio", "io/audioApi");
 static const Settings::Key AUDIO_OUTPUT_DEVICE_ID_KEY("audio", "io/outputDevice");
 static const Settings::Key AUDIO_BUFFER_SIZE_KEY("audio", "io/bufferSize");
 static const Settings::Key AUDIO_SAMPLE_RATE_KEY("audio", "io/sampleRate");
+static const Settings::Key AUDIO_MEASURE_INPUT_LAG("audio", "io/measureInputLag");
 
 static const Settings::Key USER_SOUNDFONTS_PATHS("midi", "application/paths/mySoundfonts");
 
 static const AudioResourceId DEFAULT_SOUND_FONT_NAME = "MS Basic";
 static const AudioResourceAttributes DEFAULT_AUDIO_RESOURCE_ATTRIBUTES = {
-    { PLAYBACK_SETUP_DATA_ATTRIBUTE, mpe::GENERIC_SETUP_DATA_STRING },
+    { PLAYBACK_SETUP_DATA_ATTRIBUTE, muse::mpe::GENERIC_SETUP_DATA_STRING },
     { SOUNDFONT_NAME_ATTRIBUTE, String::fromStdString(DEFAULT_SOUND_FONT_NAME) } };
 
 static const AudioResourceMeta DEFAULT_AUDIO_RESOURCE_META
@@ -84,6 +85,8 @@ void AudioConfiguration::init()
     for (const auto& path : userSoundFontDirectories()) {
         fileSystem()->makePath(path);
     }
+
+    settings()->setDefaultValue(AUDIO_MEASURE_INPUT_LAG, Val(false));
 }
 
 std::vector<std::string> AudioConfiguration::availableAudioApiList() const
@@ -166,7 +169,7 @@ async::Notification AudioConfiguration::sampleRateChanged() const
 size_t AudioConfiguration::minTrackCountForMultithreading() const
 {
     // Start mutlithreading-processing only when there are more or equal number of tracks
-    return 3;
+    return 2;
 }
 
 AudioInputParams AudioConfiguration::defaultAudioInputParams() const
@@ -188,12 +191,12 @@ SoundFontPaths AudioConfiguration::soundFontDirectories() const
 io::paths_t AudioConfiguration::userSoundFontDirectories() const
 {
     std::string pathsStr = settings()->value(USER_SOUNDFONTS_PATHS).toString();
-    return mu::io::pathsFromString(pathsStr);
+    return io::pathsFromString(pathsStr);
 }
 
 void AudioConfiguration::setUserSoundFontDirectories(const io::paths_t& paths)
 {
-    settings()->setSharedValue(USER_SOUNDFONTS_PATHS, Val(mu::io::pathsToString(paths)));
+    settings()->setSharedValue(USER_SOUNDFONTS_PATHS, Val(io::pathsToString(paths)));
 }
 
 async::Channel<io::paths_t> AudioConfiguration::soundFontDirectoriesChanged() const
@@ -204,4 +207,9 @@ async::Channel<io::paths_t> AudioConfiguration::soundFontDirectoriesChanged() co
 io::path_t AudioConfiguration::knownAudioPluginsFilePath() const
 {
     return globalConfiguration()->userAppDataPath() + "/known_audio_plugins.json";
+}
+
+bool AudioConfiguration::shouldMeasureInputLag() const
+{
+    return settings()->value(AUDIO_MEASURE_INPUT_LAG).toBool();
 }

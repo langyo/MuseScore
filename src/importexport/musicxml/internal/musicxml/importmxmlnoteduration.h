@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -49,12 +49,12 @@ public:
     Fraction specifiedDuration() const { return m_specDura; }    // value read from the duration element
     int dots() const { return m_dots; }
     TDuration normalType() const { return m_normalType; }
-    bool readProperties(XmlStreamReader& e);
+    bool readProperties(muse::XmlStreamReader& e);
     Fraction timeMod() const { return m_timeMod; }
 
 private:
-    void duration(XmlStreamReader& e);
-    void timeModification(XmlStreamReader& e);
+    void duration(muse::XmlStreamReader& e);
+    void timeModification(muse::XmlStreamReader& e);
     const int m_divs;                                  // the current divisions value
     int m_dots = 0;
     Fraction m_calcDura;

@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_GLOBAL_IINTERACTIVE_H
-#define MU_GLOBAL_IINTERACTIVE_H
+#ifndef MUSE_GLOBAL_IINTERACTIVE_H
+#define MUSE_GLOBAL_IINTERACTIVE_H
 
 #include "modularity/imoduleinterface.h"
 #include "io/path.h"
@@ -28,9 +28,10 @@
 #include "types/retval.h"
 #include "types/uri.h"
 #include "types/flags.h"
+#include "async/promise.h"
 #include "progress.h"
 
-namespace mu {
+namespace muse {
 class IInteractive : MODULE_EXPORT_INTERFACE
 {
     INTERFACE_ID(IInteractive)
@@ -180,7 +181,7 @@ public:
                          int defBtn = int(Button::NoButton), const Options& options = { WithIcon }) const = 0;
 
     // progress
-    virtual Ret showProgress(const std::string& title, mu::Progress* progress) const = 0;
+    virtual Ret showProgress(const std::string& title, Progress* progress) const = 0;
 
     // files
     virtual io::path_t selectOpeningFile(const QString& title, const io::path_t& dir, const std::vector<std::string>& filter) = 0;
@@ -216,6 +217,10 @@ public:
     virtual Ret openUrl(const std::string& url) const = 0;
     virtual Ret openUrl(const QUrl& url) const = 0;
 
+    virtual Ret isAppExists(const std::string& appIdentifier) const = 0;
+    virtual Ret canOpenApp(const Uri& uri) const = 0;
+    virtual async::Promise<Ret> openApp(const Uri& uri) const = 0;
+
     /// Opens a file browser at the parent directory of filePath,
     /// and selects the file at filePath on OSs that support it
     virtual Ret revealInFileBrowser(const io::path_t& filePath) const = 0;
@@ -223,4 +228,4 @@ public:
 DECLARE_OPERATORS_FOR_FLAGS(IInteractive::Options)
 }
 
-#endif // MU_GLOBAL_IINTERACTIVE_H
+#endif // MUSE_GLOBAL_IINTERACTIVE_H

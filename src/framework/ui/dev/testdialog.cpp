@@ -22,16 +22,7 @@
 #include "testdialog.h"
 #include "ui_testdialog.h"
 
-using namespace mu::ui;
-
-#ifdef MU_QT5_COMPAT
-TestDialog::TestDialog(const TestDialog& dialog)
-    : QDialog(dialog.parentWidget()),
-    ui(dialog.ui)
-{
-}
-
-#endif
+using namespace muse::ui;
 
 TestDialog::TestDialog(QWidget* parent)
     : QDialog(parent),

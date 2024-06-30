@@ -23,16 +23,16 @@
 
 #include "ui/view/qmltooltip.h"
 
-using namespace mu;
-using namespace mu::ui;
+using namespace muse;
+using namespace muse::ui;
 
-namespace mu::ui {
+namespace muse::ui {
 class QmlToolTipTests : public ::testing::Test, public QObject
 {
 public:
     void SetUp() override
     {
-        m_tooltip = new QmlToolTip();
+        m_tooltip = new QmlToolTip(nullptr, nullptr);
 
         QObject::connect(m_tooltip, &QmlToolTip::showToolTip, this, [this]() {
             m_isToolTipShown = true;

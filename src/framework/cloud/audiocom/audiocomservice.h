@@ -29,7 +29,6 @@
 #include "modularity/ioc.h"
 #include "icloudconfiguration.h"
 #include "network/inetworkmanagercreator.h"
-#include "multiinstances/imultiinstancesprovider.h"
 
 #include "internal/abstractcloudservice.h"
 
@@ -39,17 +38,19 @@ namespace muse::cloud {
 class AudioComService : public IAudioComService, public AbstractCloudService, public std::enable_shared_from_this<AudioComService>
 {
     INJECT(ICloudConfiguration, configuration)
-    INJECT(mu::network::INetworkManagerCreator, networkManagerCreator)
+    INJECT(network::INetworkManagerCreator, networkManagerCreator)
 
 public:
     explicit AudioComService(QObject* parent = nullptr);
 
     IAuthorizationServicePtr authorization() override;
 
+    QUrl projectManagerUrl() const override;
+
     CloudInfo cloudInfo() const override;
 
-    mu::ProgressPtr uploadAudio(QIODevice& audioData, const QString& audioFormat, const QString& title, const QUrl& url,
-                                Visibility visibility = Visibility::Private, bool replaceExisting = false) override;
+    ProgressPtr uploadAudio(QIODevice& audioData, const QString& audioFormat, const QString& title, const QUrl& url,
+                            Visibility visibility = Visibility::Private, bool replaceExisting = false) override;
 
 private:
     ServerConfig serverConfig() const override;
@@ -58,13 +59,13 @@ private:
 
     bool doUpdateTokens() override;
 
-    mu::network::RequestHeaders headers(const QString& token = QString()) const;
+    network::RequestHeaders headers(const QString& token = QString()) const;
 
-    Ret doUploadAudio(mu::network::INetworkManagerPtr uploadManager, QIODevice& audioData, const QString& audioFormat);
-    Ret doCreateAudio(mu::network::INetworkManagerPtr manager, const QString& title, int size, const QString& audioFormat,
+    Ret doUploadAudio(network::INetworkManagerPtr uploadManager, QIODevice& audioData, const QString& audioFormat);
+    Ret doCreateAudio(network::INetworkManagerPtr manager, const QString& title, int size, const QString& audioFormat,
                       const QUrl& existingUrl, Visibility visibility, bool replaceExisting);
 
-    Ret doUpdateVisibility(mu::network::INetworkManagerPtr manager, const QUrl& url, Visibility visibility);
+    Ret doUpdateVisibility(network::INetworkManagerPtr manager, const QUrl& url, Visibility visibility);
 
     void notifyServerAboutFailUpload(const QUrl& failUrl, const QString& token);
     void notifyServerAboutSuccessUpload(const QUrl& successUrl, const QString& token);

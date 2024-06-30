@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -41,8 +41,8 @@ OrnamentSettingsModel::OrnamentSettingsModel(QObject* parent, IElementRepository
     : AbstractInspectorModel(parent, repository)
 {
     setModelType(InspectorModelType::TYPE_ORNAMENT);
-    setTitle(qtrc("inspector", "Ornament"));
-    setIcon(ui::IconCode::Code::ORNAMENT);
+    setTitle(muse::qtrc("inspector", "Ornament"));
+    setIcon(muse::ui::IconCode::Code::ORNAMENT);
     createProperties();
 }
 

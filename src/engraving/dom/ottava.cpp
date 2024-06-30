@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -405,7 +405,7 @@ PointF Ottava::linePos(Grip grip, System** system) const
     // End 1sp after the right edge of the end chord, but don't overlap followig segments
     double x = seg->staffShape(endCr->staffIdx()).right() + seg->x() + seg->measure()->x() + spatium();
     Segment* followingCRseg = score()->tick2segment(endCr->tick() + endCr->actualTicks(), true, SegmentType::ChordRest);
-    if (followingCRseg) {
+    if (followingCRseg && followingCRseg->system() == seg->system()) {
         x = std::min(x, followingCRseg->x() + followingCRseg->measure()->x());
     }
 
@@ -416,6 +416,6 @@ PointF Ottava::linePos(Grip grip, System** system) const
 
 void Ottava::doComputeEndElement()
 {
-    setEndElement(score()->findCRinStaff(tick2(), track2staff(track())));
+    setEndElement(score()->findChordRestEndingBeforeTickInStaff(tick2(), track2staff(track())));
 }
 }

@@ -38,7 +38,7 @@ class MuseScoreComService : public IMuseScoreComService, public AbstractCloudSer
     public std::enable_shared_from_this<MuseScoreComService>
 {
     Inject<ICloudConfiguration> configuration;
-    Inject<mu::network::INetworkManagerCreator> networkManagerCreator;
+    Inject<network::INetworkManagerCreator> networkManagerCreator;
     Inject<IApplication> application;
 
 public:
@@ -50,17 +50,17 @@ public:
 
     QUrl scoreManagerUrl() const override;
 
-    mu::ProgressPtr uploadScore(QIODevice& scoreData, const QString& title, Visibility visibility = Visibility::Private,
-                                const QUrl& sourceUrl = QUrl(), int revisionId = 0) override;
-    mu::ProgressPtr uploadAudio(QIODevice& audioData, const QString& audioFormat, const QUrl& sourceUrl) override;
+    ProgressPtr uploadScore(QIODevice& scoreData, const QString& title, Visibility visibility = Visibility::Private,
+                            const QUrl& sourceUrl = QUrl(), int revisionId = 0) override;
+    ProgressPtr uploadAudio(QIODevice& audioData, const QString& audioFormat, const QUrl& sourceUrl) override;
 
     RetVal<ScoreInfo> downloadScoreInfo(const QUrl& sourceUrl) override;
     RetVal<ScoreInfo> downloadScoreInfo(int scoreId) override;
 
     async::Promise<ScoresList> downloadScoresList(int scoresPerBatch, int batchNumber) override;
 
-    mu::ProgressPtr downloadScore(int scoreId, QIODevice& scoreData, const QString& hash = QString(),
-                                  const QString& secret = QString()) override;
+    ProgressPtr downloadScore(int scoreId, QIODevice& scoreData, const QString& hash = QString(),
+                              const QString& secret = QString()) override;
 
 private:
     ServerConfig serverConfig() const override;
@@ -69,18 +69,17 @@ private:
 
     bool doUpdateTokens() override;
 
-    QString logoColorForTheme(const mu::ui::ThemeInfo& theme) const override;
+    QString logoColorForTheme(const ui::ThemeInfo& theme) const override;
 
-    mu::network::RequestHeaders headers() const;
+    network::RequestHeaders headers() const;
 
-    Ret doDownloadScore(mu::network::INetworkManagerPtr downloadManager, int scoreId, QIODevice& scoreData,
+    Ret doDownloadScore(network::INetworkManagerPtr downloadManager, int scoreId, QIODevice& scoreData,
                         const QString& hash = QString(), const QString& secret = QString());
 
-    mu::RetVal<mu::ValMap> doUploadScore(mu::network::INetworkManagerPtr uploadManager, QIODevice& scoreData, const QString& title,
-                                         Visibility visibility, const QUrl& sourceUrl = QUrl(), int revisionId = 0);
+    RetVal<ValMap> doUploadScore(network::INetworkManagerPtr uploadManager, QIODevice& scoreData, const QString& title,
+                                 Visibility visibility, const QUrl& sourceUrl = QUrl(), int revisionId = 0);
 
-    Ret doUploadAudio(mu::network::INetworkManagerPtr uploadManager, QIODevice& audioData, const QString& audioFormat,
-                      const QUrl& sourceUrl);
+    Ret doUploadAudio(network::INetworkManagerPtr uploadManager, QIODevice& audioData, const QString& audioFormat, const QUrl& sourceUrl);
 };
 }
 

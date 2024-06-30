@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -288,14 +288,14 @@ void SlurTieSegment::drawEditMode(Painter* p, EditData& ed, double /*currentView
     polygon[4] = PointF(ed.grip[int(Grip::END)].center());
     polygon[5] = PointF(ed.grip[int(Grip::DRAG)].center());
     polygon[6] = PointF(ed.grip[int(Grip::START)].center());
-    p->setPen(Pen(engravingConfiguration()->formattingMarksColor(), 0.0));
+    p->setPen(Pen(configuration()->formattingMarksColor(), 0.0));
     p->drawPolyline(polygon);
 
-    p->setPen(Pen(engravingConfiguration()->defaultColor(), 0.0));
+    p->setPen(Pen(configuration()->defaultColor(), 0.0));
     for (int i = 0; i < ed.grips; ++i) {
         // Can't use ternary operator, because we want different overloads of `setBrush`
         if (Grip(i) == ed.curGrip) {
-            p->setBrush(engravingConfiguration()->formattingMarksColor());
+            p->setBrush(configuration()->formattingMarksColor());
         } else {
             p->setBrush(BrushStyle::NoBrush);
         }

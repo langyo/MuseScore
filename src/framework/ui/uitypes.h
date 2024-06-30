@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_UI_UITYPES_H
-#define MU_UI_UITYPES_H
+#ifndef MUSE_UI_UITYPES_H
+#define MUSE_UI_UITYPES_H
 
 #include <vector>
 #include <QString>
@@ -30,7 +30,7 @@
 #include "view/iconcodes.h" // IWYU pragma: export
 #include "workspace/workspacetypes.h"
 
-namespace mu::ui {
+namespace muse::ui {
 using ThemeCode = std::string;
 
 inline ThemeCode themeCodeFromString(const QString& str)
@@ -71,15 +71,23 @@ enum ThemeStyleKey
 
     BACKGROUND_PRIMARY_COLOR = 0,
     BACKGROUND_SECONDARY_COLOR,
+    BACKGROUND_TERTIARY_COLOR,
+    BACKGROUND_QUARTERNARY_COLOR,
     POPUP_BACKGROUND_COLOR,
+    PROJECT_TAB_COLOR,
     TEXT_FIELD_COLOR,
     ACCENT_COLOR,
     STROKE_COLOR,
+    STROKE_SECONDARY_COLOR,
     BUTTON_COLOR,
     FONT_PRIMARY_COLOR,
     FONT_SECONDARY_COLOR,
     LINK_COLOR,
     FOCUS_COLOR,
+    WHITE_COLOR,
+    BLACK_COLOR,
+    PLAY_COLOR,
+    RECORD_COLOR,
 
     BORDER_WIDTH,
     NAVIGATION_CONTROL_BORDER_WIDTH,
@@ -153,4 +161,4 @@ inline const workspace::DataKey WS_UiStates("ui_states");
 inline const workspace::DataKey WS_UiToolConfigs("ui_toolconfigs");
 }
 
-#endif // MU_UI_UITYPES_H
+#endif // MUSE_UI_UITYPES_H

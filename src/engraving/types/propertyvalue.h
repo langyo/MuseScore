@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -104,6 +104,10 @@ enum class P_TYPE {
     PLAYTECH_TYPE,
     TEMPOCHANGE_TYPE,
     SLUR_STYLE_TYPE,
+    LYRICS_DASH_SYSTEM_START_TYPE,
+
+    VOICE_APPLICATION,
+    AUTO_ON_OFF,
 
     // Other
     GROUPS,
@@ -276,6 +280,15 @@ public:
 
     PropertyValue(const OrnamentShowAccidental& v)
         : m_type(P_TYPE::ORNAMENT_SHOW_ACCIDENTAL), m_data(make_data<OrnamentShowAccidental>(v)) {}
+
+    PropertyValue(const LyricsDashSystemStart& v)
+        : m_type(P_TYPE::LYRICS_DASH_SYSTEM_START_TYPE), m_data(make_data<LyricsDashSystemStart>(v)) {}
+
+    PropertyValue(const VoiceApplication& v)
+        : m_type(P_TYPE::VOICE_APPLICATION), m_data(make_data<VoiceApplication>(v)) {}
+
+    PropertyValue(const AutoOnOff& v)
+        : m_type(P_TYPE::AUTO_ON_OFF), m_data(make_data<AutoOnOff>(v)) {}
 
     bool isValid() const;
 
@@ -464,7 +477,7 @@ private:
 };
 }
 
-inline mu::logger::Stream& operator<<(mu::logger::Stream& s, const mu::engraving::PropertyValue&)
+inline muse::logger::Stream& operator<<(muse::logger::Stream& s, const mu::engraving::PropertyValue&)
 {
     s << "property(not implemented log output)";
     return s;

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -35,6 +35,7 @@
 
 #include "log.h"
 
+using namespace muse;
 using namespace mu::iex::musicxml;
 
 static void musicxml_init_qrc()
@@ -58,7 +59,7 @@ void MusicXmlModule::registerExports()
 {
 #ifndef MUSICXML_NO_INTERNAL
     m_configuration = std::make_shared<MusicXmlConfiguration>();
-    modularity::ioc()->registerExport<IMusicXmlConfiguration>(moduleName(), m_configuration);
+    ioc()->registerExport<IMusicXmlConfiguration>(moduleName(), m_configuration);
 #endif
 }
 
@@ -67,12 +68,12 @@ void MusicXmlModule::resolveImports()
 #ifndef MUSICXML_NO_INTERNAL
     using namespace mu::project;
 
-    auto readers = modularity::ioc()->resolve<INotationReadersRegister>(moduleName());
+    auto readers = ioc()->resolve<INotationReadersRegister>(moduleName());
     if (readers) {
         readers->reg({ "xml", "musicxml", "mxl" }, std::make_shared<MusicXmlReader>());
     }
 
-    auto writers = modularity::ioc()->resolve<INotationWritersRegister>(moduleName());
+    auto writers = ioc()->resolve<INotationWritersRegister>(moduleName());
     if (writers) {
         writers->reg({ "musicxml", "xml" }, std::make_shared<MusicXmlWriter>());
         writers->reg({ "mxl" }, std::make_shared<MxlWriter>());

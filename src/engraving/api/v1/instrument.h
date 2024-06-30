@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,7 +24,8 @@
 #define MU_ENGRAVING_APIV1_INSTRUMENT_H
 
 #include "engraving/dom/instrument.h"
-#include "extensions/api/qmllistproperty.h"
+
+#include <QQmlListProperty>
 
 // api
 #include "scoreelement.h"
@@ -210,7 +211,7 @@ public:
 ///   \cond PLUGIN_API \private \endcond
 //---------------------------------------------------------
 
-class ChannelListProperty : public muse::extensions::api::QmlListProperty<Channel>
+class ChannelListProperty : public QQmlListProperty<Channel>
 {
 public:
     ChannelListProperty(Instrument* i);

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -52,8 +52,9 @@
 #include "view/widgets/timedialog.h"
 
 using namespace mu::palette;
-using namespace mu::modularity;
-using namespace mu::ui;
+using namespace muse;
+using namespace muse::modularity;
+using namespace muse::ui;
 using namespace muse::accessibility;
 
 static void palette_init_qrc()
@@ -80,7 +81,7 @@ void PaletteModule::registerExports()
 
 void PaletteModule::resolveImports()
 {
-    auto ar = ioc()->resolve<ui::IUiActionsRegister>(moduleName());
+    auto ar = ioc()->resolve<muse::ui::IUiActionsRegister>(moduleName());
     if (ar) {
         ar->reg(m_paletteUiActions);
     }
@@ -126,11 +127,7 @@ void PaletteModule::registerUiTypes()
     qmlRegisterType<PaletteCellPropertiesModel>("MuseScore.Palette", 1, 0, "PaletteCellPropertiesModel");
     qmlRegisterType<DrumsetPanelView>("MuseScore.Palette", 1, 0, "DrumsetPanelView");
 
-    qRegisterMetaType<SpecialCharactersDialog>("SpecialCharactersDialog");
-    qRegisterMetaType<TimeSignaturePropertiesDialog>("TimeSignaturePropertiesDialog");
-    qRegisterMetaType<EditDrumsetDialog>("EditDrumsetDialog");
-
-    ioc()->resolve<ui::IUiEngine>(moduleName())->addSourceImportPath(palette_QML_IMPORT);
+    ioc()->resolve<muse::ui::IUiEngine>(moduleName())->addSourceImportPath(palette_QML_IMPORT);
 }
 
 void PaletteModule::onInit(const IApplication::RunMode& mode)

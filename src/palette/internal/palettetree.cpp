@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -42,7 +42,7 @@ void PaletteTree::append(PalettePtr palette)
 bool PaletteTree::read(mu::engraving::XmlReader& e, bool pasteMode)
 {
     while (e.readNextStartElement()) {
-        const AsciiStringView tag(e.name());
+        const muse::AsciiStringView tag(e.name());
         if (tag == "Palette") {
             PalettePtr p = std::make_shared<Palette>();
             p->read(e, pasteMode);

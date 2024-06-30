@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -73,13 +73,9 @@ class Score;
 //   @P scores               array[mu::engraving::Score]  all currently open scores (read only)
 //---------------------------------------------------------
 
-class PluginAPI : public QQuickItem, public muse::extensions::apiv1::IPluginApiV1
+class PluginAPI : public QQuickItem, public muse::extensions::apiv1::IPluginApiV1, public muse::Injectable
 {
     Q_OBJECT
-
-    INJECT(muse::actions::IActionsDispatcher, actionsDispatcher)
-    INJECT(mu::context::IGlobalContext, context)
-    INJECT(mu::IApplication, application)
 
     /** Path where the plugin is placed in menu */
     Q_PROPERTY(QString menuPath READ menuPath WRITE setMenuPath)
@@ -121,6 +117,12 @@ class PluginAPI : public QQuickItem, public muse::extensions::apiv1::IPluginApiV
     /** List of currently open scores (read only).\n \since MuseScore 3.2 */
     Q_PROPERTY(QQmlListProperty<mu::engraving::apiv1::Score> scores READ scores)
 
+public:
+    muse::Inject<muse::actions::IActionsDispatcher> actionsDispatcher = { this };
+    muse::Inject<mu::context::IGlobalContext> context = { this };
+    muse::Inject<muse::IApplication> application = { this };
+
+public:
     // Should be initialized in qmlpluginapi.cpp
     /// Contains mu::engraving::ElementType enumeration values
     DECLARE_API_ENUM(Element,          elementTypeEnum,        mu::engraving::apiv1::enums::ElementType)
@@ -264,7 +266,7 @@ public:
 
     void setup(QQmlEngine* e) override;
     void runPlugin() override { emit run(); }
-    async::Notification closeRequest() const override { return m_closeRequested; }
+    muse::async::Notification closeRequest() const override { return m_closeRequested; }
 
     void endCmd(const QMap<QString, QVariant>& stateInfo) { emit scoreStateChanged(stateInfo); }
 
@@ -336,7 +338,7 @@ private:
     bool m_requiresScore = true;
     QString m_thumbnailName;
     QString m_categoryCode;
-    async::Notification m_closeRequested;
+    muse::async::Notification m_closeRequested;
 };
 
 #undef DECLARE_API_ENUM

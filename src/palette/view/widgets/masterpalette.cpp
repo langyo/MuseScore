@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -37,7 +37,7 @@
 #include "log.h"
 
 using namespace mu::palette;
-using namespace mu::ui;
+using namespace muse::ui;
 using namespace mu::engraving;
 
 void MasterPalette::setSelectedPaletteName(const QString& name)
@@ -72,7 +72,7 @@ void MasterPalette::addPalette(PalettePtr palette)
     psa->setRestrictHeight(false);
     QTreeWidgetItem* item = new QTreeWidgetItem(QStringList(widget->name()));
     item->setData(0, Qt::UserRole, stack->count());
-    item->setText(0, mu::qtrc("palette", widget->name().toUtf8().data()).replace("&&", "&"));
+    item->setText(0, muse::qtrc("palette", widget->name().toUtf8().data()).replace("&&", "&"));
     stack->addWidget(psa);
     treeWidget->addTopLevelItem(item);
 }
@@ -139,7 +139,7 @@ MasterPalette::MasterPalette(QWidget* parent)
     child->setData(0, Qt::UserRole, m_idxAllSymbols);
     m_symbolItem->addChild(child);
 
-    std::vector<String> symbols = mu::keys(Smufl::smuflRanges());
+    std::vector<String> symbols = muse::keys(Smufl::smuflRanges());
     for (size_t i = 0; i < symbols.size(); i++) {
         QString symbol = symbols[i].toQString();
         if (symbol == Smufl::SMUFL_ALL_SYMBOLS) {
@@ -159,23 +159,15 @@ MasterPalette::MasterPalette(QWidget* parent)
     WidgetStateStore::restoreGeometry(this);
 }
 
-#ifdef MU_QT5_COMPAT
-MasterPalette::MasterPalette(const MasterPalette& other)
-    : TopLevelDialog(other.parentWidget())
-{
-}
-
-#endif
-
 //---------------------------------------------------------
 //   retranslate
 //---------------------------------------------------------
 
 void MasterPalette::retranslate(bool firstTime)
 {
-    m_keyItem->setText(0, mu::qtrc("palette", "Key signatures"));
-    m_timeItem->setText(0, mu::qtrc("palette", "Time signatures"));
-    m_symbolItem->setText(0, mu::qtrc("palette", "Symbols"));
+    m_keyItem->setText(0, muse::qtrc("palette", "Key signatures"));
+    m_timeItem->setText(0, muse::qtrc("palette", "Time signatures"));
+    m_symbolItem->setText(0, muse::qtrc("palette", "Symbols"));
     if (!firstTime) {
         retranslateUi(this);
     }
@@ -191,7 +183,7 @@ void MasterPalette::currentChanged(QTreeWidgetItem* item, QTreeWidgetItem*)
 
     if (idx > m_idxAllSymbols) {
         if (!m_symbolWidgets.contains(idx)) {
-            std::vector<String> symbols = mu::keys(Smufl::smuflRanges());
+            std::vector<String> symbols = muse::keys(Smufl::smuflRanges());
             SymbolDialog* dialog = new SymbolDialog(symbols[idx - m_idxAllSymbols - 1].toQString());
             m_symbolWidgets[idx] = dialog;
             stack->addWidget(dialog);

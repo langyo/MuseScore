@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_UICOMPONENTS_POPUPVIEW_H
-#define MU_UICOMPONENTS_POPUPVIEW_H
+#ifndef MUSE_UICOMPONENTS_POPUPVIEW_H
+#define MUSE_UICOMPONENTS_POPUPVIEW_H
 
 #include <QQuickItem>
 #include <QQmlParserStatus>
@@ -33,19 +33,20 @@
 #include "ui/imainwindow.h"
 #include "ui/iuiconfiguration.h"
 #include "ui/inavigationcontroller.h"
-#include "ui/view/navigationcontrol.h"
 
 #include "popupwindow/ipopupwindow.h"
 #include "internal/popupviewclosecontroller.h"
 
-#ifndef MU_QT5_COMPAT
 Q_MOC_INCLUDE(< QWindow >)
-#endif
 
 class QQuickCloseEvent;
 
-namespace mu::uicomponents {
-class PopupView : public QObject, public QQmlParserStatus, async::Asyncable
+namespace muse::ui {
+class INavigationControl;
+}
+
+namespace muse::uicomponents {
+class PopupView : public QObject, public QQmlParserStatus, public Injectable, public async::Asyncable
 {
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
@@ -88,9 +89,10 @@ class PopupView : public QObject, public QQmlParserStatus, async::Asyncable
     Q_PROPERTY(bool alwaysOnTop READ alwaysOnTop WRITE setAlwaysOnTop NOTIFY alwaysOnTopChanged)
     Q_PROPERTY(QVariantMap ret READ ret WRITE setRet NOTIFY retChanged)
 
-    INJECT(ui::IMainWindow, mainWindow)
-    INJECT(ui::IUiConfiguration, uiConfiguration)
-    INJECT(ui::INavigationController, navigationController)
+public:
+    Inject<ui::IMainWindow> mainWindow = { this };
+    Inject<ui::IUiConfiguration> uiConfiguration = { this };
+    Inject<ui::INavigationController> navigationController= { this };
 
 public:
 
@@ -171,8 +173,8 @@ public slots:
     void setContentHeight(int contentHeight);
     void setLocalX(qreal x);
     void setLocalY(qreal y);
-    void setOpenPolicies(mu::uicomponents::PopupView::OpenPolicies openPolicies);
-    void setClosePolicies(mu::uicomponents::PopupView::ClosePolicies closePolicies);
+    void setOpenPolicies(muse::uicomponents::PopupView::OpenPolicies openPolicies);
+    void setClosePolicies(muse::uicomponents::PopupView::ClosePolicies closePolicies);
     void setNavigationParentControl(ui::INavigationControl* parentNavigationControl);
     void setObjectId(QString objectId);
     void setTitle(QString title);
@@ -198,8 +200,8 @@ signals:
     void windowChanged();
     void xChanged(qreal x);
     void yChanged(qreal y);
-    void openPoliciesChanged(mu::uicomponents::PopupView::OpenPolicies openPolicies);
-    void closePoliciesChanged(mu::uicomponents::PopupView::ClosePolicies closePolicies);
+    void openPoliciesChanged(muse::uicomponents::PopupView::OpenPolicies openPolicies);
+    void closePoliciesChanged(muse::uicomponents::PopupView::ClosePolicies closePolicies);
     void navigationParentControlChanged(ui::INavigationControl* navigationParentControl);
     void objectIdChanged(QString objectId);
     void titleChanged(QString title);
@@ -235,8 +237,9 @@ protected:
     void doFocusOut();
     void windowMoveEvent();
 
-    bool isMouseWithinBoundaries(const QPoint& mousePos) const;
+    bool isMouseWithinBoundaries(const QPointF& mousePos) const;
 
+    virtual void beforeOpen();
     void doOpen();
 
     QWindow* qWindow() const;
@@ -249,7 +252,7 @@ protected:
     virtual QScreen* resolveScreen() const;
     QRect currentScreenGeometry() const;
     virtual void updateGeometry();
-    void updateContentPosition();
+    virtual void updateContentPosition();
 
     virtual QRect viewGeometry() const;
 
@@ -297,4 +300,4 @@ protected:
 };
 }
 
-#endif // MU_UICOMPONENTS_POPUPVIEW_H
+#endif // MUSE_UICOMPONENTS_POPUPVIEW_H

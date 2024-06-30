@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_GLOBAL_AUDIOCONFIGURATIONMOCK_H
-#define MU_GLOBAL_AUDIOCONFIGURATIONMOCK_H
+#ifndef MUSE_AUDIO_AUDIOCONFIGURATIONMOCK_H
+#define MUSE_AUDIO_AUDIOCONFIGURATIONMOCK_H
 
 #include <gmock/gmock.h>
 
@@ -61,7 +61,9 @@ public:
     MOCK_METHOD(async::Channel<io::paths_t>, soundFontDirectoriesChanged, (), (const, override));
 
     MOCK_METHOD(io::path_t, knownAudioPluginsFilePath, (), (const, override));
+
+    MOCK_METHOD(bool, shouldMeasureInputLag, (), (const, override));
 };
 }
 
-#endif // MU_GLOBAL_AUDIOCONFIGURATIONMOCK_H
+#endif // MUSE_AUDIO_AUDIOCONFIGURATIONMOCK_H

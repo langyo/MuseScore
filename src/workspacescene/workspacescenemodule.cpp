@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -28,8 +28,9 @@
 #include "view/workspacelistmodel.h"
 #include "view/newworkspacemodel.h"
 
-using namespace mu::workspace;
-using namespace mu::modularity;
+using namespace mu::workspacescene;
+using namespace muse;
+using namespace muse::modularity;
 
 static void workspacescene_init_qrc()
 {
@@ -43,10 +44,10 @@ std::string WorkspaceSceneModule::moduleName() const
 
 void WorkspaceSceneModule::resolveImports()
 {
-    auto ir = ioc()->resolve<ui::IInteractiveUriRegister>(moduleName());
+    auto ir = ioc()->resolve<muse::ui::IInteractiveUriRegister>(moduleName());
     if (ir) {
-        ir->registerQmlUri(Uri("musescore://workspace/select"), "MuseScore/Workspace/WorkspacesDialog.qml");
-        ir->registerQmlUri(Uri("musescore://workspace/create"), "MuseScore/Workspace/NewWorkspaceDialog.qml");
+        ir->registerQmlUri(Uri("muse://workspace/select"), "MuseScore/Workspace/WorkspacesDialog.qml");
+        ir->registerQmlUri(Uri("muse://workspace/create"), "MuseScore/Workspace/NewWorkspaceDialog.qml");
     }
 }
 

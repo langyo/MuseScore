@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -61,9 +61,9 @@ void ScoreLayout::layoutRange(Score* score, const Fraction& st, const Fraction& 
     // Check empty score
     if (!score->last() || (ctx.conf().isLinearMode() && !score->firstMeasure())) {
         LOGD() << "empty score";
-        DeleteAll(score->systems());
+        muse::DeleteAll(score->systems());
         score->systems().clear();
-        DeleteAll(score->pages());
+        muse::DeleteAll(score->pages());
         score->pages().clear();
         PageLayout::getNextPage(ctx);
         return;

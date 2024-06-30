@@ -30,8 +30,8 @@
 
 #include "log.h"
 
-using namespace mu::ui;
-using namespace mu::workspace;
+using namespace muse::ui;
+using namespace muse::workspace;
 
 void UiArrangement::load()
 {
@@ -68,7 +68,7 @@ void UiArrangement::updateData(DataKey key, QJsonObject& obj, Notifications& not
     }
 }
 
-void UiArrangement::saveData(workspace::DataKey key, const QJsonObject& obj)
+void UiArrangement::saveData(DataKey key, const QJsonObject& obj)
 {
     QByteArray data = QJsonDocument(obj).toJson();
 
@@ -90,7 +90,7 @@ void UiArrangement::setValue(const QString& key, const QString& val)
     }
 }
 
-mu::async::Notification UiArrangement::valueChanged(const QString& key) const
+muse::async::Notification UiArrangement::valueChanged(const QString& key) const
 {
     return m_valuesNotifications[key];
 }
@@ -111,7 +111,7 @@ void UiArrangement::setState(const QString& key, const QByteArray& data)
     }
 }
 
-mu::async::Notification UiArrangement::stateChanged(const QString& key) const
+muse::async::Notification UiArrangement::stateChanged(const QString& key) const
 {
     return m_statesNotifications[key];
 }
@@ -164,7 +164,7 @@ void UiArrangement::setToolConfig(const QString& toolName, const ToolConfig& con
     }
 }
 
-mu::async::Notification UiArrangement::toolConfigChanged(const QString& toolName) const
+muse::async::Notification UiArrangement::toolConfigChanged(const QString& toolName) const
 {
     return m_toolconfigsNotifications[toolName];
 }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -29,7 +29,8 @@
 
 using namespace mu;
 using namespace mu::palette;
-using namespace mu::ui;
+using namespace muse;
+using namespace muse::ui;
 
 static const std::string MODULE_NAME("palette");
 static const Settings::Key PALETTE_SCALE(MODULE_NAME, "application/paletteScale");
@@ -39,12 +40,10 @@ static const Settings::Key IS_SINGLE_CLICK_TO_OPEN_PALETTE(MODULE_NAME, "applica
 void PaletteConfiguration::init()
 {
     settings()->setDefaultValue(PALETTE_SCALE, Val(1.0));
-    settings()->setDescription(PALETTE_SCALE, qtrc("palette", "Palette scale").toStdString());
+    settings()->setDescription(PALETTE_SCALE, muse::qtrc("palette", "Palette scale").toStdString());
     settings()->setCanBeManuallyEdited(PALETTE_SCALE, true, Val(0.5), Val(5.0));
 
     settings()->setDefaultValue(PALETTE_USE_SINGLE, Val(false));
-    settings()->setDescription(PALETTE_USE_SINGLE, qtrc("palette", "Open only one palette at a time").toStdString());
-    settings()->setCanBeManuallyEdited(PALETTE_USE_SINGLE, true);
 
     m_isSinglePalette.val = settings()->value(PALETTE_USE_SINGLE).toBool();
     settings()->valueChanged(PALETTE_USE_SINGLE).onReceive(this, [this](const Val& newValue) {
@@ -52,8 +51,6 @@ void PaletteConfiguration::init()
     });
 
     settings()->setDefaultValue(IS_SINGLE_CLICK_TO_OPEN_PALETTE, Val(true));
-    settings()->setDescription(IS_SINGLE_CLICK_TO_OPEN_PALETTE, qtrc("palette", "Single-click to open a palette").toStdString());
-    settings()->setCanBeManuallyEdited(IS_SINGLE_CLICK_TO_OPEN_PALETTE, true);
 
     m_isSingleClickToOpenPalette.val = settings()->value(IS_SINGLE_CLICK_TO_OPEN_PALETTE).toBool();
     settings()->valueChanged(IS_SINGLE_CLICK_TO_OPEN_PALETTE).onReceive(this, [this](const Val& newValue) {
@@ -80,7 +77,7 @@ double PaletteConfiguration::paletteSpatium() const
     return PALETTE_SPATIUM;
 }
 
-mu::ValCh<bool> PaletteConfiguration::isSinglePalette() const
+ValCh<bool> PaletteConfiguration::isSinglePalette() const
 {
     return m_isSinglePalette;
 }
@@ -90,7 +87,7 @@ void PaletteConfiguration::setIsSinglePalette(bool isSingle)
     settings()->setSharedValue(PALETTE_USE_SINGLE, Val(isSingle));
 }
 
-mu::ValCh<bool> PaletteConfiguration::isSingleClickToOpenPalette() const
+ValCh<bool> PaletteConfiguration::isSingleClickToOpenPalette() const
 {
     return m_isSingleClickToOpenPalette;
 }
@@ -125,17 +122,17 @@ QColor PaletteConfiguration::themeColor(ThemeStyleKey key) const
     return uiConfiguration()->currentTheme().values[key].toString();
 }
 
-mu::async::Notification PaletteConfiguration::colorsChanged() const
+muse::async::Notification PaletteConfiguration::colorsChanged() const
 {
     return uiConfiguration()->currentThemeChanged();
 }
 
-mu::io::path_t PaletteConfiguration::keySignaturesDirPath() const
+muse::io::path_t PaletteConfiguration::keySignaturesDirPath() const
 {
     return globalConfiguration()->userAppDataPath() + "/keysigs";
 }
 
-mu::io::path_t PaletteConfiguration::timeSignaturesDirPath() const
+muse::io::path_t PaletteConfiguration::timeSignaturesDirPath() const
 {
     return globalConfiguration()->userAppDataPath() + "/timesigs";
 }
@@ -150,7 +147,7 @@ bool PaletteConfiguration::enableExperimental() const
     return globalConfiguration()->enableExperimental();
 }
 
-mu::ValCh<PaletteConfiguration::PaletteConfig> PaletteConfiguration::paletteConfig(const QString& paletteId) const
+ValCh<PaletteConfiguration::PaletteConfig> PaletteConfiguration::paletteConfig(const QString& paletteId) const
 {
     if (!m_paletteConfigs.contains(paletteId)) {
         m_paletteConfigs[paletteId] = ValCh<PaletteConfig>();
@@ -164,7 +161,7 @@ void PaletteConfiguration::setPaletteConfig(const QString& paletteId, const Pale
     m_paletteConfigs[paletteId].set(config);
 }
 
-mu::ValCh<PaletteConfiguration::PaletteCellConfig> PaletteConfiguration::paletteCellConfig(const QString& cellId) const
+ValCh<PaletteConfiguration::PaletteCellConfig> PaletteConfiguration::paletteCellConfig(const QString& cellId) const
 {
     if (!m_paletteCellsConfigs.contains(cellId)) {
         m_paletteCellsConfigs[cellId] = ValCh<PaletteCellConfig>();

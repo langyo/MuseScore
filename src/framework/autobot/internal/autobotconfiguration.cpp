@@ -24,11 +24,12 @@
 #include <cstdlib>
 #include <QDir>
 
-using namespace mu::autobot;
+using namespace muse;
+using namespace muse::autobot;
 
-mu::io::paths_t AutobotConfiguration::scriptsDirPaths() const
+io::paths_t AutobotConfiguration::scriptsDirPaths() const
 {
-    io::path_t p = io::path_t(std::getenv("MU_AUTOBOT_SCRIPTS_PATH"));
+    io::path_t p = io::path_t(std::getenv("MUSE_AUTOBOT_SCRIPTS_PATH"));
     if (!p.empty()) {
         return { p };
     }
@@ -40,9 +41,9 @@ mu::io::paths_t AutobotConfiguration::scriptsDirPaths() const
     return paths;
 }
 
-mu::io::paths_t AutobotConfiguration::testingFilesDirPaths() const
+io::paths_t AutobotConfiguration::testingFilesDirPaths() const
 {
-    io::path_t p = io::path_t(std::getenv("MU_AUTOBOT_FILES_PATH"));
+    io::path_t p = io::path_t(std::getenv("MUSE_AUTOBOT_FILES_PATH"));
     if (!p.empty()) {
         return { p };
     }
@@ -54,9 +55,9 @@ mu::io::paths_t AutobotConfiguration::testingFilesDirPaths() const
     return paths;
 }
 
-mu::io::path_t AutobotConfiguration::dataPath() const
+io::path_t AutobotConfiguration::dataPath() const
 {
-    io::path_t p = io::path_t(std::getenv("MU_AUTOBOT_DATA_PATH"));
+    io::path_t p = io::path_t(std::getenv("MUSE_AUTOBOT_DATA_PATH"));
     if (!p.empty()) {
         return p;
     }
@@ -65,22 +66,22 @@ mu::io::path_t AutobotConfiguration::dataPath() const
     return p;
 }
 
-mu::io::path_t AutobotConfiguration::savingFilesPath() const
+io::path_t AutobotConfiguration::savingFilesPath() const
 {
     return dataPath() + "/saving_files";
 }
 
-mu::io::path_t AutobotConfiguration::reportsPath() const
+io::path_t AutobotConfiguration::reportsPath() const
 {
     return dataPath() + "/reports";
 }
 
-mu::io::path_t AutobotConfiguration::drawDataPath() const
+io::path_t AutobotConfiguration::drawDataPath() const
 {
     return dataPath() + "/draw_data";
 }
 
-mu::io::path_t AutobotConfiguration::fileDrawDataPath(const io::path_t& filePath) const
+io::path_t AutobotConfiguration::fileDrawDataPath(const io::path_t& filePath) const
 {
     return drawDataPath() + "/" + io::completeBasename(filePath) + ".json";
 }

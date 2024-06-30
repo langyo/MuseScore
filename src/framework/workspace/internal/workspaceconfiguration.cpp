@@ -25,10 +25,10 @@
 
 #include "workspacetypes.h"
 
-using namespace mu;
-using namespace mu::workspace;
+using namespace muse;
+using namespace muse::workspace;
 
-static const Settings::Key CURRENT_WORKSPACE("workspace", "workspace");
+static const muse::Settings::Key CURRENT_WORKSPACE("workspace", "workspace");
 
 void WorkspaceConfiguration::init()
 {

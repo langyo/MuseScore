@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -45,6 +45,7 @@
 
 #include "log.h"
 
+using namespace muse;
 using namespace muse::draw;
 using namespace mu::notation;
 using namespace mu::engraving::rendering::dev;
@@ -330,10 +331,10 @@ void ContinuousPanel::paint(Painter& painter, const NotationViewContext& ctx)
     newElement->setFamily(u"FreeSans");
     newElement->setSizeIsSpatiumDependent(true);
     newElement->setColor(color);
-    EngravingItem::renderer()->layoutText1(newElement);
+    newElement->renderer()->layoutText1(newElement);
     pos = PointF(styleMM(mu::engraving::Sid::clefLeftMargin) + widthClef, y + newElement->height());
     painter.translate(pos);
-    EngravingItem::renderer()->drawItem(newElement, &painter);
+    newElement->renderer()->drawItem(newElement, &painter);
 
     pos += PointF(offsetPanel, 0);
     painter.translate(-pos);
@@ -378,7 +379,7 @@ void ContinuousPanel::paint(Painter& painter, const NotationViewContext& ctx)
             barLine->setSpanTo(currentStaff->barLineTo());
             scoreRender()->layoutItem(barLine);
             barLine->setColor(color);
-            EngravingItem::renderer()->drawItem(barLine, &painter);
+            barLine->renderer()->drawItem(barLine, &painter);
 
             // Draw the current staff name
             const std::list<mu::engraving::StaffName>& staffNamesLong
@@ -406,7 +407,7 @@ void ContinuousPanel::paint(Painter& painter, const NotationViewContext& ctx)
                 const double spatium2 = score->style().spatium();
                 pos = PointF(styleMM(mu::engraving::Sid::clefLeftMargin) + widthClef, -spatium2 * 2);
                 painter.translate(pos);
-                EngravingItem::renderer()->drawItem(newName, &painter);
+                newName->renderer()->drawItem(newName, &painter);
 
                 painter.translate(-pos);
             }

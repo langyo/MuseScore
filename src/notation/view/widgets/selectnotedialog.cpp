@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -44,14 +44,14 @@
 
 using namespace mu::notation;
 using namespace mu::engraving;
-using namespace mu::ui;
+using namespace muse::ui;
 
 //---------------------------------------------------------
 //   SelectDialog
 //---------------------------------------------------------
 
 SelectNoteDialog::SelectNoteDialog(QWidget* parent)
-    : QDialog(parent)
+    : QDialog(parent), muse::Injectable(muse::iocCtxForQWidget(this))
 {
     setObjectName("SelectNoteDialog");
     setupUi(this);
@@ -79,7 +79,7 @@ SelectNoteDialog::SelectNoteDialog(QWidget* parent)
     //: "quarter note" and "quarter" (for example), or if the translations for the
     //: durations as separate strings are not suitable to be used as adjectives here,
     //: translate this string with "%1", so that just the duration will be shown.
-    durationType->setText(qtrc("notation", "%1 note").arg(TConv::translatedUserName(m_note->chord()->durationType().type())));
+    durationType->setText(muse::qtrc("notation", "%1 note").arg(TConv::translatedUserName(m_note->chord()->durationType().type())));
     sameDurationType->setAccessibleName(sameDurationType->text() + durationType->text());
 
     durationTicks->setText(m_note->chord()->durationUserName());
@@ -99,14 +99,6 @@ SelectNoteDialog::SelectNoteDialog(QWidget* parent)
     //! NOTE: It is necessary for the correct start of navigation in the dialog
     setFocus();
 }
-
-#ifdef MU_QT5_COMPAT
-SelectNoteDialog::SelectNoteDialog(const SelectNoteDialog& other)
-    : QDialog(other.parentWidget())
-{
-}
-
-#endif
 
 FilterNotesOptions SelectNoteDialog::noteOptions() const
 {

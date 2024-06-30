@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -46,10 +46,10 @@ public:
     QString name() const override;
     void setName(const QString& name) override;
     void undoSetName(const QString& name) override;
-    async::Notification nameChanged() const override;
+    muse::async::Notification nameChanged() const override;
 
     bool hasFileName() const override;
-    const String& fileName() const override;
+    const muse::String& fileName() const override;
 
     INotationPtr notation() override;
     IExcerptNotationPtr clone() const override;

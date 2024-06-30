@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -28,7 +28,7 @@
 #include "engraving/dom/undo.h"
 
 using namespace mu::notation;
-using namespace mu::async;
+using namespace muse::async;
 
 NotationUndoStack::NotationUndoStack(IGetScore* getScore, Notification notationChanged)
     : m_getScore(getScore), m_notationChanged(notationChanged)
@@ -162,15 +162,15 @@ bool NotationUndoStack::isLocked() const
     return undoStack()->locked();
 }
 
-mu::async::Notification NotationUndoStack::stackChanged() const
+muse::async::Notification NotationUndoStack::stackChanged() const
 {
     return m_stackStateChanged;
 }
 
-mu::async::Channel<ChangesRange> NotationUndoStack::changesChannel() const
+muse::async::Channel<ChangesRange> NotationUndoStack::changesChannel() const
 {
     IF_ASSERT_FAILED(score()) {
-        return async::Channel<ChangesRange>();
+        return muse::async::Channel<ChangesRange>();
     }
 
     return score()->changesChannel();

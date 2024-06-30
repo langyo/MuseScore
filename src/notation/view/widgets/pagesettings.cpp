@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -33,7 +33,7 @@
 #include "ui/view/widgetstatestore.h"
 
 using namespace mu::notation;
-using namespace mu::ui;
+using namespace muse::ui;
 using namespace mu::engraving;
 
 PageSettings::PageSettings(QWidget* parent)
@@ -67,42 +67,34 @@ PageSettings::PageSettings(QWidget* parent)
     connect(landscapeButton, &QRadioButton::clicked, this, &PageSettings::orientationClicked);
     connect(twosided,        &QCheckBox::toggled,    this, &PageSettings::twosidedToggled);
 
-    connect(pageHeight,           QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+    connect(pageHeight,           &QDoubleSpinBox::valueChanged,
             this,                 &PageSettings::pageHeightChanged);
-    connect(pageWidth,            QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+    connect(pageWidth,            &QDoubleSpinBox::valueChanged,
             this,                 &PageSettings::pageWidthChanged);
-    connect(oddPageTopMargin,     QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+    connect(oddPageTopMargin,     &QDoubleSpinBox::valueChanged,
             this,                 &PageSettings::otmChanged);
-    connect(oddPageBottomMargin,  QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+    connect(oddPageBottomMargin,  &QDoubleSpinBox::valueChanged,
             this,                 &PageSettings::obmChanged);
-    connect(oddPageLeftMargin,    QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+    connect(oddPageLeftMargin,    &QDoubleSpinBox::valueChanged,
             this,                 &PageSettings::olmChanged);
-    connect(oddPageRightMargin,   QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+    connect(oddPageRightMargin,   &QDoubleSpinBox::valueChanged,
             this,                 &PageSettings::ormChanged);
-    connect(evenPageTopMargin,    QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+    connect(evenPageTopMargin,    &QDoubleSpinBox::valueChanged,
             this,                 &PageSettings::etmChanged);
-    connect(evenPageBottomMargin, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+    connect(evenPageBottomMargin, &QDoubleSpinBox::valueChanged,
             this,                 &PageSettings::ebmChanged);
-    connect(evenPageRightMargin,  QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+    connect(evenPageRightMargin,  &QDoubleSpinBox::valueChanged,
             this,                 &PageSettings::ermChanged);
-    connect(evenPageLeftMargin,   QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+    connect(evenPageLeftMargin,   &QDoubleSpinBox::valueChanged,
             this,                 &PageSettings::elmChanged);
-    connect(spatiumEntry,         QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+    connect(spatiumEntry,         &QDoubleSpinBox::valueChanged,
             this,                 &PageSettings::spatiumChanged);
 
-    connect(pageGroup,            QOverload<int>::of(&QComboBox::activated),
+    connect(pageGroup,            &QComboBox::activated,
             this, &PageSettings::pageFormatSelected);
-    connect(pageOffsetEntry,      QOverload<int>::of(&QSpinBox::valueChanged),
+    connect(pageOffsetEntry,      &QSpinBox::valueChanged,
             this, &PageSettings::pageOffsetChanged);
 }
-
-#ifdef MU_QT5_COMPAT
-PageSettings::PageSettings(const PageSettings& other)
-    : QDialog(other.parentWidget())
-{
-}
-
-#endif
 
 void PageSettings::showEvent(QShowEvent* event)
 {

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -289,7 +289,7 @@ enum class ElementType {
     STAFF_STATE           = int(mu::engraving::ElementType::STAFF_STATE),
     NOTEHEAD              = int(mu::engraving::ElementType::NOTEHEAD),
     NOTEDOT               = int(mu::engraving::ElementType::NOTEDOT),
-    TREMOLO               = int(mu::engraving::ElementType::TREMOLO), // deprecated
+    TREMOLO               = int(mu::engraving::ElementType::INVALID), // deprecated
     TREMOLO_SINGLECHORD   = int(mu::engraving::ElementType::TREMOLO_SINGLECHORD),
     TREMOLO_TWOCHORD      = int(mu::engraving::ElementType::TREMOLO_TWOCHORD),
     IMAGE                 = int(mu::engraving::ElementType::IMAGE),
@@ -1118,8 +1118,8 @@ enum class SymId {
     analyticsTheme = int(mu::engraving::SymId::analyticsTheme),
     analyticsTheme1 = int(mu::engraving::SymId::analyticsTheme1),
     analyticsThemeInversion = int(mu::engraving::SymId::analyticsThemeInversion),
-    analyticsThemeRetrograde = int(mu::engraving::SymId::analyticsThemeRetrograde),
-    analyticsThemeRetrogradeInversion = int(mu::engraving::SymId::analyticsThemeRetrogradeInversion),
+    analyticsThemerograde = int(mu::engraving::SymId::analyticsThemerograde),
+    analyticsThemerogradeInversion = int(mu::engraving::SymId::analyticsThemerogradeInversion),
     arpeggiato = int(mu::engraving::SymId::arpeggiato),
     arpeggiatoDown = int(mu::engraving::SymId::arpeggiatoDown),
     arpeggiatoUp = int(mu::engraving::SymId::arpeggiatoUp),

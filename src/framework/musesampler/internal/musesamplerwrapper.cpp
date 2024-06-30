@@ -26,9 +26,9 @@
 
 #include "realfn.h"
 
-using namespace mu;
+using namespace muse;
 using namespace muse::audio;
-using namespace mu::musesampler;
+using namespace muse::musesampler;
 
 static constexpr int AUDIO_CHANNELS_COUNT = 2;
 
@@ -40,8 +40,6 @@ MuseSamplerWrapper::MuseSamplerWrapper(MuseSamplerLibHandlerPtr samplerLib,
     if (!m_samplerLib || !m_samplerLib->isValid()) {
         return;
     }
-
-    m_samplerLib->initLib();
 
     m_sequencer.setOnOffStreamFlushed([this]() {
         revokePlayingNotes();
@@ -178,7 +176,7 @@ void MuseSamplerWrapper::setupSound(const mpe::PlaybackSetupData& setupData)
         }
     }
 
-    m_sequencer.init(m_samplerLib, m_sampler, shared_from_this(), resolveDefaultPresetCode(m_instrument));
+    m_sequencer.init(m_samplerLib, m_sampler, this, resolveDefaultPresetCode(m_instrument));
 }
 
 void MuseSamplerWrapper::setupEvents(const mpe::PlaybackData& playbackData)
@@ -212,10 +210,6 @@ ms_Track MuseSamplerWrapper::addTrack()
     TRACEFUNC;
 
     IF_ASSERT_FAILED(m_samplerLib && m_sampler) {
-        return nullptr;
-    }
-
-    if (!m_samplerLib->supportsMultipleTracks() && !m_tracks.empty()) {
         return nullptr;
     }
 
@@ -258,12 +252,9 @@ void MuseSamplerWrapper::setIsActive(bool arg)
 
     m_samplerLib->setPlaying(m_sampler, arg);
 
-    if (!isActive()) {
-        //! NOTE: restore the current position because setPlaying(m_sampler, false) resets it
+    if (arg) {
         m_samplerLib->setPosition(m_sampler, m_currentPosition);
     }
-
-    LOGD() << "Toggled playing status, isPlaying: " << arg;
 }
 
 InstrumentInfo MuseSamplerWrapper::resolveInstrument(const mpe::PlaybackSetupData& setupData) const
@@ -358,9 +349,10 @@ void MuseSamplerWrapper::setCurrentPosition(const samples_t samples)
     }
 
     m_currentPosition = samples;
-    m_samplerLib->setPosition(m_sampler, m_currentPosition);
 
-    LOGD() << "Seek a new playback position, newPosition: " << m_currentPosition;
+    if (isActive()) {
+        m_samplerLib->setPosition(m_sampler, m_currentPosition);
+    }
 }
 
 void MuseSamplerWrapper::extractOutputSamples(samples_t samples, float* output)

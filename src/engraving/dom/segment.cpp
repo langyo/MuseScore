@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -234,7 +234,7 @@ Segment::~Segment()
         delete e;
     }
 
-    DeleteAll(m_annotations);
+    muse::DeleteAll(m_annotations);
 }
 
 #ifndef ENGRAVING_NO_ACCESSIBILITY
@@ -515,6 +515,42 @@ Segment* Segment::prev1MM(SegmentType types) const
     return 0;
 }
 
+Segment* Segment::nextActive() const
+{
+    Segment* ns = next();
+    while (ns && !ns->isActive()) {
+        ns = ns->next();
+    }
+    return ns;
+}
+
+Segment* Segment::nextEnabled() const
+{
+    Segment* ns = next();
+    while (ns && !ns->enabled()) {
+        ns = ns->next();
+    }
+    return ns;
+}
+
+Segment* Segment::prevActive() const
+{
+    Segment* ps = prev();
+    while (ps && !ps->isActive()) {
+        ps = ps->prev();
+    }
+    return ps;
+}
+
+Segment* Segment::prevEnabled() const
+{
+    Segment* ps = prev();
+    while (ps && !ps->enabled()) {
+        ps = ps->prev();
+    }
+    return ps;
+}
+
 //---------------------------------------------------------
 //   nextCR
 //    get next ChordRest Segment
@@ -532,7 +568,7 @@ Segment* Segment::nextCR(track_idx_t track, bool sameStaff) const
     }
     for (Segment* seg = next1(); seg; seg = seg->next1()) {
         if (seg->isChordRestType()) {
-            if (track == mu::nidx) {
+            if (track == muse::nidx) {
                 return seg;
             }
             for (track_idx_t t = strack; t < etrack; ++t) {
@@ -647,7 +683,7 @@ void Segment::add(EngravingItem* el)
     }
 
     track_idx_t track = el->track();
-    assert(track != mu::nidx);
+    assert(track != muse::nidx);
     assert(el->score() == score());
     assert(score()->nstaves() * VOICES == m_elist.size());
     // make sure offset is correct for staff
@@ -1253,6 +1289,13 @@ bool Segment::hasElements(track_idx_t minTrack, track_idx_t maxTrack) const
     return false;
 }
 
+bool Segment::hasElements(staff_idx_t staffIdx) const
+{
+    track_idx_t startTrack = staffIdx * VOICES;
+    track_idx_t endTrack = startTrack + VOICES - 1;
+    return hasElements(startTrack, endTrack);
+}
+
 //---------------------------------------------------------
 //   allElementsInvisible
 ///  return true if all elements in the segment are invisible
@@ -1260,6 +1303,10 @@ bool Segment::hasElements(track_idx_t minTrack, track_idx_t maxTrack) const
 
 bool Segment::allElementsInvisible() const
 {
+    if (isType(SegmentType::TimeTick)) {
+        return true;
+    }
+
     if (isType(SegmentType::BarLineType | SegmentType::ChordRest)) {
         return false;
     }
@@ -1276,7 +1323,7 @@ bool Segment::allElementsInvisible() const
         track_idx_t endTrack = staffIdx * VOICES + VOICES;
         for (track_idx_t track = staffIdx * VOICES; track < endTrack; ++track) {
             EngravingItem* e = m_elist[track];
-            if (e && e->visible() && !RealIsEqual(e->width(), 0.0)) {
+            if (e && e->visible() && !muse::RealIsEqual(e->width(), 0.0)) {
                 return false;
             }
         }
@@ -1437,7 +1484,7 @@ RectF Segment::contentRect() const
 //   segment, or a barline if it spanns in the staff
 //---------------------------------------------------------
 
-EngravingItem* Segment::firstElement(staff_idx_t staff)
+EngravingItem* Segment::firstElementForNavigation(staff_idx_t staff)
 {
     if (isChordRestType()) {
         track_idx_t strack = staff * VOICES;
@@ -1461,7 +1508,7 @@ EngravingItem* Segment::firstElement(staff_idx_t staff)
 //   segment, or a barline if it spanns in the staff
 //---------------------------------------------------------
 
-EngravingItem* Segment::lastElement(staff_idx_t staff)
+EngravingItem* Segment::lastElementForNavigation(staff_idx_t staff)
 {
     if (segmentType() == SegmentType::ChordRest) {
         for (int voice = static_cast<int>(staff * VOICES + (VOICES - 1)); voice / static_cast<int>(VOICES) == static_cast<int>(staff);
@@ -1496,7 +1543,7 @@ EngravingItem* Segment::getElement(staff_idx_t staff)
 {
     segmentType();
     if (segmentType() == SegmentType::ChordRest) {
-        return firstElement(staff);
+        return firstElementForNavigation(staff);
     } else if (segmentType() & (SegmentType::EndBarLine | SegmentType::BarLine | SegmentType::StartRepeatBarLine)) {
         for (int i = static_cast<int>(staff); i >= 0; i--) {
             if (!element(i * VOICES)) {
@@ -1610,7 +1657,7 @@ EngravingItem* Segment::firstInNextSegments(staff_idx_t activeStaff)
             break;
         }
 
-        re = seg->firstElement(activeStaff);
+        re = seg->firstElementForNavigation(activeStaff);
     }
 
     if (re) {
@@ -2244,6 +2291,18 @@ EngravingItem* Segment::prevElement(staff_idx_t activeStaff)
     }
 }
 
+EngravingItem* Segment::firstElement(staff_idx_t staffIdx) const
+{
+    track_idx_t startTrack = staffIdx * VOICES;
+    track_idx_t endTrack = startTrack + VOICES;
+    for (track_idx_t track =  startTrack; track < endTrack; ++track) {
+        if (EngravingItem* item = m_elist[track]) {
+            return item;
+        }
+    }
+    return nullptr;
+}
+
 //--------------------------------------------------------
 //   lastInPrevSegments
 //   Searches for the previous segment that has elements on
@@ -2282,7 +2341,7 @@ EngravingItem* Segment::lastInPrevSegments(staff_idx_t activeStaff)
             //if (seg->segmentType() == SegmentType::EndBarLine)
             //      score()->inputState().setTrack((activeStaff - 1) * VOICES ); //correction
 
-            if ((re = seg->lastElement(activeStaff - 1)) != 0) {
+            if ((re = seg->lastElementForNavigation(activeStaff - 1)) != 0) {
                 return re;
             }
 
@@ -2315,7 +2374,7 @@ String Segment::accessibleExtraInfo() const
             }
         }
         if (!temp.isEmpty()) {
-            rez = rez + mtrc("engraving", "Annotations:") + temp;
+            rez = rez + muse::mtrc("engraving", "Annotations:") + temp;
         }
     }
 
@@ -2341,7 +2400,7 @@ String Segment::accessibleExtraInfo() const
         }
 
         if (s->tick() == tick()) {
-            startSpanners += u" " + mtrc("engraving", "Start of %1").arg(s->accessibleInfo());
+            startSpanners += u" " + muse::mtrc("engraving", "Start of %1").arg(s->accessibleInfo());
         }
 
         const Segment* seg = 0;
@@ -2356,7 +2415,7 @@ String Segment::accessibleExtraInfo() const
         }
 
         if (seg && s->tick2() == seg->tick()) {
-            endSpanners += u" " + mtrc("engraving", "End of %1").arg(s->accessibleInfo());
+            endSpanners += u" " + muse::mtrc("engraving", "End of %1").arg(s->accessibleInfo());
         }
     }
 
@@ -2399,7 +2458,7 @@ void Segment::createShape(staff_idx_t staffIdx)
         if (bl) {
             rendering::dev::LayoutContext lctx(score());
             RectF r = rendering::dev::TLayout::layoutRect(bl, lctx);
-            s.add(r.translated(bl->pos()), bl);
+            s.add(r.translated(bl->pos() + bl->staffOffset()), bl);
         }
         s.addHorizontalSpacing(bl, 0, 0);
         return;
@@ -2426,14 +2485,14 @@ void Segment::createShape(staff_idx_t staffIdx)
                 continue;
             }
             if (e->addToSkyline()) {
-                s.add(e->shape().translate(e->isClef() ? e->ldata()->pos() : e->pos()));
+                s.add(e->shape().translate((e->isClef() ? e->ldata()->pos() : e->pos()) + e->staffOffset()));
             }
             // Non-standard trills display a cue note that we must add to shape here
             if (e->isChord()) {
                 Ornament* orn = toChord(e)->findOrnament();
                 Chord* cueNoteChord = orn ? orn->cueNoteChord() : nullptr;
                 if (cueNoteChord && cueNoteChord->upNote()->visible()) {
-                    s.add(cueNoteChord->shape().translate(cueNoteChord->pos()));
+                    s.add(cueNoteChord->shape().translate(cueNoteChord->pos() + cueNoteChord->staffOffset()));
                 }
             }
         }
@@ -2476,7 +2535,7 @@ void Segment::createShape(staff_idx_t staffIdx)
                    && !e->isStringTunings()) {
             // annotations added here are candidates for collision detection
             // lyrics, ...
-            s.add(e->shape().translate(e->pos()));
+            s.add(e->shape().translate(e->pos() + e->staffOffset()));
         }
     }
 }
@@ -2493,7 +2552,7 @@ void Segment::addPreAppendedToShape()
             toGraceNotesGroup(item)->addToShape();
         } else {
             Shape& shape = m_shapes[item->vStaffIdx()];
-            shape.add(item->shape().translate(item->pos()));
+            shape.add(item->shape().translate(item->pos() + item->staffOffset()));
         }
     }
 }
@@ -2540,16 +2599,17 @@ double Segment::spacing() const
     return m_spacing;
 }
 
-bool Segment::canWriteSpannerStartEnd(track_idx_t track) const
+bool Segment::canWriteSpannerStartEnd(track_idx_t track, const Spanner* spanner) const
 {
-    if (isChordRestType() && elementAt(track)) {
+    staff_idx_t staffIdx = track2staff(track);
+    if (isChordRestType() && (elementAt(track) || (!spanner->isVoiceSpecific() && hasElements(staffIdx)))) {
         return true;
     }
 
     if (isTimeTickType()) {
         Segment* crSegAtSameTick
             = score()->tick2segment(tick(), true, SegmentType::ChordRest, style().styleB(Sid::createMultiMeasureRests));
-        if (!crSegAtSameTick || !crSegAtSameTick->elementAt(track)) {
+        if (!crSegAtSameTick || !crSegAtSameTick->canWriteSpannerStartEnd(track, spanner)) {
             return true;
         }
     }
@@ -2568,18 +2628,18 @@ double Segment::elementsTopOffsetFromSkyline(staff_idx_t staffIndex) const
 
     SkylineLine north = staffSystem->skyline().north();
     int topOffset = INT_MAX;
-    for (SkylineSegment segment: north) {
+    for (const ShapeElement& element : north.elements()) {
         Segment* seg = prev1enabled();
         if (!seg) {
             continue;
         }
-        bool ok = seg->pagePos().x() <= segment.x && segment.x <= pagePos().x();
+        bool ok = seg->pagePos().x() <= element.left() && element.left() <= pagePos().x();
         if (!ok) {
             continue;
         }
 
-        if (segment.y < topOffset) {
-            topOffset = segment.y;
+        if (element.top() < topOffset) {
+            topOffset = element.top();
         }
     }
 
@@ -2601,18 +2661,18 @@ double Segment::elementsBottomOffsetFromSkyline(staff_idx_t staffIndex) const
 
     SkylineLine south = staffSystem->skyline().south();
     int bottomOffset = INT_MIN;
-    for (SkylineSegment segment: south) {
+    for (const ShapeElement& element : south.elements()) {
         Segment* seg = prev1enabled();
         if (!seg) {
             continue;
         }
-        bool ok = seg->pagePos().x() <= segment.x && segment.x <= pagePos().x();
+        bool ok = seg->pagePos().x() <= element.left() && element.left() <= pagePos().x();
         if (!ok) {
             continue;
         }
 
-        if (segment.y > bottomOffset) {
-            bottomOffset = segment.y;
+        if (element.bottom() > bottomOffset) {
+            bottomOffset = element.bottom();
         }
     }
 
@@ -2742,7 +2802,7 @@ void Segment::computeCrossBeamType(Segment* nextSeg)
 
 void Segment::stretchSegmentsToWidth(std::vector<Spring>& springs, double width)
 {
-    if (springs.empty() || RealIsEqualOrLess(width, 0.0)) {
+    if (springs.empty() || muse::RealIsEqualOrLess(width, 0.0)) {
         return;
     }
 
@@ -2786,12 +2846,12 @@ double Segment::computeDurationStretch(const Segment* prevSeg, Fraction minTicks
         static constexpr double maxRatio = 32.0;
         double dMinTicks = minTicks.toDouble();
         double dMaxTicks = maxTicks.toDouble();
-        double maxSysRatio = dMaxTicks / dMinTicks;
-        if (RealIsEqualOrMore(dMaxTicks / dMinTicks, 2.0) && dMinTicks < longNoteThreshold) {
+        if (muse::RealIsEqualOrMore(dMaxTicks / dMinTicks, 2.0) && dMinTicks < longNoteThreshold) {
             /* HACK: we trick the system to ignore the shortest note and use the "next"
              * shortest. For example, if the shortest is a 32nd, we make it a 16th. */
             dMinTicks *= 2.0;
         }
+        double maxSysRatio = dMaxTicks / dMinTicks;
         double ratio = curTicks.toDouble() / dMinTicks;
         if (maxSysRatio > maxRatio) {
             double A = (dMinTicks * (maxRatio - 1)) / (dMaxTicks - dMinTicks);

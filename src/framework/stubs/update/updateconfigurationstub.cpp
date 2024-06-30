@@ -21,7 +21,7 @@
  */
 #include "updateconfigurationstub.h"
 
-using namespace mu::update;
+using namespace muse::update;
 
 bool UpdateConfigurationStub::isAppUpdatable() const
 {
@@ -51,23 +51,37 @@ std::string UpdateConfigurationStub::skippedReleaseVersion() const
     return "";
 }
 
-void UpdateConfigurationStub::setSkippedReleaseVersion(const std::string&) const
+void UpdateConfigurationStub::setSkippedReleaseVersion(const std::string&)
 {
 }
 
-std::string UpdateConfigurationStub::previousReleasesNotesUrl() const
+std::string UpdateConfigurationStub::lastShownMuseSoundsReleaseVersion() const
 {
     return "";
 }
 
-std::string UpdateConfigurationStub::checkForUpdateUrl() const
+void UpdateConfigurationStub::setLastShownMuseSoundsReleaseVersion(const std::string&)
+{
+}
+
+std::string UpdateConfigurationStub::checkForAppUpdateUrl() const
 {
     return "";
 }
 
-mu::network::RequestHeaders UpdateConfigurationStub::updateHeaders() const
+std::string UpdateConfigurationStub::previousAppReleasesNotesUrl() const
 {
-    return network::RequestHeaders();
+    return "";
+}
+
+std::string UpdateConfigurationStub::checkForMuseSamplerUpdateUrl() const
+{
+    return "";
+}
+
+muse::network::RequestHeaders UpdateConfigurationStub::updateHeaders() const
+{
+    return muse::network::RequestHeaders();
 }
 
 std::string UpdateConfigurationStub::museScoreUrl() const
@@ -80,7 +94,7 @@ std::string UpdateConfigurationStub::museScorePrivacyPolicyUrl() const
     return "";
 }
 
-mu::io::path_t UpdateConfigurationStub::updateDataPath() const
+muse::io::path_t UpdateConfigurationStub::updateDataPath() const
 {
     return "";
 }

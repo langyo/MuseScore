@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -32,14 +32,14 @@
 #include "../types/fraction.h"
 
 namespace mu::engraving {
-class XmlReader : public XmlStreamReader
+class XmlReader : public muse::XmlStreamReader
 {
 public:
 
     XmlReader() = default;
-    XmlReader(const mu::ByteArray& d)
+    XmlReader(const muse::ByteArray& d)
         : XmlStreamReader(d) {}
-    XmlReader(mu::io::IODevice* d)
+    XmlReader(muse::io::IODevice* d)
         : XmlStreamReader(d) {}
 
 #ifndef NO_QT_SUPPORT
@@ -62,7 +62,7 @@ public:
     SizeF readSize();
     ScaleF readScale();
     RectF readRect();
-    muse::draw::Color readColor();
+    Color readColor();
     Fraction readFraction();
     String readXml();
 

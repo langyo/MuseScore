@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -53,7 +53,7 @@ void Autoplace::autoplaceSegmentElement(const EngravingItem* item, EngravingItem
         staff_idx_t si = item->staffIdxOrNextVisible();
 
         // if there's no good staff for this object, obliterate it
-        ldata->setIsSkipDraw(si == mu::nidx);
+        ldata->setIsSkipDraw(si == muse::nidx);
         const_cast<EngravingItem*>(item)->setSelectable(!ldata->isSkipDraw());
         if (ldata->isSkipDraw()) {
             return;
@@ -75,10 +75,10 @@ void Autoplace::autoplaceSegmentElement(const EngravingItem* item, EngravingItem
         SkylineLine sk(!above);
         double d;
         if (above) {
-            sk.add(r.x(), r.bottom(), r.width());
+            sk.add(ShapeElement(r, item));
             d = sk.minDistance(ss->skyline().north());
         } else {
-            sk.add(r.x(), r.top(), r.width());
+            sk.add(ShapeElement(r, item));
             d = ss->skyline().south().minDistance(sk);
         }
 
@@ -99,7 +99,7 @@ void Autoplace::autoplaceSegmentElement(const EngravingItem* item, EngravingItem
             r.translate(PointF(0.0, yd));
         }
         if (add && item->addToSkyline()) {
-            ss->skyline().add(r);
+            ss->skyline().add(r, const_cast<EngravingItem*>(item));
         }
     }
     setOffsetChanged(item, ldata, false);
@@ -123,7 +123,7 @@ void Autoplace::autoplaceMeasureElement(const EngravingItem* item, EngravingItem
         staff_idx_t si = item->staffIdxOrNextVisible();
 
         // if there's no good staff for this object, obliterate it
-        ldata->setIsSkipDraw(si == mu::nidx);
+        ldata->setIsSkipDraw(si == muse::nidx);
         const_cast<EngravingItem*>(item)->setSelectable(!ldata->isSkipDraw());
         if (ldata->isSkipDraw()) {
             return;
@@ -196,7 +196,7 @@ void Autoplace::autoplaceSpannerSegment(const SpannerSegment* item, EngravingIte
         sl.add(sh.translated(item->pos()));
         double yd = 0.0;
         staff_idx_t stfIdx = item->systemFlag() ? item->staffIdxOrNextVisible() : item->staffIdx();
-        if (stfIdx == mu::nidx) {
+        if (stfIdx == muse::nidx) {
             ldata->setIsSkipDraw(true);
             return;
         } else {
@@ -378,10 +378,10 @@ void Autoplace::doAutoplace(const Articulation* item, Articulation::LayoutData* 
             bool above = item->up();
             SkylineLine sk(!above);
             if (above) {
-                sk.add(r.x(), r.bottom(), r.width());
+                sk.add(shapeEl);
                 d = sk.minDistance(ss->skyline().north());
             } else {
-                sk.add(r.x(), r.top(), r.width());
+                sk.add(shapeEl);
                 d = ss->skyline().south().minDistance(sk);
             }
 

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,16 +22,26 @@
 
 #include "notationtoolbarmodel.h"
 
+#include "uicomponents/view/toolbaritem.h"
+
 using namespace mu::notation;
-using namespace mu::uicomponents;
+using namespace muse::uicomponents;
 using namespace muse::actions;
 
 void NotationToolBarModel::load()
 {
-    MenuItemList items = {
-        makeItem("parts"),
-        makeItem("toggle-mixer")
+    muse::actions::ActionCodeList itemsCodes = {
+        "parts",
+        "toggle-mixer"
     };
+
+    ToolBarItemList items;
+    for (const ActionCode& code : itemsCodes) {
+        ToolBarItem* item = makeItem(code);
+        item->setShowTitle(true);
+
+        items << item;
+    }
 
     setItems(items);
 
@@ -39,16 +49,5 @@ void NotationToolBarModel::load()
         load();
     });
 
-    AbstractMenuModel::load();
-}
-
-MenuItem* NotationToolBarModel::makeItem(const ActionCode& actionCode)
-{
-    MenuItem* item = new MenuItem(actionsRegister()->action(actionCode), this);
-
-    ui::UiActionState state;
-    state.enabled = context()->currentNotation() != nullptr;
-    item->setState(state);
-
-    return item;
+    AbstractToolBarModel::load();
 }

@@ -19,21 +19,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_UI_INTERACTIVEURIREGISTER_H
-#define MU_UI_INTERACTIVEURIREGISTER_H
+#ifndef MUSE_UI_INTERACTIVEURIREGISTER_H
+#define MUSE_UI_INTERACTIVEURIREGISTER_H
 
 #include "iinteractiveuriregister.h"
 
 template<>
-struct std::hash<mu::Uri>
+struct std::hash<muse::Uri>
 {
-    std::size_t operator()(const mu::Uri& uri) const noexcept
+    std::size_t operator()(const muse::Uri& uri) const noexcept
     {
         return std::hash<std::string> {}(uri.toString());
     }
 };
 
-namespace mu::ui {
+namespace muse::ui {
 class InteractiveUriRegister : public IInteractiveUriRegister
 {
 public:
@@ -45,4 +45,4 @@ private:
 };
 }
 
-#endif // MU_UI_INTERACTIVEURIREGISTER_H
+#endif // MUSE_UI_INTERACTIVEURIREGISTER_H

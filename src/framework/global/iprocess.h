@@ -19,18 +19,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_GLOBAL_IPROCESS_H
-#define MU_GLOBAL_IPROCESS_H
+#ifndef MUSE_GLOBAL_IPROCESS_H
+#define MUSE_GLOBAL_IPROCESS_H
 
 #include <string>
 #include <vector>
 
 #include "modularity/imoduleinterface.h"
 
-namespace mu {
+namespace muse {
 class IProcess : MODULE_EXPORT_INTERFACE
 {
-    INTERFACE_ID(mu::IProcess)
+    INTERFACE_ID(muse::IProcess)
 
 public:
     virtual ~IProcess() = default;
@@ -40,4 +40,4 @@ public:
 };
 }
 
-#endif // MU_GLOBAL_IPROCESS_H
+#endif // MUSE_GLOBAL_IPROCESS_H

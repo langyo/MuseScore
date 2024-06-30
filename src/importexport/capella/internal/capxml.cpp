@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -1306,13 +1306,13 @@ void convertCapella(Score* score, Capella* cap, bool capxMode);
 Err importCapXml(MasterScore* score, const QString& name)
 {
     LOGD("importCapXml(score %p, name %s)", score, qPrintable(name));
-    ZipReader uz(name);
+    muse::ZipReader uz(name);
     if (!uz.exists()) {
         LOGD("importCapXml: <%s> not found", qPrintable(name));
         return Err::FileNotFound;
     }
 
-    ByteArray dbuf = uz.fileData("score.xml");
+    muse::ByteArray dbuf = uz.fileData("score.xml");
     XmlReader e(dbuf);
     e.setDocName(name);
     Capella cf;

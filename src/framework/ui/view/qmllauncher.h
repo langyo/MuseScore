@@ -19,27 +19,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_UI_QMLLAUNCHER_H
-#define MU_UI_QMLLAUNCHER_H
+#ifndef MUSE_UI_QMLLAUNCHER_H
+#define MUSE_UI_QMLLAUNCHER_H
 
 #include <QObject>
 
 #include "modularity/ioc.h"
 #include "iinteractive.h"
 
-namespace mu::ui {
-class QmlLauncher : public QObject
+namespace muse::ui {
+class QmlLauncher : public QObject, public Injectable
 {
     Q_OBJECT
 
-    INJECT(IInteractive, interactive)
+    Inject<IInteractive> interactive = { this };
 
 public:
-    QmlLauncher(QObject* parent);
+    QmlLauncher(QObject* parent, const modularity::ContextPtr& iocCtx);
 
     Q_INVOKABLE bool open(const QString& uri);
     Q_INVOKABLE bool openUrl(const QString& url);
 };
 }
 
-#endif // MU_UI_QMLLAUNCHER_H
+#endif // MUSE_UI_QMLLAUNCHER_H

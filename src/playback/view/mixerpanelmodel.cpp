@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -236,18 +236,18 @@ void MixerPanelModel::updateItemsPanelsOrder()
 {
     TRACEFUNC;
 
-    ui::NavigationPanel* previousPanel = nullptr;
+    muse::ui::NavigationPanel* previousPanel = nullptr;
     for (MixerChannelItem* item : m_mixerChannelList) {
-        disconnect(item->panel(), &ui::NavigationPanel::orderChanged, this, nullptr);
+        disconnect(item->panel(), &muse::ui::NavigationPanel::orderChanged, this, nullptr);
     }
 
     for (int i = 0; i < m_mixerChannelList.size(); i++) {
         m_mixerChannelList[i]->setPanelOrder(i);
 
         if (previousPanel) {
-            disconnect(previousPanel, &ui::NavigationPanel::orderChanged, this, nullptr);
+            disconnect(previousPanel, &muse::ui::NavigationPanel::orderChanged, this, nullptr);
 
-            connect(previousPanel, &ui::NavigationPanel::orderChanged, this, [this, i](int order){
+            connect(previousPanel, &muse::ui::NavigationPanel::orderChanged, this, [this, i](int order){
                 if (i < m_mixerChannelList.count()) {
                     m_mixerChannelList[i]->setPanelOrder(order + 1);
                 }
@@ -273,7 +273,7 @@ void MixerPanelModel::setupConnections()
         this, [this](const aux_channel_idx_t index,
                      notation::INotationSoloMuteState::SoloMuteState newSoloMuteState) {
         const IPlaybackController::AuxTrackIdMap& auxTrackIdMap = controller()->auxTrackIdMap();
-        TrackId trackId = mu::value(auxTrackIdMap, index);
+        TrackId trackId = muse::value(auxTrackIdMap, index);
 
         if (MixerChannelItem* item = findChannelItem(trackId)) {
             item->loadSoloMuteState(std::move(newSoloMuteState));
@@ -322,7 +322,7 @@ void MixerPanelModel::setupConnections()
 
     configuration()->isAuxChannelVisibleChanged().onReceive(this, [this](aux_channel_idx_t index, bool visible) {
         const auto& auxMap = controller()->auxTrackIdMap();
-        TrackId trackId = mu::value(auxMap, index);
+        TrackId trackId = muse::value(auxMap, index);
         if (visible) {
             int visibleAuxesOnRight = 0;
 
@@ -549,7 +549,7 @@ MixerChannelItem* MixerPanelModel::buildMasterChannelItem()
 {
     MixerChannelItem* item = new MixerChannelItem(this, MixerChannelItem::Type::Master, true /*outputOnly*/);
     item->setPanelSection(m_navigationSection);
-    item->setTitle(qtrc("playback", "Master"));
+    item->setTitle(muse::qtrc("playback", "Master"));
 
     playback()->audioOutput()->masterOutputParams()
     .onResolve(this, [this, item](AudioOutputParams outParams) {
@@ -645,12 +645,12 @@ INotationPartsPtr MixerPanelModel::masterNotationParts() const
     return currentProject() ? currentProject()->masterNotation()->parts() : nullptr;
 }
 
-mu::ui::NavigationSection* MixerPanelModel::navigationSection() const
+muse::ui::NavigationSection* MixerPanelModel::navigationSection() const
 {
     return m_navigationSection;
 }
 
-void MixerPanelModel::setNavigationSection(ui::NavigationSection* navigationSection)
+void MixerPanelModel::setNavigationSection(muse::ui::NavigationSection* navigationSection)
 {
     if (m_navigationSection == navigationSection) {
         return;

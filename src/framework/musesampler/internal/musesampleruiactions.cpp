@@ -25,15 +25,21 @@
 #include "shortcuts/shortcutcontext.h"
 #include "types/translatablestring.h"
 
-using namespace mu::ui;
+using namespace muse;
+using namespace muse::ui;
 using namespace muse::actions;
-using namespace mu::musesampler;
+using namespace muse::musesampler;
 
 const UiActionList MuseSamplerUiActions::m_actions = {
     UiAction("musesampler-check",
-             ui::UiCtxAny,
-             shortcuts::CTX_ANY,
+             muse::ui::UiCtxAny,
+             muse::shortcuts::CTX_ANY,
              TranslatableString("action", "Check Muse Sampler")
+             ),
+    UiAction("musesampler-reload",
+             muse::ui::UiCtxAny,
+             muse::shortcuts::CTX_ANY,
+             TranslatableString("action", "Reload Muse Sampler")
              )
 };
 
@@ -47,7 +53,7 @@ bool MuseSamplerUiActions::actionEnabled(const UiAction&) const
     return true;
 }
 
-mu::async::Channel<ActionCodeList> MuseSamplerUiActions::actionEnabledChanged() const
+async::Channel<ActionCodeList> MuseSamplerUiActions::actionEnabledChanged() const
 {
     static async::Channel<ActionCodeList> ch;
     return ch;
@@ -58,7 +64,7 @@ bool MuseSamplerUiActions::actionChecked(const UiAction&) const
     return false;
 }
 
-mu::async::Channel<ActionCodeList> MuseSamplerUiActions::actionCheckedChanged() const
+async::Channel<ActionCodeList> MuseSamplerUiActions::actionCheckedChanged() const
 {
     static async::Channel<ActionCodeList> ch;
     return ch;

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -158,53 +158,53 @@ QString SelectionFilterModel::titleForType(SelectionFilterType type) const
 {
     switch (type) {
     case SelectionFilterType::ALL:
-        return qtrc("notation", "All");
+        return muse::qtrc("notation", "All");
     case SelectionFilterType::FIRST_VOICE:
-        return qtrc("notation", "Voice %1").arg(1);
+        return muse::qtrc("notation", "Voice %1").arg(1);
     case SelectionFilterType::SECOND_VOICE:
-        return qtrc("notation", "Voice %1").arg(2);
+        return muse::qtrc("notation", "Voice %1").arg(2);
     case SelectionFilterType::THIRD_VOICE:
-        return qtrc("notation", "Voice %1").arg(3);
+        return muse::qtrc("notation", "Voice %1").arg(3);
     case SelectionFilterType::FOURTH_VOICE:
-        return qtrc("notation", "Voice %1").arg(4);
+        return muse::qtrc("notation", "Voice %1").arg(4);
     case SelectionFilterType::DYNAMIC:
-        return qtrc("notation", "Dynamics");
+        return muse::qtrc("notation", "Dynamics");
     case SelectionFilterType::HAIRPIN:
-        return qtrc("notation", "Hairpins");
+        return muse::qtrc("notation", "Hairpins");
     case SelectionFilterType::FINGERING:
-        return qtrc("notation", "Fingerings");
+        return muse::qtrc("notation", "Fingerings");
     case SelectionFilterType::LYRICS:
-        return qtrc("notation", "Lyrics");
+        return muse::qtrc("notation", "Lyrics");
     case SelectionFilterType::CHORD_SYMBOL:
-        return qtrc("notation", "Chord symbols");
+        return muse::qtrc("notation", "Chord symbols");
     case SelectionFilterType::OTHER_TEXT:
-        return qtrc("notation", "Other text");
+        return muse::qtrc("notation", "Other text");
     case SelectionFilterType::ARTICULATION:
-        return qtrc("notation", "Articulations");
+        return muse::qtrc("notation", "Articulations");
     case SelectionFilterType::ORNAMENT:
-        return qtrc("notation", "Ornaments");
+        return muse::qtrc("notation", "Ornaments");
     case SelectionFilterType::SLUR:
-        return qtrc("notation", "Slurs");
+        return muse::qtrc("notation", "Slurs");
     case SelectionFilterType::FIGURED_BASS:
-        return qtrc("notation", "Figured bass");
+        return muse::qtrc("notation", "Figured bass");
     case SelectionFilterType::OTTAVA:
-        return qtrc("notation", "Ottavas");
+        return muse::qtrc("notation", "Ottavas");
     case SelectionFilterType::PEDAL_LINE:
-        return qtrc("notation", "Pedal lines");
+        return muse::qtrc("notation", "Pedal lines");
     case SelectionFilterType::OTHER_LINE:
-        return qtrc("notation", "Other lines");
+        return muse::qtrc("notation", "Other lines");
     case SelectionFilterType::ARPEGGIO:
-        return qtrc("notation", "Arpeggios");
+        return muse::qtrc("notation", "Arpeggios");
     case SelectionFilterType::GLISSANDO:
-        return qtrc("notation", "Glissandos");
+        return muse::qtrc("notation", "Glissandos");
     case SelectionFilterType::FRET_DIAGRAM:
-        return qtrc("notation", "Fretboard diagrams");
+        return muse::qtrc("notation", "Fretboard diagrams");
     case SelectionFilterType::BREATH:
-        return qtrc("notation", "Breath marks");
+        return muse::qtrc("notation", "Breath marks");
     case SelectionFilterType::TREMOLO:
-        return qtrc("notation", "Tremolos");
+        return muse::qtrc("notation", "Tremolos");
     case SelectionFilterType::GRACE_NOTE:
-        return qtrc("notation", "Grace notes");
+        return muse::qtrc("notation", "Grace notes");
     case SelectionFilterType::NONE:
         break;
     }

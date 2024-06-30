@@ -23,7 +23,7 @@
 
 #include "log.h"
 
-using namespace mu::shortcuts;
+using namespace muse::shortcuts;
 using namespace muse::actions;
 
 void ShortcutsController::init()
@@ -60,8 +60,8 @@ static bool defaultHasLowerPriorityThan(const std::string& ctx1, const std::stri
         CTX_PROJECT_FOCUSED,
     };
 
-    size_t index1 = mu::indexOf(CONTEXTS_BY_INCREASING_PRIORITY, ctx1);
-    size_t index2 = mu::indexOf(CONTEXTS_BY_INCREASING_PRIORITY, ctx2);
+    size_t index1 = muse::indexOf(CONTEXTS_BY_INCREASING_PRIORITY, ctx1);
+    size_t index2 = muse::indexOf(CONTEXTS_BY_INCREASING_PRIORITY, ctx2);
 
     return index1 < index2;
 }
@@ -82,7 +82,7 @@ ActionCode ShortcutsController::resolveAction(const std::string& sequence) const
         }
 
         //! NOTE Check if the action is allowed
-        ui::UiActionState st = aregister()->actionState(sc.action);
+        muse::ui::UiActionState st = aregister()->actionState(sc.action);
         if (!st.enabled) {
             continue;
         }

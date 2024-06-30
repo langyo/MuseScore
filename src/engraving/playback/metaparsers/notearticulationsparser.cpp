@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,7 +30,8 @@
 #include "internal/symbolsmetaparser.h"
 
 using namespace mu::engraving;
-using namespace mu::mpe;
+using namespace muse;
+using namespace muse::mpe;
 
 void NoteArticulationsParser::buildNoteArticulationMap(const Note* note, const RenderingContext& ctx, mpe::ArticulationMap& result)
 {
@@ -85,8 +86,9 @@ ArticulationType NoteArticulationsParser::articulationTypeByNoteheadGroup(const 
         return mpe::ArticulationType::CircleCrossNote;
 
     case NoteHeadGroup::HEAD_TRIANGLE_DOWN:
+        return mpe::ArticulationType::TriangleDownNote;
     case NoteHeadGroup::HEAD_TRIANGLE_UP:
-        return mpe::ArticulationType::TriangleNote;
+        return mpe::ArticulationType::TriangleUpNote;
 
     case NoteHeadGroup::HEAD_DIAMOND:
     case NoteHeadGroup::HEAD_DIAMOND_OLD:
@@ -103,6 +105,18 @@ ArticulationType NoteArticulationsParser::articulationTypeByNoteheadGroup(const 
 
     case NoteHeadGroup::HEAD_SLASHED2:
         return mpe::ArticulationType::SlashedBackwardsNote;
+
+    case NoteHeadGroup::HEAD_DO:
+        return mpe::ArticulationType::TriangleUpNote;
+
+    case NoteHeadGroup::HEAD_RE:
+        return mpe::ArticulationType::MoonNote;
+
+    case NoteHeadGroup::HEAD_FA:
+        return mpe::ArticulationType::TriangleRightNote;
+
+    case NoteHeadGroup::HEAD_LA:
+        return mpe::ArticulationType::SquareNote;
 
     case NoteHeadGroup::HEAD_TI:
         return mpe::ArticulationType::TriangleRoundDownNote;
@@ -134,7 +148,7 @@ void NoteArticulationsParser::parsePersistentMeta(const RenderingContext& ctx, m
 
 void NoteArticulationsParser::parseGhostNote(const Note* note, const RenderingContext& ctx, mpe::ArticulationMap& result)
 {
-    if (!note->ghost()) {
+    if (!note->ghost() && !note->headHasParentheses()) {
         return;
     }
 

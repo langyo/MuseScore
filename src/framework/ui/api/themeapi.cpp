@@ -38,8 +38,8 @@
 
 #include "log.h"
 
-using namespace mu::ui;
-using namespace mu::api;
+using namespace muse::ui;
+using namespace muse::api;
 
 static const QPen NO_BORDER(Qt::transparent, 0);
 static const QBrush NO_FILL(Qt::transparent);
@@ -90,8 +90,8 @@ struct FontConfig
     FontSizeType sizeType = FontSizeType::BODY;
 };
 
-ThemeApi::ThemeApi()
-    : ApiObject(nullptr)
+ThemeApi::ThemeApi(IApiEngine* e)
+    : api::ApiObject(e)
 {
     setObjectName("UiTheme");
 }
@@ -123,6 +123,8 @@ void ThemeApi::initThemeValues()
 
     m_backgroundPrimaryColor = themeValues[BACKGROUND_PRIMARY_COLOR].toString();
     m_backgroundSecondaryColor = themeValues[BACKGROUND_SECONDARY_COLOR].toString();
+    m_backgroundTertiaryColor = themeValues[BACKGROUND_TERTIARY_COLOR].toString();
+    m_backgroundQuarternaryColor = themeValues[BACKGROUND_QUARTERNARY_COLOR].toString();
     m_popupBackgroundColor = themeValues[POPUP_BACKGROUND_COLOR].toString();
     m_textFieldColor = themeValues[TEXT_FIELD_COLOR].toString();
     m_accentColor = themeValues[ACCENT_COLOR].toString();
@@ -165,6 +167,16 @@ QColor ThemeApi::backgroundPrimaryColor() const
 QColor ThemeApi::backgroundSecondaryColor() const
 {
     return m_backgroundSecondaryColor;
+}
+
+QColor ThemeApi::backgroundTertiaryColor() const
+{
+    return m_backgroundTertiaryColor;
+}
+
+QColor ThemeApi::backgroundQuarternaryColor() const
+{
+    return m_backgroundQuarternaryColor;
 }
 
 QColor ThemeApi::popupBackgroundColor() const
@@ -699,7 +711,7 @@ QRect ProxyStyle::subControlRect(QStyle::ComplexControl control, const QStyleOpt
 
             if (checkable) {
                 const bool isRadioButtonGroupBox
-                    =widget && strcmp(widget->metaObject()->className(), "mu::uicomponents::RadioButtonGroupBox") == 0;
+                    =widget && strcmp(widget->metaObject()->className(), "muse::uicomponents::RadioButtonGroupBox") == 0;
 
                 indicatorWidth = pixelMetric(isRadioButtonGroupBox ? PM_ExclusiveIndicatorWidth : PM_IndicatorWidth, option, widget);
                 indicatorHeight = pixelMetric(isRadioButtonGroupBox ? PM_ExclusiveIndicatorHeight : PM_IndicatorHeight, option, widget);
@@ -799,7 +811,7 @@ QSize ProxyStyle::sizeFromContents(QStyle::ContentsType type, const QStyleOption
 
         if (checkable) {
             const bool isRadioButtonGroupBox
-                =widget && strcmp(widget->metaObject()->className(), "mu::uicomponents::RadioButtonGroupBox") == 0;
+                =widget && strcmp(widget->metaObject()->className(), "muse::uicomponents::RadioButtonGroupBox") == 0;
 
             int pm = pixelMetric(isRadioButtonGroupBox ? PM_ExclusiveIndicatorHeight : PM_IndicatorHeight, option, widget);
             return commonStyleSize + QSize(0, std::max(pm, option->fontMetrics.height()));

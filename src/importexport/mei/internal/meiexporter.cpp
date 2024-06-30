@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -44,12 +44,14 @@
 #include "engraving/dom/lyrics.h"
 #include "engraving/dom/marker.h"
 #include "engraving/dom/measure.h"
+#include "engraving/dom/measurerepeat.h"
 #include "engraving/dom/note.h"
 #include "engraving/dom/ornament.h"
 #include "engraving/dom/ottava.h"
 #include "engraving/dom/page.h"
 #include "engraving/dom/part.h"
 #include "engraving/dom/pedal.h"
+#include "engraving/dom/rehearsalmark.h"
 #include "engraving/dom/rest.h"
 #include "engraving/dom/score.h"
 #include "engraving/dom/segment.h"
@@ -180,12 +182,12 @@ bool MeiExporter::writeHeader()
         pugi::xml_node title = titleStmt.append_child("title");
         if (!m_score->metaTag(u"workTitle").isEmpty()) {
             title.text().set(m_score->metaTag(u"workTitle").toStdString().c_str());
-            title.append_attribute("type") = u"main";
+            title.append_attribute("type") = "main";
         }
         if (!m_score->metaTag(u"subtitle").isEmpty()) {
             pugi::xml_node subtitle = titleStmt.append_child("title");
             subtitle.text().set(m_score->metaTag(u"subtitle").toStdString().c_str());
-            subtitle.append_attribute("type") = u"subordinate";
+            subtitle.append_attribute("type") = "subordinate";
         }
 
         pugi::xml_node respStmt;
@@ -208,7 +210,7 @@ bool MeiExporter::writeHeader()
         pugi::xml_node date = pubStmt.append_child("date");
 
         // date
-        String dateStr = DateTime::currentDateTime().toString();
+        String dateStr = muse::DateTime::currentDateTime().toString();
         date.append_attribute("isodate") = dateStr.toStdString().c_str();
 
         if (!m_score->metaTag(u"copyright").isEmpty()) {
@@ -816,12 +818,17 @@ bool MeiExporter::writeMeasure(const Measure* measure, int& measureN, bool& isFi
             success = success && this->writeHairpin(dynamic_cast<const Hairpin*>(controlEvent.first), controlEvent.second);
         } else if (controlEvent.first->isHarmony()) {
             success = success && this->writeHarm(dynamic_cast<const Harmony*>(controlEvent.first), controlEvent.second);
+        } else if (controlEvent.first->isArticulation() && !controlEvent.first->isOrnament()) {
+            // laissez vibrer is the only non-ornamental articulation we find in the list, see MeiExporter::writeArtics
+            success = success && this->writeLv(dynamic_cast<const Articulation*>(controlEvent.first), controlEvent.second);
         } else if (controlEvent.first->isOrnament()) {
             success = success && this->writeOrnament(dynamic_cast<const Ornament*>(controlEvent.first), controlEvent.second);
         } else if (controlEvent.first->isOttava()) {
             success = success && this->writeOctave(dynamic_cast<const Ottava*>(controlEvent.first), controlEvent.second);
         } else if (controlEvent.first->isPedal()) {
             success = success && this->writePedal(dynamic_cast<const Pedal*>(controlEvent.first), controlEvent.second);
+        } else if (controlEvent.first->isRehearsalMark()) {
+            success = success && this->writeRehearsalMark(dynamic_cast<const RehearsalMark*>(controlEvent.first), controlEvent.second);
         } else if (controlEvent.first->isSlur()) {
             success = success && this->writeSlur(dynamic_cast<const Slur*>(controlEvent.first), controlEvent.second);
         } else if (controlEvent.first->isTempoText()) {
@@ -902,6 +909,12 @@ bool MeiExporter::writeLayer(track_idx_t track, const Staff* staff, const Measur
     meiLayer.SetN(static_cast<int>(track2voice(track) + 1));
     meiLayer.Write(m_currentNode, this->getLayerXmlId());
 
+    if (measure->measureRepeatNumMeasures(track2staff(track)) == 1) {
+        MeasureRepeat* measureRepeat = measure->measureRepeatElement(track2staff(track));
+        this->writeMRpt(measureRepeat);
+        return true;
+    }
+
     for (Segment* seg = measure->first(); seg; seg = seg->next()) {
         if (seg->segmentType() == SegmentType::EndBarLine) {
             this->addFermataToMap(track, seg, measure);
@@ -920,6 +933,8 @@ bool MeiExporter::writeLayer(track_idx_t track, const Staff* staff, const Measur
         } else if (item->isRest()) {
             this->writeRest(dynamic_cast<const Rest*>(item), staff);
         } else if (item->isBarLine()) {
+            //
+        } else if (item->isBreath()) {
             //
         } else if (item->isKeySig()) {
             if (m_keySig && (seg != m_keySig)) {
@@ -956,7 +971,8 @@ bool MeiExporter::writeArtics(const Chord* chord)
     }
 
     for (const Articulation* articulation : chord->articulations()) {
-        if (articulation->isArticulation()) {
+        if (articulation->isArticulation() && !this->isLaissezVibrer(articulation->symId())) {
+            // laissez vibrer is handled as control element
             this->writeArtic(articulation);
         }
     }
@@ -1061,6 +1077,11 @@ bool MeiExporter::writeBeam(const Beam* beam, const ChordRest* chordRest, bool& 
 {
     IF_ASSERT_FAILED(beam && chordRest) {
         return false;
+    }
+
+    // Cross-measure beams are not supported in the export to MEI Basic
+    if (beam->elements().front()->measure() != beam->elements().back()->measure()) {
+        return true;
     }
 
     if (beam->elements().front() == chordRest) {
@@ -1273,7 +1294,14 @@ bool MeiExporter::writeNote(const Note* note, const Chord* chord, const Staff* s
 
     if (meiAccid.HasAccid() || meiAccid.HasAccidGes()) {
         pugi::xml_node accidNode = m_currentNode.append_child();
-        meiAccid.Write(accidNode, this->getLayerXmlIdFor(ACCID_L));
+        Accidental* acc = note->accidental();
+        if (acc) {
+            Convert::colorToMEI(acc, meiAccid);
+            std::string xmlIdAcc = this->getXmlIdFor(acc, 'a');
+            meiAccid.Write(accidNode, xmlIdAcc);
+        } else {
+            meiAccid.Write(accidNode, this->getLayerXmlIdFor(ACCID_L));
+        }
     }
 
     // non critical assert
@@ -1329,6 +1357,27 @@ bool MeiExporter::writeRest(const Rest* rest, const Staff* staff)
             restNode.set_name("space");
         }
     }
+
+    return true;
+}
+
+/**
+ * Write a measure repeat
+ */
+
+bool MeiExporter::writeMRpt(const MeasureRepeat* measureRepeat)
+{
+    IF_ASSERT_FAILED(measureRepeat) {
+        return false;
+    }
+
+    libmei::MRpt meiMRpt;
+    Convert::colorToMEI(measureRepeat, meiMRpt);
+    meiMRpt.SetExpand(libmei::BOOLEAN_false);
+    pugi::xml_node mRptNode = m_currentNode.append_child();
+    meiMRpt.Write(mRptNode, this->getXmlIdFor(measureRepeat, 'm'));
+
+    m_currentNode = m_currentNode.parent();
 
     return true;
 }
@@ -1414,9 +1463,13 @@ bool MeiExporter::writeVerse(const Lyrics* lyrics)
 
     libmei::Verse meiVerse;
     meiVerse.SetN(String::number(lyrics->no() + 1).toStdString());
+    if (lyrics->propertyFlags(engraving::Pid::PLACEMENT) == engraving::PropertyFlags::UNSTYLED) {
+        meiVerse.SetPlace(Convert::placeToMEI(lyrics->placement()));
+    }
     Convert::colorToMEI(lyrics, meiVerse);
     m_currentNode = m_currentNode.append_child();
-    meiVerse.Write(m_currentNode, this->getLayerXmlIdFor(VERSE_L));
+    std::string xmlId = this->getXmlIdFor(lyrics, 'v');
+    meiVerse.Write(m_currentNode, xmlId);
 
     // Split the syllable into line blocks
     Convert::textWithSmufl lineBlocks;
@@ -1713,6 +1766,24 @@ bool MeiExporter::writeHarm(const Harmony* harmony, const std::string& startid)
 }
 
 /**
+ * Write a lv.
+ */
+
+bool MeiExporter::writeLv(const Articulation* articulation, const std::string& startid)
+{
+    IF_ASSERT_FAILED(articulation) {
+        return false;
+    }
+
+    pugi::xml_node lvNode = m_currentNode.append_child();
+    libmei::Lv meiLv = Convert::lvToMEI(articulation);
+    meiLv.SetStartid(startid);
+    meiLv.Write(lvNode, this->getXmlIdFor(articulation, 'l'));
+
+    return true;
+}
+
+/**
  * Write a octave (ottava).
  */
 
@@ -1818,6 +1889,33 @@ bool MeiExporter::writeRepeatMark(const Jump* jump, const Measure* measure)
 }
 
 /**
+ * Write a reh from a RehearsalMark.
+ */
+
+bool MeiExporter::writeRehearsalMark(const RehearsalMark* mark, const std::string& startid)
+{
+    IF_ASSERT_FAILED(mark) {
+        return false;
+    }
+
+    pugi::xml_node rehNode = m_currentNode.append_child();
+    String text = mark->plainText();
+    libmei::Reh meiReh;
+    Convert::colorToMEI(mark, meiReh);
+
+    if (text.size() > 0) {
+        rehNode.text().set(text.toStdString().c_str());
+    }
+
+    meiReh.SetStartid(startid);
+
+    std::string xmlId = this->getXmlIdFor(mark, 'r');
+    meiReh.Write(rehNode, xmlId);
+
+    return true;
+}
+
+/**
  * Write a repeatMark from a Marker.
  */
 
@@ -1881,7 +1979,12 @@ bool MeiExporter::writeTempo(const TempoText* tempoText, const std::string& star
 
     pugi::xml_node tempoNode = m_currentNode.append_child();
     libmei::Tempo meiTempo = Convert::tempoToMEI(tempoText, meiLines);
-    meiTempo.SetStartid(startid);
+    if (tempoText->tick() == tempoText->measure()->tick()) {
+        double tstamp = Convert::tstampFromFraction(tempoText->tick() - tempoText->measure()->tick(), tempoText->measure()->timesig());
+        meiTempo.SetTstamp(tstamp);
+    } else {
+        meiTempo.SetStartid(startid);
+    }
     meiTempo.Write(tempoNode, this->getXmlIdFor(tempoText, 't'));
 
     this->writeLinesWithSMuFL(tempoNode, meiLines);
@@ -2047,9 +2150,11 @@ void MeiExporter::fillControlEventMap(const std::string& xmlId, const ChordRest*
     // For chords only
     if (chordRest->isChord()) {
         const Chord* chord = toChord(chordRest);
-        // Ornaments
+        // Ornaments and laissez vibrer
         for (const Articulation* articulation : chord->articulations()) {
-            if (articulation->isOrnament()) {
+            if (this->isLaissezVibrer(articulation->symId())) {
+                m_startingControlEventList.push_back(std::make_pair(articulation, "#" + xmlId));
+            } else if (articulation->isOrnament()) {
                 m_startingControlEventList.push_back(std::make_pair(articulation, "#" + xmlId));
             }
         }
@@ -2450,4 +2555,13 @@ std::string MeiExporter::getLayerXmlIdFor(layerElementCounter elementType)
                                                                                                                                      elementType)));
     }
     return id.toStdString();
+}
+
+/**
+ * Return true if the used symbol is a laissez vibrer
+ */
+
+bool MeiExporter::isLaissezVibrer(const SymId id)
+{
+    return id == SymId::articLaissezVibrerAbove || id == SymId::articLaissezVibrerBelow;
 }

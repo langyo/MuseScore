@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -48,8 +48,6 @@ class Symbol : public BSymbol
     OBJECT_ALLOCATOR(engraving, Symbol)
     DECLARE_CLASSOF(ElementType::SYMBOL)
 
-    INJECT(IEngravingFontsProvider, engravingFonts)
-
 public:
     Symbol(const ElementType& type, EngravingItem* parent, ElementFlags f = ElementFlag::MOVABLE);
     Symbol(EngravingItem* parent, ElementFlags f = ElementFlag::MOVABLE);
@@ -64,7 +62,7 @@ public:
     const std::shared_ptr<IEngravingFont>& scoreFont() const { return m_scoreFont; }
     double symbolsSize() const { return m_symbolsSize; }
     double symAngle() const { return m_symAngle; }
-    mu::AsciiStringView symName() const;
+    AsciiStringView symName() const;
 
     String accessibleInfo() const override;
 

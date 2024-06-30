@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -27,6 +27,7 @@
 #include "log.h"
 
 using namespace mu::playback;
+using namespace muse;
 using namespace muse::audio;
 
 static constexpr volume_dbfs_t MAX_DISPLAYED_DBFS = 0.f; // 100%
@@ -36,8 +37,8 @@ static constexpr float BALANCE_SCALING_FACTOR = 100.f;
 
 static constexpr int OUTPUT_RESOURCE_COUNT_LIMIT = 4;
 
-static const std::string VSTFX_EDITOR_URI("musescore://vstfx/editor?sync=false&modal=false&floating=true");
-static const std::string VSTI_EDITOR_URI("musescore://vsti/editor?sync=false&modal=false&floating=true");
+static const std::string VSTFX_EDITOR_URI("muse://vstfx/editor?sync=false&modal=false&floating=true");
+static const std::string VSTI_EDITOR_URI("muse://vsti/editor?sync=false&modal=false&floating=true");
 
 static const std::string TRACK_ID_KEY("trackId");
 static const std::string RESOURCE_ID_KEY("resourceId");
@@ -58,7 +59,7 @@ MixerChannelItem::MixerChannelItem(QObject* parent, Type type, bool outputOnly, 
     m_panel = new ui::NavigationPanel(this);
     m_panel->setDirection(ui::NavigationPanel::Vertical);
     m_panel->setName("MixerChannelPanel " + QString::number(m_trackId));
-    m_panel->accessible()->setName(qtrc("playback", "Mixer channel panel %1").arg(m_trackId));
+    m_panel->accessible()->setName(muse::qtrc("playback", "Mixer channel panel %1").arg(m_trackId));
     m_panel->componentComplete();
 
     connect(this, &MixerChannelItem::mutedChanged, this, [this]() {
@@ -133,7 +134,7 @@ bool MixerChannelItem::forceMute() const
     return m_outParams.forceMute;
 }
 
-mu::ui::NavigationPanel* MixerChannelItem::panel() const
+muse::ui::NavigationPanel* MixerChannelItem::panel() const
 {
     return m_panel;
 }
@@ -143,7 +144,7 @@ void MixerChannelItem::setPanelOrder(int panelOrder)
     m_panel->setOrder(panelOrder);
 }
 
-void MixerChannelItem::setPanelSection(mu::ui::INavigationSection* section)
+void MixerChannelItem::setPanelSection(muse::ui::INavigationSection* section)
 {
     m_panel->setSection(section);
 }
@@ -232,12 +233,12 @@ void MixerChannelItem::loadInputParams(const AudioInputParams& newParams)
 
 void MixerChannelItem::loadOutputParams(const AudioOutputParams& newParams)
 {
-    if (!RealIsEqual(m_outParams.volume, newParams.volume)) {
+    if (!muse::RealIsEqual(m_outParams.volume, newParams.volume)) {
         m_outParams.volume = newParams.volume;
         emit volumeLevelChanged(newParams.volume);
     }
 
-    if (!RealIsEqual(m_outParams.balance, newParams.balance)) {
+    if (!muse::RealIsEqual(m_outParams.balance, newParams.balance)) {
         m_outParams.balance = newParams.balance;
         emit balanceChanged(newParams.balance);
     }
@@ -520,12 +521,12 @@ InputResourceItem* MixerChannelItem::buildInputResourceItem()
 
         bool auxParamsChanged = false;
         for (aux_channel_idx_t idx = 0; idx < static_cast<size_t>(m_outParams.auxSends.size()); ++idx) {
-            const String& soundId = m_inputParams.resourceMeta.attributeVal(PLAYBACK_SETUP_DATA_ATTRIBUTE);
+            const muse::String& soundId = m_inputParams.resourceMeta.attributeVal(PLAYBACK_SETUP_DATA_ATTRIBUTE);
             gain_t newAudioSignalAmount = configuration()->defaultAuxSendValue(idx, m_inputParams.type(), soundId);
 
             auto it = m_auxSendItems.find(idx);
             if (it == m_auxSendItems.end()) {
-                if (!RealIsEqual(m_outParams.auxSends.at(idx).signalAmount, newAudioSignalAmount)) {
+                if (!muse::RealIsEqual(m_outParams.auxSends.at(idx).signalAmount, newAudioSignalAmount)) {
                     m_outParams.auxSends.at(idx).signalAmount = newAudioSignalAmount;
                     auxParamsChanged = true;
                 }
@@ -608,7 +609,7 @@ AuxSendItem* MixerChannelItem::buildAuxSendItem(aux_channel_idx_t index, const A
     newItem->blockSignals(true);
     newItem->setIsActive(params.active);
     newItem->setAudioSignalPercentage(params.signalAmount * 100.f);
-    newItem->setTitle(mu::qtrc("playback", "Aux %1").arg(index + 1));
+    newItem->setTitle(muse::qtrc("playback", "Aux %1").arg(index + 1));
     newItem->blockSignals(false);
 
     connect(newItem, &AuxSendItem::isActiveChanged, this, [this, index](bool active) {
@@ -654,7 +655,7 @@ void MixerChannelItem::closeEditor(AbstractAudioResourceItem* item)
 
 bool MixerChannelItem::askAboutChangingSound()
 {
-    if (!configuration()->needToShowChangeSoundWarning()) {
+    if (!configuration()->needToShowResetSoundFlagsWhenChangeSoundWarning()) {
         return true;
     }
 
@@ -666,17 +667,17 @@ bool MixerChannelItem::askAboutChangingSound()
     IInteractive::Options options = IInteractive::Option::WithIcon | IInteractive::Option::WithDontShowAgainCheckBox;
     IInteractive::ButtonDatas buttons = {
         interactive()->buttonData(IInteractive::Button::Cancel),
-        IInteractive::ButtonData(changeBtn, trc("playback", "Change sound"), true /*accent*/)
+        IInteractive::ButtonData(changeBtn, muse::trc("playback", "Change sound"), true /*accent*/)
     };
 
-    IInteractive::Result result = interactive()->warning(trc("playback", "Are you sure you want to change this sound?"),
-                                                         trc("playback",
-                                                             "Sound flags on this instrument may be reset, but staff text will remain. This action can’t be undone."),
+    IInteractive::Result result = interactive()->warning(muse::trc("playback", "Are you sure you want to change this sound?"),
+                                                         muse::trc("playback",
+                                                                   "Sound flags on this instrument may be reset, but staff text will remain. This action can’t be undone."),
                                                          buttons, changeBtn, options);
 
     if (result.button() == changeBtn) {
         if (!result.showAgain()) {
-            configuration()->setNeedToShowChangeSoundWarning(false);
+            configuration()->setNeedToShowResetSoundFlagsWhenChangeSoundWarning(false);
         }
 
         return true;

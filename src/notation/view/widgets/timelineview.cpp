@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,7 +30,7 @@
 #include "log.h"
 
 namespace mu::notation {
-class TimelineAdapter : public QSplitter, public uicomponents::IDisplayableWidget
+class TimelineAdapter : public QSplitter, public muse::uicomponents::IDisplayableWidget
 {
 public:
     TimelineAdapter()
@@ -82,17 +82,12 @@ private:
         bool result = false;
 
         if (QWidget* receiver = m_mouseDownWidget ? m_mouseDownWidget : childAt(pos)) {
-#ifdef MU_QT5_COMPAT
-            event->setLocalPos(receiver->mapFrom(this, pos));
-            result = qApp->notify(receiver, event);
-#else
             QMouseEvent mappedEvent(event->type(), receiver->mapFrom(this, event->position()),
                                     event->scenePosition(), event->globalPosition(),
                                     event->button(), event->buttons(), event->modifiers(),
                                     event->source(), event->pointingDevice());
             result = qApp->notify(receiver, &mappedEvent);
             event->setAccepted(mappedEvent.isAccepted());
-#endif
         }
 
         return result;
@@ -106,7 +101,7 @@ private:
 using namespace mu::notation;
 
 TimelineView::TimelineView(QQuickItem* parent)
-    : WidgetView(parent)
+    : WidgetView(parent), muse::Injectable(muse::iocCtxForQmlObject(this))
 {
 }
 

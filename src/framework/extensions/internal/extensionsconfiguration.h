@@ -31,10 +31,10 @@
 #include "global/async/asyncable.h"
 
 namespace muse::extensions {
-class ExtensionsConfiguration : public IExtensionsConfiguration, public mu::async::Asyncable
+class ExtensionsConfiguration : public IExtensionsConfiguration, public async::Asyncable
 {
-    Inject<mu::IGlobalConfiguration> globalConfiguration;
-    Inject<mu::mi::IMultiInstancesProvider> multiInstancesProvider;
+    Inject<IGlobalConfiguration> globalConfiguration;
+    Inject<mi::IMultiInstancesProvider> multiInstancesProvider;
 
 public:
     ExtensionsConfiguration() = default;

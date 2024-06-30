@@ -22,40 +22,79 @@
 #ifndef MU_MODULARITY_IOC_H
 #define MU_MODULARITY_IOC_H
 
+#ifndef NO_QT_SUPPORT
+#include <QObject>
+class QQmlEngine;
+#endif
+
 #include "../thirdparty/kors_modularity/modularity/ioc.h" // IWYU pragma: export
 
-namespace mu {
-template<class I>
-using Inject = kors::modularity::Inject<I>;
+namespace muse::modularity {
+using ModulesIoC = kors::modularity::ModulesIoC;
+using Context = kors::modularity::Context;
+using ContextPtr = kors::modularity::ContextPtr;
+
+template<class T>
+using Creator = kors::modularity::Creator<T>;
+
+inline ModulesIoC* _ioc(const ContextPtr& ctx = nullptr)
+{
+    return kors::modularity::_ioc(ctx);
+}
+
+inline ModulesIoC* globalIoc()
+{
+    return kors::modularity::_ioc(nullptr);
+}
+
+inline muse::modularity::ContextPtr globalCtx()
+{
+    static muse::modularity::ContextPtr ctx = std::make_shared<kors::modularity::Context>();
+    return ctx;
+}
+
+inline ModulesIoC* fixmeIoc()
+{
+    return kors::modularity::_ioc(nullptr);
+}
+
+inline void removeIoC(const ContextPtr& ctx = nullptr)
+{
+    kors::modularity::removeIoC(ctx);
+}
 }
 
 namespace muse {
 template<class I>
 using Inject = kors::modularity::Inject<I>;
-}
+template<class I>
+using GlobalInject = kors::modularity::GlobalInject<I>;
 
-namespace mu::modularity {
-using ModulesIoC = kors::modularity::ModulesIoC;
+#define INJECT(Interface, getter) muse::Inject<Interface> getter;
+#define INJECT_STATIC(Interface, getter) static inline muse::Inject<Interface> getter;
 
-template<class T>
-using Creator = kors::modularity::Creator<T>;
+using Injectable = kors::modularity::Injectable;
 
-inline ModulesIoC* ioc()
+#ifndef NO_QT_SUPPORT
+struct QmlIoCContext : public QObject
 {
-    return kors::modularity::ModulesIoC::instance();
-}
+    Q_OBJECT
+public:
+    QmlIoCContext(QObject* p)
+        : QObject(p) {}
+
+    modularity::ContextPtr ctx;
+};
+
+Injectable::GetContext iocCtxForQmlObject(const QObject* o);
+modularity::ContextPtr iocCtxForQmlEngine(const QQmlEngine* e);
+modularity::ContextPtr iocCtxForQWidget(const QWidget* o);
+#endif
 }
 
-namespace muse::modularity {
-using ModulesIoC = kors::modularity::ModulesIoC;
-
-template<class T>
-using Creator = kors::modularity::Creator<T>;
-
-inline ModulesIoC* ioc()
-{
-    return kors::modularity::ModulesIoC::instance();
-}
+namespace mu {
+template<class I>
+using Inject = kors::modularity::Inject<I>;
 }
 
 #endif // MU_MODULARITY_IOC_H

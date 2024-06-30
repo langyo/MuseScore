@@ -25,7 +25,7 @@
 
 #include "log.h"
 
-using namespace mu;
+using namespace muse;
 
 const Uri::Scheme Uri::MuseScore("musescore");
 const Uri::Scheme Uri::Http("http");
@@ -34,7 +34,7 @@ const Uri::Scheme Uri::Https("https");
 static const std::string URI_VAL_TRUE("true");
 static const std::string URI_VAL_FALSE("false");
 
-// musescore://module/target/name
+// muse://module/target/name
 
 Uri::Uri(const std::string& str)
 {
@@ -78,7 +78,7 @@ std::string Uri::toString() const
     return m_scheme + "://" + m_path;
 }
 
-// musescore://module/target/name?param1=value1&paramn=valuen
+// muse://module/target/name?param1=value1&paramn=valuen
 
 UriQuery::UriQuery(const std::string& str)
     : m_uri(str)
@@ -196,7 +196,7 @@ const UriQuery::Params& UriQuery::params() const
     return m_params;
 }
 
-mu::Val UriQuery::param(const std::string& key, const Val& def) const
+Val UriQuery::param(const std::string& key, const Val& def) const
 {
     auto it = m_params.find(key);
     if (it == m_params.end()) {

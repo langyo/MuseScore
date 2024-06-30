@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -40,7 +40,7 @@ BreaksDialog::BreaksDialog(QWidget* parent)
 
     //: `%1` will be replaced with a number input field.
     //: Text before it will appear before that number field, text after will appear after the field.
-    QString text = qtrc("notation/add-remove-system-breaks", "Break systems every %1 measures");
+    QString text = muse::qtrc("notation/add-remove-system-breaks", "Break systems every %1 measures");
     QStringList pieces = text.split(QStringLiteral("%1"));
 
     IF_ASSERT_FAILED(pieces.size() >= 2) {
@@ -52,14 +52,6 @@ BreaksDialog::BreaksDialog(QWidget* parent)
     intervalButton->setText(part1);
     intervalLabel2->setText(part2);
 }
-
-#ifdef MU_QT5_COMPAT
-BreaksDialog::BreaksDialog(const BreaksDialog& dialog)
-    : BreaksDialog(dialog.parentWidget())
-{
-}
-
-#endif
 
 //---------------------------------------------------------
 //   accept

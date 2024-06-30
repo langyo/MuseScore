@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -31,7 +31,7 @@
 
 #include "log.h"
 
-static mu::testing::SuiteEnvironment importexport_se(
+static muse::testing::SuiteEnvironment importexport_se(
 {
     new muse::draw::DrawModule(),
     new mu::engraving::EngravingModule()
@@ -40,7 +40,7 @@ static mu::testing::SuiteEnvironment importexport_se(
     []() {
     LOGI() << "capella tests suite post init";
 
-    mu::engraving::ScoreRW::setRootPath(mu::String::fromUtf8(iex_capella_tests_DATA_ROOT));
+    mu::engraving::ScoreRW::setRootPath(muse::String::fromUtf8(iex_capella_tests_DATA_ROOT));
 
     mu::engraving::MScore::testMode = true;
     mu::engraving::MScore::noGui = true;

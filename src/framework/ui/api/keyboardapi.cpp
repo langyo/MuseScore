@@ -28,21 +28,17 @@
 
 #include "log.h"
 
-using namespace mu::api;
+using namespace muse::api;
 
-KeyboardApi::KeyboardApi(IApiEngine* e)
-    : ApiObject(e)
+KeyboardApi::KeyboardApi(api::IApiEngine* e)
+    : api::ApiObject(e)
 {
 }
 
 void KeyboardApi::key(const QString& key)
 {
     LOGD() << key;
-#ifdef MU_QT5_COMPAT
-    int code = QKeySequence::fromString(key.toUpper())[0];
-#else
     int code = QKeySequence::fromString(key.toUpper())[0].toCombined();
-#endif
 
     QWindow* w = qApp->focusWindow();
     if (!w) {

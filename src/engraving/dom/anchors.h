@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,9 +30,9 @@ namespace mu::engraving {
 class EditTimeTickAnchors
 {
 public:
-    static void updateAnchors(const EngravingItem* item, Fraction absTick, track_idx_t track);
-
+    static void updateAnchors(const EngravingItem* item, track_idx_t track);
     static TimeTickAnchor* createTimeTickAnchor(Measure* measure, Fraction relTick, staff_idx_t staffIdx);
+    static void updateLayout(Measure* measure);
 
 private:
     static void updateAnchors(Measure* measure, staff_idx_t staffIdx);
@@ -47,7 +47,15 @@ public:
 
     TimeTickAnchor* clone() const override { return new TimeTickAnchor(*this); }
 
-    bool isDraw() const;
+    enum class DrawRegion {
+        OUT_OF_RANGE,
+        EXTENDED_REGION,
+        MAIN_REGION
+    };
+
+    DrawRegion drawRegion() const;
+
+    voice_idx_t voiceIdx() const;
 
     struct LayoutData : public EngravingItem::LayoutData {
         bool darker() const { return m_darker; }

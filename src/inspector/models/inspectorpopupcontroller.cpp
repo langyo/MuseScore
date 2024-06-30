@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,7 +30,7 @@
 #include "log.h"
 
 using namespace mu::inspector;
-using namespace mu::uicomponents;
+using namespace muse::uicomponents;
 
 InspectorPopupController::InspectorPopupController(QObject* parent)
     : QObject(parent)
@@ -154,7 +154,7 @@ bool InspectorPopupController::eventFilter(QObject* watched, QEvent* event)
     return QObject::eventFilter(watched, event);
 }
 
-void InspectorPopupController::closePopupIfNeed(const QPoint& mouseGlobalPos)
+void InspectorPopupController::closePopupIfNeed(const QPointF& mouseGlobalPos)
 {
     if (!m_popup || !m_visualControl) {
         return;
@@ -166,13 +166,12 @@ void InspectorPopupController::closePopupIfNeed(const QPoint& mouseGlobalPos)
         return;
     }
 
-    auto globalRect = [](const QQuickItem* item) -> QRect {
-        QPointF globalPos = item->mapToGlobal(QPoint(0, 0));
-        return QRect(globalPos.x(), globalPos.y(), item->width(), item->height());
+    auto globalRect = [](const QQuickItem* item) -> QRectF {
+        return QRectF(item->mapToGlobal(QPoint(0, 0)), item->size());
     };
 
-    QRect globalVisualControlRect = globalRect(m_visualControl);
-    QRect globalPopupContentRect = globalRect(popupContent);
+    QRectF globalVisualControlRect = globalRect(m_visualControl);
+    QRectF globalPopupContentRect = globalRect(popupContent);
 
     if (globalVisualControlRect.contains(mouseGlobalPos) || globalPopupContentRect.contains(mouseGlobalPos)) {
         return;

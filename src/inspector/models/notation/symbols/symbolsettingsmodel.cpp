@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2024 MuseScore BVBA and others
+ * Copyright (C) 2024 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -31,8 +31,8 @@ SymbolSettingsModel::SymbolSettingsModel(QObject* parent, IElementRepositoryServ
     : AbstractInspectorModel(parent, repository)
 {
     setModelType(InspectorModelType::TYPE_SYMBOL);
-    setTitle(qtrc("inspector", "Symbol"));
-    setIcon(ui::IconCode::Code::TRIANGLE_SYMBOL);
+    setTitle(muse::qtrc("inspector", "Symbol"));
+    setIcon(muse::ui::IconCode::Code::TRIANGLE_SYMBOL);
     createProperties();
 }
 
@@ -61,7 +61,7 @@ void SymbolSettingsModel::loadProperties()
     loadPropertyItem(m_sym);
     loadPropertyItem(m_scoreFont);
     loadPropertyItem(m_symbolSize, [](const QVariant& elementPropertyValue) -> QVariant {
-        return DataFormatter::roundDouble(elementPropertyValue.toDouble()) * 100;
+        return muse::DataFormatter::roundDouble(elementPropertyValue.toDouble()) * 100;
     });
     loadPropertyItem(m_symAngle);
 }

@@ -19,12 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_AUTOBOT_AUTOBOTACTIONS_H
-#define MU_AUTOBOT_AUTOBOTACTIONS_H
+#ifndef MUSE_AUTOBOT_AUTOBOTACTIONS_H
+#define MUSE_AUTOBOT_AUTOBOTACTIONS_H
 
 #include "ui/iuiactionsmodule.h"
 
-namespace mu::autobot {
+namespace muse::autobot {
 class AutobotActions : public ui::IUiActionsModule
 {
 public:
@@ -32,14 +32,14 @@ public:
 
     const ui::UiActionList& actionsList() const override;
     bool actionEnabled(const ui::UiAction& act) const override;
-    async::Channel<actions::ActionCodeList> actionEnabledChanged() const override;
+    async::Channel<muse::actions::ActionCodeList> actionEnabledChanged() const override;
 
     bool actionChecked(const ui::UiAction& act) const override;
-    async::Channel<actions::ActionCodeList> actionCheckedChanged() const override;
+    async::Channel<muse::actions::ActionCodeList> actionCheckedChanged() const override;
 
 private:
     static const ui::UiActionList m_actions;
 };
 }
 
-#endif // MU_AUTOBOT_AUTOBOTACTIONS_H
+#endif // MUSE_AUTOBOT_AUTOBOTACTIONS_H

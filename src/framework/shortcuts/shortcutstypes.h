@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_SHORTCUTS_SHORTCUTSTYPES_H
-#define MU_SHORTCUTS_SHORTCUTSTYPES_H
+#ifndef MUSE_SHORTCUTS_SHORTCUTSTYPES_H
+#define MUSE_SHORTCUTS_SHORTCUTSTYPES_H
 
 #include <string>
 #include <list>
@@ -32,13 +32,14 @@
 
 #include "translation.h"
 
-namespace mu::shortcuts {
+namespace muse::shortcuts {
 struct Shortcut
 {
     std::string action;
     std::vector<std::string> sequences;
     std::string context;
     QKeySequence::StandardKey standardKey = QKeySequence::UnknownKey;
+    bool autoRepeat = true;
 
     Shortcut() = default;
     Shortcut(const std::string& a)
@@ -51,20 +52,23 @@ struct Shortcut
 
     bool operator ==(const Shortcut& sc) const
     {
-        return action == sc.action && sequences == sc.sequences && standardKey == sc.standardKey;
+        return action == sc.action
+               && sequences == sc.sequences
+               && standardKey == sc.standardKey
+               && autoRepeat == sc.autoRepeat;
     }
 
     std::string sequencesAsString() const { return sequencesToString(sequences); }
 
     static std::string sequencesToString(const std::vector<std::string>& seqs)
     {
-        return strings::join(seqs, ", ");
+        return muse::strings::join(seqs, ", ");
     }
 
     static std::vector<std::string> sequencesFromString(const std::string& str)
     {
         std::vector<std::string> seqs;
-        strings::split(str, seqs, ", ");
+        muse::strings::split(str, seqs, ", ");
         return seqs;
     }
 
@@ -100,14 +104,15 @@ struct RemoteEvent {
     {
         if (this->type == RemoteEventType::Note) {
             //: A MIDI remote event, namely a note event
-            return mtrc("shortcuts", "Note %1").arg(String::fromStdString(pitchToString(this->value)));
+            return muse::mtrc("shortcuts", "Note %1")
+                   .arg(String::fromStdString(muse::pitchToString(this->value)));
         } else if (this->type == RemoteEventType::Controller) {
             //: A MIDI remote event, namely a MIDI controller event
-            return mtrc("shortcuts", "CC %1").arg(String::number(this->value));
+            return muse::mtrc("shortcuts", "CC %1").arg(String::number(this->value));
         }
 
         //: No MIDI remote event
-        return mtrc("shortcuts", "None");
+        return muse::mtrc("shortcuts", "None");
     }
 
     bool operator ==(const RemoteEvent& other) const
@@ -142,8 +147,10 @@ struct MidiControlsMapping {
 
 using MidiMappingList = std::list<MidiControlsMapping>;
 
-inline RemoteEvent remoteEventFromMidiEvent(const midi::Event& midiEvent)
+inline RemoteEvent remoteEventFromMidiEvent(const muse::midi::Event& midiEvent)
 {
+    using namespace muse;
+
     RemoteEvent event;
     bool isNote = midiEvent.isOpcodeIn({ midi::Event::Opcode::NoteOff, midi::Event::Opcode::NoteOn });
     bool isController = midiEvent.isOpcodeIn({ midi::Event::Opcode::ControlChange });
@@ -214,4 +221,4 @@ inline bool areContextPrioritiesEqual(const std::string& shortcutCtx1, const std
 }
 }
 
-#endif // MU_SHORTCUTS_SHORTCUTSTYPES_H
+#endif // MUSE_SHORTCUTS_SHORTCUTSTYPES_H

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -669,7 +669,7 @@ void TLayout::layoutAmbitus(const Ambitus* item, Ambitus::LayoutData* ldata, con
                        ldata->bottomPos.y());
         // shorten line on each side by offsets
         double yDelta = ldata->bottomPos.y() - ldata->topPos.y();
-        if (!RealIsNull(yDelta)) {
+        if (!muse::RealIsNull(yDelta)) {
             double off = spatium * Ambitus::LINEOFFSET_DEFAULT;
             PointF p1 = fullLine.pointAt(off / yDelta);
             PointF p2 = fullLine.pointAt(1 - (off / yDelta));
@@ -1638,8 +1638,8 @@ void TLayout::layoutChordLine(const ChordLine* item, ChordLine::LayoutData* ldat
         height = r.height();
         ldata->setBbox(x1, y1, width, height);
     } else {
-        RectF r = conf.engravingFont()->bbox(ChordLine::WAVE_SYMBOLS, item->magS());
-        double angle = ChordLine::WAVE_ANGEL * M_PI / 180;
+        RectF r = conf.engravingFont()->bbox({ SymId::wiggleVIbratoMediumSlower, SymId::wiggleVIbratoMediumSlower }, item->magS());
+        double angle = 20 * M_PI / 180;
 
         r.setHeight(r.height() + r.width() * sin(angle));
 
@@ -1820,7 +1820,8 @@ void TLayout::layoutDeadSlapped(const DeadSlapped* item, DeadSlapped::LayoutData
 
 void TLayout::layoutDynamic(const Dynamic* item, Dynamic::LayoutData* ldata, const LayoutConfiguration& conf)
 {
-    const_cast<Dynamic*>(item)->setSnappedExpression(nullptr); // Here we reset it. It will become known again when we layout expression
+    ldata->disconnectItemSnappedAfter();
+    ldata->disconnectItemSnappedBefore();
 
     const StaffType* stType = item->staffType();
     if (stType && stType->isHiddenElementOnTab(conf.style(), Sid::dynamicsShowTabCommon, Sid::dynamicsShowTabSimple)) {
@@ -1917,7 +1918,8 @@ void TLayout::layoutExpression(const Expression* item, Expression::LayoutData* l
         }
     }
 
-    const_cast<Expression*>(item)->setSnappedDynamic(nullptr);
+    ldata->disconnectItemSnappedAfter();
+    ldata->disconnectItemSnappedBefore();
 
     if (!item->autoplace()) {
         return;
@@ -1940,14 +1942,13 @@ void TLayout::layoutExpression(const Expression* item, Expression::LayoutData* l
         return;
     }
 
-    const_cast<Expression*>(item)->setSnappedDynamic(dynamic);
-    dynamic->setSnappedExpression(const_cast<Expression*>(item));
+    ldata->connectItemSnappedBefore(dynamic);
 
     LD_CONDITION(dynamic->ldata()->isSetBbox()); // dynamic->shape()
     LD_CONDITION(dynamic->ldata()->isSetPos());
 
     // If there is a dynamic on same segment and track, lock this expression to it
-    double padding = item->computeDynamicExpressionDistance();
+    double padding = item->computeDynamicExpressionDistance(dynamic);
     double dynamicRight = dynamic->shape().translate(dynamic->pos()).right();
     double expressionLeft = ldata->bbox().translated(item->pos()).left();
     double difference = expressionLeft - dynamicRight - padding;
@@ -2225,15 +2226,15 @@ static void layoutLines(const FiguredBass* item, FiguredBass::LayoutData* ldata,
     const std::vector<System*>& systems = ctx.dom().systems();
     System* s1  = item->segment()->measure()->system();
     System* s2  = nextSegm->measure()->system();
-    system_idx_t sysIdx1 = mu::indexOf(systems, s1);
-    system_idx_t sysIdx2 = mu::indexOf(systems, s2);
+    system_idx_t sysIdx1 = muse::indexOf(systems, s1);
+    system_idx_t sysIdx2 = muse::indexOf(systems, s2);
 
-    if (sysIdx2 == mu::nidx || sysIdx2 < sysIdx1) {
+    if (sysIdx2 == muse::nidx || sysIdx2 < sysIdx1) {
         sysIdx2 = sysIdx1;
         nextSegm = item->segment()->next1();
         // TODO
         // During layout of figured bass next systems' numbers may be still
-        // undefined (then sysIdx2 == mu::nidx) or change in the future.
+        // undefined (then sysIdx2 == muse::nidx) or change in the future.
         // A layoutSystem() approach similar to that for spanners should
         // probably be implemented.
     }
@@ -2371,7 +2372,7 @@ void TLayout::layoutFingering(const Fingering* item, Fingering::LayoutData* ldat
                 } else {
                     RectF r = ldata->bbox().translated(measure->pos() + segment->pos() + chord->pos() + note->pos() + item->pos());
                     SkylineLine sk(false);
-                    sk.add(r.x(), r.bottom(), r.width());
+                    sk.add(r, const_cast<Fingering*>(item));
                     double d = sk.minDistance(ss->skyline().north());
                     double yd = 0.0;
                     if (d > 0.0 && item->isStyled(Pid::MIN_DISTANCE)) {
@@ -2407,7 +2408,7 @@ void TLayout::layoutFingering(const Fingering* item, Fingering::LayoutData* ldat
                 } else {
                     RectF r = ldata->bbox().translated(measure->pos() + segment->pos() + chord->pos() + note->pos() + item->pos());
                     SkylineLine sk(true);
-                    sk.add(r.x(), r.top(), r.width());
+                    sk.add(r, const_cast<Fingering*>(item));
                     double d = ss->skyline().south().minDistance(sk);
                     double yd = 0.0;
                     if (d > 0.0 && item->isStyled(Pid::MIN_DISTANCE)) {
@@ -2552,7 +2553,7 @@ void TLayout::layoutFretDiagram(const FretDiagram* item, FretDiagram::LayoutData
 
         double minDistance = harmony->minDistance().val() * item->spatium();
         SkylineLine sk(false);
-        sk.add(r.x(), r.bottom(), r.width());
+        sk.add(r, harmony);
         double d = sk.minDistance(ss->skyline().north());
         if (d > -minDistance) {
             double yd = d + minDistance;
@@ -2561,7 +2562,7 @@ void TLayout::layoutFretDiagram(const FretDiagram* item, FretDiagram::LayoutData
             r.translate(PointF(0.0, yd));
         }
         if (harmony->addToSkyline()) {
-            ss->skyline().add(r);
+            ss->skyline().add(r, harmony);
         }
     }
 }
@@ -2633,10 +2634,10 @@ static void _layoutGlissando(Glissando* item, LayoutContext& ctx, Glissando::Lay
     double tune2 = anchor2->tuning();
     AccidentalType acc1 = anchor1->accidentalType();
     AccidentalType acc2 = anchor2->accidentalType();
-    if (RealIsNull(tune1) && Accidental::isMicrotonal(acc1)) {
+    if (muse::RealIsNull(tune1) && Accidental::isMicrotonal(acc1)) {
         tune1 = Accidental::subtype2centOffset(acc1);
     }
-    if (RealIsNull(tune2) && Accidental::isMicrotonal(acc2)) {
+    if (muse::RealIsNull(tune2) && Accidental::isMicrotonal(acc2)) {
         tune2 = Accidental::subtype2centOffset(acc2);
     }
 
@@ -2679,7 +2680,7 @@ static void _layoutGlissando(Glissando* item, LayoutContext& ctx, Glissando::Lay
     double y0   = segm1->ldata()->pos().y();
     double yTot = segm2->ldata()->pos().y() + segm2->ipos2().y() - y0;
     yTot -= yStaffDifference(segm2->system(), segm2->staffIdx(), segm1->system(), segm1->staffIdx());
-    double ratio = mu::divide(yTot, xTot, 1.0);
+    double ratio = muse::divide(yTot, xTot, 1.0);
     // interpolate y-coord of intermediate points across total width and height
     double xCurr = 0.0;
     double yCurr;
@@ -2733,11 +2734,11 @@ static void _layoutGlissando(Glissando* item, LayoutContext& ctx, Glissando::Lay
     offs2.rx() -= glissNoteDist;
 
     // apply offsets: shorten first segment by x1 (and proportionally y) and adjust its length accordingly
-    offs1.ry() = segm1->ipos2().y() * mu::divide(offs1.x(), segm1->ipos2().x(), 1.0);
+    offs1.ry() = segm1->ipos2().y() * muse::divide(offs1.x(), segm1->ipos2().x(), 1.0);
     segm1->setPos(segm1->ldata()->pos() + offs1);
     segm1->setPos2(segm1->ipos2() - offs1);
     // adjust last segment length by x2 (and proportionally y)
-    offs2.ry() = segm2->ipos2().y() * mu::divide(offs2.x(), segm2->ipos2().x(), 1.0);
+    offs2.ry() = segm2->ipos2().y() * muse::divide(offs2.x(), segm2->ipos2().x(), 1.0);
     segm2->setPos2(segm2->ipos2() + offs2);
 
     for (SpannerSegment* segm : item->spannerSegments()) {
@@ -2785,7 +2786,7 @@ void TLayout::layoutGlissandoSegment(GlissandoSegment* item, LayoutContext&)
 void TLayout::layoutGraceNotesGroup(GraceNotesGroup* item, LayoutContext& ctx)
 {
     Shape _shape;
-    for (size_t i = item->size() - 1; i != mu::nidx; --i) {
+    for (size_t i = item->size() - 1; i != muse::nidx; --i) {
         Chord* grace = item->at(i);
         Shape graceShape = grace->shape();
         Shape groupShape = _shape;
@@ -2809,7 +2810,7 @@ void TLayout::layoutGraceNotesGroup(GraceNotesGroup* item, LayoutContext& ctx)
                 }
             }
         }
-        _shape.add(graceShape.translated(mu::PointF(offset, 0.0)));
+        _shape.add(graceShape.translated(PointF(offset, 0.0)));
         double xpos = offset - item->parent()->rxoffset() - item->parent()->ldata()->pos().x();
         grace->setPos(xpos, 0.0);
     }
@@ -3212,7 +3213,7 @@ void TLayout::layoutHairpinSegment(HairpinSegment* item, LayoutContext& ctx)
                         RectF r = sd->ldata()->bbox().translated(sd->pos());
                         s->staffShape(sd->staffIdx()).add(r);
                         r = sd->ldata()->bbox().translated(sd->pos() + s->pos() + m->pos());
-                        m->system()->staff(sd->staffIdx())->skyline().add(r);
+                        m->system()->staff(sd->staffIdx())->skyline().add(r, sd);
                     }
                 }
             }
@@ -3236,7 +3237,7 @@ void TLayout::layoutHairpinSegment(HairpinSegment* item, LayoutContext& ctx)
                         RectF r = ed->ldata()->bbox().translated(ed->pos());
                         s->staffShape(ed->staffIdx()).add(r);
                         r = ed->ldata()->bbox().translated(ed->pos() + s->pos() + m->pos());
-                        m->system()->staff(ed->staffIdx())->skyline().add(r);
+                        m->system()->staff(ed->staffIdx())->skyline().add(r, ed);
                     }
                 }
             }
@@ -3708,7 +3709,7 @@ void TLayout::layoutKeySig(const KeySig* item, KeySig::LayoutData* ldata, const 
             && !item->segment()->isKeySigAnnounceType()) {
             naturalsOn = false;
         }
-        if (item->track() == mu::nidx) {
+        if (item->track() == muse::nidx) {
             naturalsOn = false;
         }
 
@@ -4061,7 +4062,7 @@ void TLayout::layoutMeasureRepeat(const MeasureRepeat* item, MeasureRepeat::Layo
     case 1:
     {
         ldata->setSymId(SymId::repeat1Bar);
-        if (ctx.conf().styleB(Sid::mrNumberSeries) && item->track() != mu::nidx) {
+        if (ctx.conf().styleB(Sid::mrNumberSeries) && item->track() != muse::nidx) {
             int placeInSeries = 2; // "1" would be the measure actually being repeated
             staff_idx_t staffIdx = item->staffIdx();
             const Measure* m = item->measure();
@@ -4101,7 +4102,7 @@ void TLayout::layoutMeasureRepeat(const MeasureRepeat* item, MeasureRepeat::Layo
 
     RectF bbox = item->symBbox(ldata->symId);
 
-    if (item->track() != mu::nidx) { // if this is in score rather than a palette cell
+    if (item->track() != muse::nidx) { // if this is in score rather than a palette cell
         // For unknown reasons, the symbol has some offset in almost all SMuFL fonts
         // We compensate for it, to make sure the symbol is visually centered around the staff line
         double offset = (-bbox.top() - bbox.bottom()) / 2.0;
@@ -4249,7 +4250,7 @@ void TLayout::layoutNote(const Note* item, Note::LayoutData* ldata)
             const_cast<Note*>(item)->setHeadGroup(NoteHeadGroup::HEAD_DIAMOND);
         }
         SymId nh = item->noteHead();
-        if (Note::engravingConfiguration()->crossNoteHeadAlwaysBlack() && ((nh == SymId::noteheadXHalf) || (nh == SymId::noteheadXWhole))) {
+        if (item->configuration()->crossNoteHeadAlwaysBlack() && ((nh == SymId::noteheadXHalf) || (nh == SymId::noteheadXWhole))) {
             nh = SymId::noteheadXBlack;
         }
 
@@ -4820,11 +4821,11 @@ void TLayout::layoutLine(SLine* item, LayoutContext& ctx)
     PointF p2(item->linePos(Grip::END,   &s2));
 
     const std::vector<System*>& systems = ctx.dom().systems();
-    system_idx_t sysIdx1 = mu::indexOf(systems, s1);
-    system_idx_t sysIdx2 = mu::indexOf(systems, s2);
+    system_idx_t sysIdx1 = muse::indexOf(systems, s1);
+    system_idx_t sysIdx2 = muse::indexOf(systems, s2);
     int segmentsNeeded = 0;
 
-    if (sysIdx1 == mu::nidx || sysIdx2 == mu::nidx) {
+    if (sysIdx1 == muse::nidx || sysIdx2 == muse::nidx) {
         return;
     }
 
@@ -4938,7 +4939,7 @@ void TLayout::layoutForWidth(StaffLines* item, double w, LayoutContext& ctx)
 //                  rypos() = 2 * _spatium;
     } else {
         _lines = 5;
-        item->setColor(StaffLines::engravingConfiguration()->defaultColor());
+        item->setColor(item->configuration()->defaultColor());
     }
     item->setLw(ctx.conf().styleS(Sid::staffLineWidth).val() * _spatium);
     double x1 = item->pos().x();
@@ -4946,7 +4947,7 @@ void TLayout::layoutForWidth(StaffLines* item, double w, LayoutContext& ctx)
     double y  = item->pos().y();
     ldata->setBbox(x1, -item->lw() * .5 + y, w, (_lines - 1) * dist + item->lw());
 
-    std::vector<mu::LineF> ll;
+    std::vector<LineF> ll;
     for (int i = 0; i < _lines; ++i) {
         ll.push_back(LineF(x1, y, x2, y));
         y += dist;

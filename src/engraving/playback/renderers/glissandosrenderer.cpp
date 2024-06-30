@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -25,7 +25,8 @@
 #include "dom/glissando.h"
 
 using namespace mu::engraving;
-using namespace mu::mpe;
+using namespace muse;
+using namespace muse::mpe;
 
 const ArticulationTypeSet& GlissandosRenderer::supportedTypes()
 {
@@ -55,6 +56,11 @@ void GlissandosRenderer::doRender(const EngravingItem* item, const mpe::Articula
 
 void GlissandosRenderer::renderDiscreteGlissando(const Note* note, const RenderingContext& context, mpe::PlaybackEventList& result)
 {
+    const Score* score = note->score();
+    IF_ASSERT_FAILED(score) {
+        return;
+    }
+
     const Glissando* glissando = nullptr;
     for (const Spanner* spanner : note->spannerFor()) {
         if (spanner->type() == ElementType::GLISSANDO) {
@@ -85,6 +91,9 @@ void GlissandosRenderer::renderDiscreteGlissando(const Note* note, const Renderi
         noteCtx.duration = durationStep;
         noteCtx.timestamp += i * durationStep;
         noteCtx.pitchLevel += pitchSteps.at(i) * mpe::PITCH_LEVEL_STEP;
+
+        int utick = timestampToTick(score, noteCtx.timestamp);
+        noteCtx.dynamicLevel = context.playbackCtx->appliableDynamicLevel(note->track(), utick);
 
         updateArticulationBoundaries(ArticulationType::DiscreteGlissando,
                                      noteCtx.timestamp,

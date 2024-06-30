@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -34,7 +34,7 @@
 #include "iappshellconfiguration.h"
 
 namespace mu::appshell {
-class FoldersPreferencesModel : public QAbstractListModel, public async::Asyncable
+class FoldersPreferencesModel : public QAbstractListModel, public muse::async::Asyncable
 {
     Q_OBJECT
 
@@ -42,7 +42,7 @@ class FoldersPreferencesModel : public QAbstractListModel, public async::Asyncab
     Inject<notation::INotationConfiguration> notationConfiguration;
     Inject<muse::extensions::IExtensionsConfiguration> extensionsConfiguration;
     Inject<muse::audio::IAudioConfiguration> audioConfiguration;
-    Inject<vst::IVstConfiguration> vstConfiguration;
+    Inject<muse::vst::IVstConfiguration> vstConfiguration;
     Inject<IAppShellConfiguration> configuration;
 
 public:
@@ -93,8 +93,8 @@ private:
     void setFolderPaths(FolderType folderType, const QString& paths);
     QModelIndex folderIndex(FolderType folderType);
 
-    QString pathsToString(const io::paths_t& paths) const;
-    io::paths_t pathsFromString(const QString& pathsStr) const;
+    QString pathsToString(const muse::io::paths_t& paths) const;
+    muse::io::paths_t pathsFromString(const QString& pathsStr) const;
 
     QList<FolderInfo> m_folders;
 };

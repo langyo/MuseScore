@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,7 +24,10 @@
 #define MU_NOTATION_EDITSTAFFTYPE_H
 
 #include "ui_editstafftype.h"
-#include "engraving/dom/mscore.h"
+
+#include "modularity/ioc.h"
+#include "engraving/iengravingconfiguration.h"
+
 #include "engraving/dom/stafftype.h"
 
 #include "notation/notationtypes.h"
@@ -34,9 +37,11 @@ namespace mu::notation {
 //   EditStaffType
 //---------------------------------------------------------
 
-class EditStaffType : public QDialog, private Ui::EditStaffType
+class EditStaffType : public QDialog, private Ui::EditStaffType, public muse::Injectable
 {
     Q_OBJECT
+
+    muse::Inject<engraving::IEngravingConfiguration> engravingConfiguration = { this };
 
     mu::engraving::Staff* staff;
     mu::engraving::StaffType staffType;
@@ -76,7 +81,7 @@ public:
     void setInstrument(const Instrument& instrument);
 
 private:
-    mu::Ret loadScore(mu::engraving::MasterScore* score, const io::path_t& path);
+    muse::Ret loadScore(mu::engraving::MasterScore* score, const muse::io::path_t& path);
 };
 }
 #endif

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -28,6 +28,7 @@
 
 using namespace mu;
 using namespace mu::print;
+using namespace muse;
 using namespace muse::draw;
 using namespace mu::notation;
 
@@ -45,7 +46,7 @@ Ret PrintProvider::printNotation(INotationPtr notation)
     printerDev.setPageSize(ps);
     printerDev.setPageOrientation(pageSizeInch.width() > pageSizeInch.height() ? QPageLayout::Landscape : QPageLayout::Portrait);
 
-    //printerDev.setCreator("MuseScore Version: " VERSION);
+    //printerDev.setCreator("MuseScore Studio Version: " VERSION);
     printerDev.setFullPage(true);
     if (!printerDev.setPageMargins(QMarginsF())) {
         LOGD() << "unable to clear printer margins";
@@ -58,7 +59,7 @@ Ret PrintProvider::printNotation(INotationPtr notation)
 
     QPrintDialog pd(&printerDev, 0);
     if (!pd.exec()) {
-        return mu::make_ret(Ret::Code::Cancel);
+        return muse::make_ret(Ret::Code::Cancel);
     }
 
     Painter painter(&printerDev, "print");
@@ -75,5 +76,5 @@ Ret PrintProvider::printNotation(INotationPtr notation)
 
     painter.endDraw();
 
-    return mu::make_ret(Ret::Code::Ok);
+    return muse::make_ok();
 }

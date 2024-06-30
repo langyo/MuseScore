@@ -22,7 +22,7 @@
 #include "audioconfigurationstub.h"
 
 using namespace muse::audio;
-using namespace mu;
+using namespace muse;
 
 std::vector<std::string> AudioConfigurationStub::availableAudioApiList() const
 {
@@ -123,4 +123,9 @@ async::Channel<io::paths_t> AudioConfigurationStub::soundFontDirectoriesChanged(
 io::path_t AudioConfigurationStub::knownAudioPluginsFilePath() const
 {
     return {};
+}
+
+bool AudioConfigurationStub::shouldMeasureInputLag() const
+{
+    return false;
 }

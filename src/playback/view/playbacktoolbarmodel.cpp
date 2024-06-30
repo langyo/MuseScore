@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -28,10 +28,11 @@
 #include "playback/internal/playbackuiactions.h"
 
 using namespace mu::playback;
-using namespace muse::actions;
-using namespace mu::ui;
-using namespace mu::uicomponents;
 using namespace mu::notation;
+using namespace muse;
+using namespace muse::actions;
+using namespace muse::ui;
+using namespace muse::uicomponents;
 using namespace muse::audio;
 
 static const ActionCode PLAY_ACTION_CODE("play");
@@ -58,12 +59,15 @@ void PlaybackToolBarModel::load()
 {
     AbstractMenuModel::load();
     updateActions();
+
+    connect(this, &PlaybackToolBarModel::isToolbarFloatingChanged, this, &PlaybackToolBarModel::updateActions);
+
     setupConnections();
 }
 
 void PlaybackToolBarModel::setupConnections()
 {
-    connect(this, &PlaybackToolBarModel::isToolbarFloatingChanged, this, &PlaybackToolBarModel::updateActions);
+    context::IPlaybackStatePtr playbackState = globalContext()->playbackState();
 
     playbackController()->isPlayAllowedChanged().onNotify(this, [this]() {
         emit isPlayAllowedChanged();
@@ -73,13 +77,14 @@ void PlaybackToolBarModel::setupConnections()
         onActionsStateChanges({ PLAY_ACTION_CODE });
     });
 
-    playbackController()->playbackPositionChanged().onNotify(this, [this]() {
-        updatePlayPosition();
+    playbackState->playbackPositionChanged().onReceive(this, [this](secs_t secs) {
+        updatePlayPosition(secs);
     });
 
     playbackController()->totalPlayTimeChanged().onNotify(this, [this]() {
         emit maxPlayTimeChanged();
-        updatePlayPosition();
+        secs_t pos = globalContext()->playbackState()->playbackPosition();
+        updatePlayPosition(pos);
     });
 
     playbackController()->currentTempoChanged().onNotify(this, [this]() {
@@ -230,10 +235,9 @@ UiAction PlaybackToolBarModel::playAction() const
     return action;
 }
 
-void PlaybackToolBarModel::updatePlayPosition()
+void PlaybackToolBarModel::updatePlayPosition(secs_t secs)
 {
-    float seconds = playbackController()->playbackPositionInSeconds();
-    QTime playTime = timeFromSeconds(seconds);
+    QTime playTime = timeFromSeconds(secs);
 
     if (m_playTime == playTime) {
         return;

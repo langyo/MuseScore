@@ -19,15 +19,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_WORKSPACE_WORKSPACECONFIGURATION_H
-#define MU_WORKSPACE_WORKSPACECONFIGURATION_H
+#ifndef MUSE_WORKSPACE_WORKSPACECONFIGURATION_H
+#define MUSE_WORKSPACE_WORKSPACECONFIGURATION_H
 
 #include "../iworkspaceconfiguration.h"
 #include "modularity/ioc.h"
 #include "iglobalconfiguration.h"
 #include "async/asyncable.h"
 
-namespace mu::workspace {
+namespace muse::workspace {
 class WorkspaceConfiguration : public IWorkspaceConfiguration, public async::Asyncable
 {
     INJECT(IGlobalConfiguration, globalConfiguration)
@@ -48,4 +48,4 @@ private:
 };
 }
 
-#endif // MU_WORKSPACE_WORKSPACECONFIGURATION_H
+#endif // MUSE_WORKSPACE_WORKSPACECONFIGURATION_H

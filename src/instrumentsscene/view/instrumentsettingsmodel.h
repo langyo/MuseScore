@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -34,13 +34,13 @@
 #include "notation/notationtypes.h"
 
 namespace mu::instrumentsscene {
-class InstrumentSettingsModel : public QObject, public async::Asyncable
+class InstrumentSettingsModel : public QObject, public muse::async::Asyncable
 {
     Q_OBJECT
 
     INJECT(notation::ISelectInstrumentsScenario, selectInstrumentsScenario)
     INJECT(context::IGlobalContext, context)
-    INJECT(IInteractive, interactive)
+    INJECT(muse::IInteractive, interactive)
 
     Q_PROPERTY(QString instrumentName READ instrumentName WRITE setInstrumentName NOTIFY dataChanged)
     Q_PROPERTY(QString abbreviature READ abbreviature WRITE setAbbreviature NOTIFY dataChanged)

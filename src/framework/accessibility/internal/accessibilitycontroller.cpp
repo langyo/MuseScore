@@ -44,6 +44,7 @@
 #endif
 
 using namespace muse;
+using namespace muse::modularity;
 using namespace muse::accessibility;
 
 AccessibleObject* s_rootObject = nullptr;
@@ -63,10 +64,15 @@ QAccessibleInterface* AccessibilityController::accessibleInterface(QObject*)
     return static_cast<QAccessibleInterface*>(new AccessibleItemInterface(s_rootObject));
 }
 
+void AccessibilityController::setAccesibilityEnabled(bool enabled)
+{
+    m_enabled = enabled;
+}
+
 static QAccessibleInterface* muAccessibleFactory(const QString& classname, QObject* object)
 {
     if (!accessibleInterfaceRegister) {
-        accessibleInterfaceRegister = mu::modularity::ioc()->resolve<IQAccessibleInterfaceRegister>("accessibility");
+        accessibleInterfaceRegister = globalIoc()->resolve<IQAccessibleInterfaceRegister>("accessibility");
     }
 
     auto interfaceGetter = accessibleInterfaceRegister->interfaceGetter(classname);
@@ -91,7 +97,13 @@ void AccessibilityController::init()
 
 void AccessibilityController::reg(IAccessible* item)
 {
+    if (!m_enabled) {
+        return;
+    }
+
     if (!m_inited) {
+        //! This needed to be done here, because we need to init controller (register factory) after UI is start loaded,
+        //! thus we register the factory after qt registers its factory so that our factory is called first
         m_inited = true;
         init();
     }
@@ -426,7 +438,7 @@ IAccessible* AccessibilityController::findSiblingItem(const IAccessible* item, c
     return nullptr;
 }
 
-mu::async::Channel<QAccessibleEvent*> AccessibilityController::eventSent() const
+async::Channel<QAccessibleEvent*> AccessibilityController::eventSent() const
 {
     return m_eventSent;
 }
@@ -566,6 +578,11 @@ QWindow* AccessibilityController::accessibleWindow() const
     return mainWindow()->qWindow();
 }
 
+muse::modularity::ContextPtr AccessibilityController::iocContext() const
+{
+    return Injectable::iocContext();
+}
+
 IAccessible::Role AccessibilityController::accessibleRole() const
 {
     return IAccessible::Role::Application;
@@ -669,7 +686,7 @@ int AccessibilityController::accessibleRowIndex() const
     return 0;
 }
 
-async::Channel<IAccessible::Property, mu::Val> AccessibilityController::accessiblePropertyChanged() const
+async::Channel<IAccessible::Property, Val> AccessibilityController::accessiblePropertyChanged() const
 {
     static async::Channel<IAccessible::Property, Val> ch;
     return ch;

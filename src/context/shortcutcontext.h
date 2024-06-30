@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,10 +30,10 @@
 
 namespace mu::context {
 // common shortcuts (re declared for convenience)
-static const std::string CTX_ANY = shortcuts::CTX_ANY;
-static const std::string CTX_NOTATION_OPENED = shortcuts::CTX_PROJECT_OPENED;
-static const std::string CTX_NOTATION_FOCUSED = shortcuts::CTX_PROJECT_FOCUSED;
-static const std::string CTX_NOT_NOTATION_FOCUSED = shortcuts::CTX_NOT_PROJECT_FOCUSED;
+static const std::string CTX_ANY = muse::shortcuts::CTX_ANY;
+static const std::string CTX_NOTATION_OPENED = muse::shortcuts::CTX_PROJECT_OPENED;
+static const std::string CTX_NOTATION_FOCUSED = muse::shortcuts::CTX_PROJECT_FOCUSED;
+static const std::string CTX_NOT_NOTATION_FOCUSED = muse::shortcuts::CTX_NOT_PROJECT_FOCUSED;
 
 /// We're not [in note input on a TAB staff] (i.e. either not in note input mode, or in note input mode but not on a TAB staff)
 static const std::string CTX_NOTATION_NOT_NOTE_INPUT_STAFF_TAB("notation-not-note-input-staff-tab");
@@ -42,7 +42,7 @@ static const std::string CTX_NOTATION_NOTE_INPUT_STAFF_TAB("notation-note-input-
 
 static const std::string CTX_NOTATION_TEXT_EDITING("notation-text-editing");
 
-class ShortcutContextPriority : public shortcuts::IShortcutContextPriority
+class ShortcutContextPriority : public muse::shortcuts::IShortcutContextPriority
 {
 public:
 
@@ -61,8 +61,8 @@ public:
             CTX_NOTATION_TEXT_EDITING
         };
 
-        size_t index1 = mu::indexOf(CONTEXTS_BY_INCREASING_PRIORITY, ctx1);
-        size_t index2 = mu::indexOf(CONTEXTS_BY_INCREASING_PRIORITY, ctx2);
+        size_t index1 = muse::indexOf(CONTEXTS_BY_INCREASING_PRIORITY, ctx1);
+        size_t index2 = muse::indexOf(CONTEXTS_BY_INCREASING_PRIORITY, ctx2);
 
         return index1 < index2;
     }

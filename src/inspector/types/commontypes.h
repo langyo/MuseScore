@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -75,11 +75,11 @@ public:
 
 inline double formatDoubleFunc(const QVariant& elementPropertyValue)
 {
-    return DataFormatter::roundDouble(elementPropertyValue.toDouble());
+    return muse::DataFormatter::roundDouble(elementPropertyValue.toDouble());
 }
 
 template<typename T>
-inline QVariant object(T type, QString title, ui::IconCode::Code iconCode = ui::IconCode::Code::NONE)
+inline QVariant object(T type, QString title, muse::ui::IconCode::Code iconCode = muse::ui::IconCode::Code::NONE)
 {
     QVariantMap obj;
     obj["value"] = static_cast<int>(type);

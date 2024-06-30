@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -256,7 +256,7 @@ LineSegment* Trill::createLineSegment(System* parent)
 {
     TrillSegment* seg = new TrillSegment(this, parent);
     seg->setTrack(track());
-    seg->setColor(color());
+    seg->setColor(lineColor());
     seg->initElementStyle(&trillSegmentStyle);
     return seg;
 }
@@ -350,6 +350,6 @@ String Trill::accessibleInfo() const
 
 void Trill::doComputeEndElement()
 {
-    setEndElement(score()->findCRinStaff(tick2(), track2staff(track2())));
+    setEndElement(score()->findChordRestEndingBeforeTickInStaff(tick2(), track2staff(track2())));
 }
 }

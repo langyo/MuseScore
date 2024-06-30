@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -237,7 +237,7 @@ String ScoreOrder::getFamilyName(const InstrumentTemplate* instrTemplate, bool s
 
     if (soloist) {
         return String(u"<soloists>");
-    } else if (mu::contains(instrumentMap, instrTemplate->id)) {
+    } else if (muse::contains(instrumentMap, instrTemplate->id)) {
         return instrumentMap.at(instrTemplate->id).id;
     } else if (instrTemplate->family) {
         return instrTemplate->family->id;
@@ -315,7 +315,7 @@ int ScoreOrder::instrumentSortingIndex(const String& instrumentId, bool isSolois
         return 0;
     }
 
-    String family = mu::contains(instrumentMap, instrumentId) ? instrumentMap.at(instrumentId).id : ii.instrTemplate->familyId();
+    String family = muse::contains(instrumentMap, instrumentId) ? instrumentMap.at(instrumentId).id : ii.instrTemplate->familyId();
 
     size_t index = groups.size();
 
@@ -586,17 +586,16 @@ void ScoreOrder::write(XmlWriter& xml) const
 
 void ScoreOrder::updateInstruments(const Score* score)
 {
-    for (Part* part : score->parts()) {
+    for (const Part* part : score->parts()) {
         InstrumentIndex ii = searchTemplateIndexForId(part->instrument()->id());
         if (!ii.instrTemplate || !ii.instrTemplate->family) {
             continue;
         }
 
-        InstrumentFamily* family = ii.instrTemplate->family;
         InstrumentOverwrite io;
-        io.id = family->id;
-        io.name = family->name;
-        instrumentMap.insert({ ii.instrTemplate->id, io });
+        io.id = ii.instrTemplate->family->id;
+        io.name = ii.instrTemplate->family->name;
+        instrumentMap.emplace(ii.instrTemplate->id, std::move(io));
     }
 }
 }

@@ -19,14 +19,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_LEARN_LEARNCONFIGURATION_H
-#define MU_LEARN_LEARNCONFIGURATION_H
+#ifndef MUSE_LEARN_LEARNCONFIGURATION_H
+#define MUSE_LEARN_LEARNCONFIGURATION_H
+
+#include "modularity/ioc.h"
+#include "iglobalconfiguration.h"
+
+#include "global/types/config.h"
 
 #include "ilearnconfiguration.h"
 
-namespace mu::learn {
+namespace muse::learn {
 class LearnConfiguration : public ILearnConfiguration
 {
+    Inject<IGlobalConfiguration> globalConfiguration;
+
 public:
     void init();
 
@@ -34,10 +41,13 @@ public:
 
     QUrl startedPlaylistUrl() const override;
     QUrl advancedPlaylistUrl() const override;
+    bool classesEnabled() const override;
 
 private:
     bool isTestingMode() const;
+
+    Config m_config;
 };
 }
 
-#endif // MU_LEARN_LEARNCONFIGURATION_H
+#endif // MUSE_LEARN_LEARNCONFIGURATION_H

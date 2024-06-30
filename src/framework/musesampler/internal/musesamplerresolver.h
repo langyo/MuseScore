@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_MUSESAMPLER_MUSESAMPLERRESOLVER_H
-#define MU_MUSESAMPLER_MUSESAMPLERRESOLVER_H
+#ifndef MUSE_MUSESAMPLER_MUSESAMPLERRESOLVER_H
+#define MUSE_MUSESAMPLER_MUSESAMPLERRESOLVER_H
 
 #include "audio/isynthresolver.h"
 #include "modularity/ioc.h"
@@ -30,13 +30,14 @@
 #include "imusesamplerconfiguration.h"
 #include "imusesamplerinfo.h"
 
-namespace mu::musesampler {
+namespace muse::musesampler {
 class MuseSamplerResolver : public muse::audio::synth::ISynthResolver::IResolver, public IMuseSamplerInfo
 {
     INJECT(IMuseSamplerConfiguration, configuration)
 
 public:
     void init();
+    bool reloadMuseSampler();
 
     muse::audio::synth::ISynthesizerPtr resolveSynth(const muse::audio::TrackId trackId,
                                                      const muse::audio::AudioInputParams& params) const override;
@@ -50,11 +51,12 @@ public:
     bool isInstalled() const override;
 
     float defaultReverbLevel(const String& instrumentSoundId) const override;
-    String drumMapping(int instrumentId) const override;
+
+    ByteArray drumMapping(int instrumentId) const override;
+    std::vector<Instrument> instruments() const override;
 
 private:
-    bool checkLibrary() const;
-    bool isVersionSupported() const;
+    bool doInit(const io::path_t& libPath);
 
     void loadSoundPresetAttributes(muse::audio::SoundPresetAttributes& attributes, int instrumentId, const char* presetCode) const;
 
@@ -64,4 +66,4 @@ private:
 };
 }
 
-#endif // MU_MUSESAMPLER_MUSESAMPLERRESOLVER_H
+#endif // MUSE_MUSESAMPLER_MUSESAMPLERRESOLVER_H

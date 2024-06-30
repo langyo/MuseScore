@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -39,7 +39,7 @@ using namespace muse::draw;
 using namespace mu::engraving;
 using namespace mu::engraving::rendering::stable;
 
-static const muse::draw::Color DEBUG_ELTREE_SELECTED_COLOR(164, 0, 0);
+static const Color DEBUG_ELTREE_SELECTED_COLOR(164, 0, 0);
 
 /// Generates a seemingly random but stable color based on a pointer address.
 /// If we would use really random colors, they would change on every redraw.
@@ -65,7 +65,7 @@ static Color colorForPointer(const void* ptr)
 void DebugPaint::paintElementDebug(Painter& painter, const EngravingItem* item)
 {
     // Elements tree
-    bool isDiagnosticSelected = elementsProvider()->isSelected(item);
+    bool isDiagnosticSelected = item->score()->elementsProvider() ? item->score()->elementsProvider()->isSelected(item) : false;
 
     PointF pos(item->pagePos());
     painter.translate(pos);
@@ -73,7 +73,7 @@ void DebugPaint::paintElementDebug(Painter& painter, const EngravingItem* item)
     RectF bbox = item->ldata()->bbox();
 
     if (item->isType(ElementType::SEGMENT)) {
-        if (RealIsNull(bbox.height())) {
+        if (muse::RealIsNull(bbox.height())) {
             bbox.setHeight(10.0);
             LOGD() << "Segment bbox height is null";
         }
@@ -81,7 +81,7 @@ void DebugPaint::paintElementDebug(Painter& painter, const EngravingItem* item)
 
     if (!bbox.isEmpty()) {
         // Draw shape
-        if (configuration()->debuggingOptions().colorElementShapes
+        if (item->configuration()->debuggingOptions().colorElementShapes
             && !item->isPage() && !item->isSystem() && !item->isStaffLines() && !item->isBox()) {
             PainterPath path;
             path.setFillRule(PainterPath::FillRule::WindingFill);
@@ -97,8 +97,8 @@ void DebugPaint::paintElementDebug(Painter& painter, const EngravingItem* item)
         }
 
         // Draw bbox
-        if (isDiagnosticSelected || configuration()->debuggingOptions().showElementBoundingRects) {
-            double scaling = painter.worldTransform().m11() / configuration()->guiScaling();
+        if (isDiagnosticSelected || item->configuration()->debuggingOptions().showElementBoundingRects) {
+            double scaling = painter.worldTransform().m11() / item->configuration()->guiScaling();
             Pen borderPen(DEBUG_ELTREE_SELECTED_COLOR, (item->selected() ? 2.0 : 1.0) / scaling);
 
             painter.setPen(borderPen);
@@ -112,7 +112,11 @@ void DebugPaint::paintElementDebug(Painter& painter, const EngravingItem* item)
 
 void DebugPaint::paintPageDebug(Painter& painter, const Page* page, const std::vector<EngravingItem*>& items)
 {
-    auto options = configuration()->debuggingOptions();
+    if (items.empty()) {
+        return;
+    }
+
+    auto options = items.front()->configuration()->debuggingOptions();
     if (!options.anyEnabled()) {
         return;
     }
@@ -127,7 +131,7 @@ void DebugPaint::paintPageDebug(Painter& painter, const Page* page, const std::v
         return;
     }
 
-    double scaling = painter.worldTransform().m11() / configuration()->guiScaling();
+    double scaling = painter.worldTransform().m11() / items.front()->configuration()->guiScaling();
 
     painter.save();
 

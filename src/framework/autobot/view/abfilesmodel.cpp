@@ -23,7 +23,7 @@
 
 #include "log.h"
 
-using namespace mu::autobot;
+using namespace muse::autobot;
 
 static const QString STATUS_NONE("none");
 static const QString STATUS_SUCCESS("success");

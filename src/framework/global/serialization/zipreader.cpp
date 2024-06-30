@@ -22,10 +22,11 @@
 #include "zipreader.h"
 
 #include "global/io/file.h"
+#include "global/io/dir.h"
 #include "internal/zipcontainer.h"
 
-using namespace mu;
-using namespace mu::io;
+using namespace muse;
+using namespace muse::io;
 
 struct ZipReader::Impl
 {
@@ -104,4 +105,32 @@ bool ZipReader::fileExists(const std::string& fileName) const
 ByteArray ZipReader::fileData(const std::string& fileName) const
 {
     return m_impl->zip->fileData(fileName);
+}
+
+// ===========================
+// ZipUnpack
+// ===========================
+
+Ret ZipUnpack::unpack(const io::path_t& zipPath, const io::path_t& dirPath)
+{
+    Ret ret = io::Dir::mkpath(dirPath);
+    if (!ret) {
+        return ret;
+    }
+
+    ZipReader zip(zipPath);
+    for (const ZipReader::FileInfo& fi : zip.fileInfoList()) {
+        if (fi.isDir) {
+            ret = io::Dir::mkpath(dirPath + "/" + fi.filePath);
+        } else if (fi.isFile) {
+            ByteArray data = zip.fileData(fi.filePath.toStdString());
+            ret = io::File::writeFile(dirPath + "/" + fi.filePath, data);
+        }
+
+        if (!ret) {
+            break;
+        }
+    }
+
+    return ret;
 }

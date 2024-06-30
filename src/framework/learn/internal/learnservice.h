@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_LEARN_LEARNSERVICE_H
-#define MU_LEARN_LEARNSERVICE_H
+#ifndef MUSE_LEARN_LEARNSERVICE_H
+#define MUSE_LEARN_LEARNSERVICE_H
 
 #include "ilearnservice.h"
 
@@ -31,7 +31,7 @@
 
 class QJsonDocument;
 
-namespace mu::learn {
+namespace muse::learn {
 class LearnService : public ILearnService
 {
     INJECT(ILearnConfiguration, configuration)
@@ -60,4 +60,4 @@ private:
 };
 }
 
-#endif // MU_LEARN_LEARNSERVICE_H
+#endif // MUSE_LEARN_LEARNSERVICE_H

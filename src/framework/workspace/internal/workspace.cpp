@@ -28,8 +28,8 @@
 
 #include "log.h"
 
-using namespace mu;
-using namespace mu::workspace;
+using namespace muse;
+using namespace muse::workspace;
 
 Workspace::Workspace(const io::path_t& filePath)
     : m_file(filePath)

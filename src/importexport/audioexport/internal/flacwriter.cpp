@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -26,9 +26,9 @@
 
 using namespace muse::audio;
 using namespace mu::iex::audioexport;
-using namespace mu::io;
+using namespace muse::io;
 
-mu::Ret FlacWriter::write(notation::INotationPtr notation, io::IODevice& destinationDevice, const Options&)
+muse::Ret FlacWriter::write(notation::INotationPtr notation, muse::io::IODevice& destinationDevice, const Options&)
 {
     const SoundTrackFormat format {
         SoundTrackType::FLAC,

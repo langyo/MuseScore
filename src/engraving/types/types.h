@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -27,8 +27,9 @@
 #include <map>
 #include <unordered_set>
 
-#include "types/id.h"
-#include "types/string.h"
+#include "global/types/id.h"
+#include "global/types/string.h"
+#include "global/types/translatablestring.h"
 #include "global/types/flags.h"
 
 #include "draw/types/color.h"
@@ -151,7 +152,6 @@ enum class ElementType {
     STAFF_STATE,
     NOTEHEAD,
     NOTEDOT,
-    TREMOLO, // deprecated
     IMAGE,
     MEASURE,
     SELECTION,
@@ -220,13 +220,25 @@ using ElementTypeSet = std::unordered_set<ElementType>;
 // ========================================
 // PropertyValue
 // ========================================
+// --- Common ---
+using String = muse::String;
+using StringList = muse::StringList;
+using TranslatableString = muse::TranslatableString;
+using Char = muse::Char;
+using AsciiStringView = muse::AsciiStringView;
+using real_t = muse::real_t;
+using ID = muse::ID;
 
 // --- Geometry ---
-using PointF = mu::PointF;              // P_TYPE::POINT
-using SizeF = mu::SizeF;                // P_TYPE::SIZE
+using Point = muse::Point;
+using PointF = muse::PointF;              // P_TYPE::POINT
+using RectF = muse::RectF;
+using LineF = muse::LineF;
+using SizeF = muse::SizeF;                // P_TYPE::SIZE
 using PainterPath = muse::draw::PainterPath; // P_TYPE::PATH
-using ScaleF = mu::ScaleF;              // P_TYPE::SCALE
-using PairF = mu::PairF;                // P_TYPE::PAIR_REAL
+using ScaleF = muse::ScaleF;              // P_TYPE::SCALE
+using PairF = muse::PairF;                // P_TYPE::PAIR_REAL
+using PolygonF = muse::PolygonF;
 
 // --- Draw ---
 using Color = muse::draw::Color;        // P_TYPE::COLOR
@@ -311,6 +323,18 @@ enum class DirectionH : char {
 enum class Orientation : signed char {
     VERTICAL,
     HORIZONTAL
+};
+
+enum class AutoOnOff : char {
+    AUTO,
+    ON,
+    OFF
+};
+
+enum class VoiceApplication {
+    ALL_VOICE_IN_INSTRUMENT,
+    ALL_VOICE_IN_STAFF,
+    CURRENT_VOICE_ONLY
 };
 
 // P_TYPE::BEAM_MODE
@@ -582,6 +606,8 @@ enum class DynamicType : char {
     SFZ,
     SFF,
     SFFZ,
+    SFFF,
+    SFFFZ,
     SFP,
     SFPP,
     RFZ,
@@ -655,6 +681,12 @@ enum class IntervalType {
     DIMINISHED
 };
 
+enum class InstrumentLabelVisibility : char {
+    LONG,
+    SHORT,
+    HIDE
+};
+
 struct OrnamentInterval
 {
     IntervalStep step = IntervalStep::SECOND;
@@ -675,7 +707,7 @@ struct OrnamentInterval
             IntervalStep::FIFTH,
             IntervalStep::OCTAVE
         };
-        return mu::contains(perfectSteps, step);
+        return muse::contains(perfectSteps, step);
     }
 
     bool isPerfect() const
@@ -879,7 +911,7 @@ enum class SlurStyleType {
 };
 
 struct InstrumentTrackId {
-    ID partId = 0;
+    muse::ID partId = 0;
     String instrumentId;
 
     bool operator ==(const InstrumentTrackId& other) const
@@ -997,6 +1029,12 @@ enum class LyricsSyllabic : char {
     SINGLE, BEGIN, END, MIDDLE
 };
 
+enum class LyricsDashSystemStart {
+    STANDARD,
+    UNDER_HEADER,
+    UNDER_FIRST_NOTE
+};
+
 enum class SpannerSegmentType {
     SINGLE, BEGIN, MIDDLE, END
 };
@@ -1064,7 +1102,7 @@ struct PartAudioSettingsCompat {
 };
 
 struct SettingsCompat {
-    std::map<ID /*partid*/, PartAudioSettingsCompat> audioSettings;
+    std::map<muse::ID /*partid*/, PartAudioSettingsCompat> audioSettings;
 };
 
 //---------------------------------------------------------
@@ -1091,7 +1129,7 @@ enum class LayoutFlag : char {
     REBUILD_MIDI_MAPPING = 4,
 };
 
-typedef Flags<LayoutFlag> LayoutFlags;
+typedef muse::Flags<LayoutFlag> LayoutFlags;
 } // mu::engraving
 
 template<>
@@ -1100,7 +1138,7 @@ struct std::hash<mu::engraving::InstrumentTrackId>
     std::size_t operator()(const mu::engraving::InstrumentTrackId& s) const noexcept
     {
         std::size_t h1 = std::hash<int> {}(static_cast<int>(s.partId.toUint64()));
-        std::size_t h2 = std::hash<mu::String> {}(s.instrumentId);
+        std::size_t h2 = std::hash<muse::String> {}(s.instrumentId);
         return h1 ^ (h2 << 1);
     }
 };

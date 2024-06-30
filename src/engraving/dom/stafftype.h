@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,7 +23,6 @@
 #ifndef MU_ENGRAVING_STAFFTYPE_H
 #define MU_ENGRAVING_STAFFTYPE_H
 
-#include "draw/types/color.h"
 #include "draw/types/font.h"
 
 #include "engravingitem.h"
@@ -200,16 +199,15 @@ enum class ParenthesizeTiedFret {
 
 class StaffType
 {
-    INJECT_STATIC(IEngravingConfiguration, engravingConfiguration)
-
+    static inline muse::GlobalInject<IEngravingConfiguration> configuration;
 public:
     StaffType();
 
     StaffType(StaffGroup sg, const String& xml, const String& name, int lines, int stpOff, double lineDist, bool genClef, bool showBarLines,
-              bool stemless, bool genTimeSig, bool genKeySig, bool showLedgerLiness, bool invisible, const muse::draw::Color& color);
+              bool stemless, bool genTimeSig, bool genKeySig, bool showLedgerLiness, bool invisible, const Color& color);
 
     StaffType(StaffGroup sg, const String& xml, const String& name, int lines, int stpOff, double lineDist, bool genClef, bool showBarLines,
-              bool stemless, bool genTimesig, bool invisible, const muse::draw::Color& color, const String& durFontName, double durFontSize,
+              bool stemless, bool genTimesig, bool invisible, const Color& color, const String& durFontName, double durFontSize,
               double durFontUserY, double genDur, const String& fretFontName, double fretFontSize, double fretFontUserY,
               TablatureSymbolRepeat symRepeat, bool linesThrough, TablatureMinimStyle minimStyle, bool onLines, bool showRests,
               bool stemsDown, bool stemThrough, bool upsideDown, bool showTabFingering, bool useNumbers, bool showBackTied);
@@ -242,11 +240,11 @@ public:
     double userMag() const { return m_userMag; }
     bool isSmall() const { return m_small; }
     bool invisible() const { return m_invisible; }
-    const muse::draw::Color& color() const { return m_color; }
+    const Color& color() const { return m_color; }
     void setUserMag(double val) { m_userMag = val; }
     void setSmall(bool val) { m_small = val; }
     void setInvisible(bool val) { m_invisible = val; }
-    void setColor(const muse::draw::Color& val) { m_color = val; }
+    void setColor(const Color& val) { m_color = val; }
     Spatium yoffset() const { return m_yoffset; }
     void setYoffset(Spatium val) { m_yoffset = val; }
     double spatium(const MStyle& style) const;
@@ -278,7 +276,7 @@ public:
     int     visualStringToPhys(int line) const;                   // return the string in physical order from visual string
     double   physStringToYOffset(int strg) const;                  // return the string Y offset (in sp, chord-relative)
     String tabBassStringPrefix(int strg, bool* hasFret) const;   // return a string with the prefix, if any, identifying a bass string
-    void    drawInputStringMarks(muse::draw::Painter* p, int string, voice_idx_t voice, const RectF& rect) const;
+    void    drawInputStringMarks(muse::draw::Painter* p, int string, const Color& selectionColor, const RectF& rect) const;
     int     numOfTabLedgerLines(int string) const;
 
     // properties getters (some getters require updated metrics)
@@ -343,10 +341,10 @@ public:
     void  setShowBackTied(bool val) { m_showBackTied = val; }
 
     // utility functions for tab specially managed elements
-    mu::PointF chordStemPos(const Chord*) const;
+    PointF chordStemPos(const Chord*) const;
     double   chordRestStemPosY(const ChordRest*) const;
     double   chordStemPosX(const Chord*) const { return STAFFTYPE_TAB_DEFAULTSTEMPOSX; }
-    mu::PointF chordStemPosBeam(const Chord*) const;
+    PointF chordStemPosBeam(const Chord*) const;
     double   chordStemLength(const Chord*) const;
 
     bool isTabStaff() const { return m_group == StaffGroup::TAB; }
@@ -360,7 +358,7 @@ public:
     static std::vector<String> fontNames(bool bDuration);
     static bool fontData(bool bDuration, size_t nIdx, String* pFamily, String* pDisplayName, double* pSize, double* pYOff);
 
-    static void initStaffTypes();
+    static void initStaffTypes(const Color& defaultColor);
     static const std::vector<StaffType>& presets() { return m_presets; }
 
 private:
@@ -381,7 +379,7 @@ private:
     Spatium m_yoffset;
     bool m_small = false;
     bool m_invisible = false;
-    muse::draw::Color m_color = engravingConfiguration()->defaultColor();
+    Color m_color;
 
     int m_lines = 5;
     int m_stepOffset = 0;

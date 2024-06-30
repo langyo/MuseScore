@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_MUSESAMPLER_MUSESAMPLERACTIONCONTROLLER_H
-#define MU_MUSESAMPLER_MUSESAMPLERACTIONCONTROLLER_H
+#ifndef MUSE_MUSESAMPLER_MUSESAMPLERACTIONCONTROLLER_H
+#define MUSE_MUSESAMPLER_MUSESAMPLERACTIONCONTROLLER_H
 
 #include "actions/actionable.h"
 #include "async/asyncable.h"
@@ -30,7 +30,7 @@
 #include "iinteractive.h"
 #include "imusesamplerinfo.h"
 
-namespace mu::musesampler {
+namespace muse::musesampler {
 class MuseSamplerActionController : public muse::actions::Actionable, public async::Asyncable
 {
     INJECT(muse::actions::IActionsDispatcher, dispatcher)
@@ -38,11 +38,16 @@ class MuseSamplerActionController : public muse::actions::Actionable, public asy
     INJECT(IMuseSamplerInfo, museSamplerInfo)
 
 public:
-    void init();
+    using ReloadMuseSamplerFunc = std::function<bool ()>;
+
+    void init(const ReloadMuseSamplerFunc& reloadMuseSampler);
 
 private:
     void checkLibraryIsDetected();
+    void reloadMuseSampler();
+
+    ReloadMuseSamplerFunc m_reloadMuseSampler;
 };
 }
 
-#endif // MU_MUSESAMPLER_MUSESAMPLERACTIONCONTROLLER_H
+#endif // MUSE_MUSESAMPLER_MUSESAMPLERACTIONCONTROLLER_H

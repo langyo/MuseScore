@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -41,6 +41,7 @@
 #include "log.h"
 #include "translation.h"
 
+using namespace muse;
 using namespace mu::palette;
 using namespace mu::engraving;
 
@@ -141,7 +142,7 @@ const char* PaletteCell::translationContext() const
 
 QString PaletteCell::translatedName() const
 {
-    const QString trName = mu::qtrc(translationContext(), name.toUtf8());
+    const QString trName = muse::qtrc(translationContext(), name.toUtf8());
 
     if (element && element->isTextBase() && name.contains("%1")) {
         return trName.arg(toTextBase(element.get())->plainText());
@@ -156,7 +157,7 @@ void PaletteCell::retranslate()
         TextBase* target = toTextBase(element.get());
         TextBase* orig = toTextBase(untranslatedElement.get());
         const QString& text = orig->xmlText();
-        target->setXmlText(mu::qtrc("palette", text.toUtf8().constData()));
+        target->setXmlText(muse::qtrc("palette", text.toUtf8().constData()));
     }
 }
 
@@ -230,7 +231,7 @@ bool PaletteCell::read(XmlReader& e, bool pasteMode)
 
                 if (element->type() == ElementType::ACTION_ICON) {
                     ActionIcon* icon = toActionIcon(element.get());
-                    const mu::ui::UiAction& action = actionsRegister()->action(icon->actionCode());
+                    const muse::ui::UiAction& action = actionsRegister()->action(icon->actionCode());
                     if (action.isValid()) {
                         icon->setAction(icon->actionCode(), static_cast<char16_t>(action.iconCode));
                     } else {
@@ -286,14 +287,14 @@ void PaletteCell::write(XmlWriter& xml, bool pasteMode) const
     if (!tag.isEmpty()) {
         xml.tag("tag", tag);
     }
-    if (mag != 1.0) {
+    if (!RealIsEqual(mag, 1.0)) {
         xml.tag("mag", mag);
     }
 
     if (untranslatedElement) {
-        rw::RWRegister::writer()->writeItem(untranslatedElement.get(), xml);
+        rw::RWRegister::writer(untranslatedElement->iocContext())->writeItem(untranslatedElement.get(), xml);
     } else {
-        rw::RWRegister::writer()->writeItem(element.get(), xml);
+        rw::RWRegister::writer(element->iocContext())->writeItem(element.get(), xml);
     }
     xml.endElement();
 }
@@ -319,7 +320,7 @@ PaletteCellPtr PaletteCell::fromElementMimeData(const QByteArray& data)
 
     if (element->isActionIcon()) {
         ActionIcon* icon = toActionIcon(element.get());
-        const mu::ui::UiAction& action = actionsRegister()->action(icon->actionCode());
+        const muse::ui::UiAction& action = actionsRegister()->action(icon->actionCode());
         if (action.isValid()) {
             icon->setAction(icon->actionCode(), static_cast<char16_t>(action.iconCode));
         }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -32,8 +32,8 @@ BarlineSettingsModel::BarlineSettingsModel(QObject* parent, IElementRepositorySe
     : AbstractInspectorModel(parent, repository)
 {
     setModelType(InspectorModelType::TYPE_BARLINE);
-    setTitle(qtrc("inspector", "Barline"));
-    setIcon(ui::IconCode::Code::SECTION_BREAK);
+    setTitle(muse::qtrc("inspector", "Barline"));
+    setIcon(muse::ui::IconCode::Code::SECTION_BREAK);
     createProperties();
 }
 
@@ -83,31 +83,31 @@ void BarlineSettingsModel::onNotationChanged(const mu::engraving::PropertyIdSet&
 
 void BarlineSettingsModel::loadProperties(const mu::engraving::PropertyIdSet& propertyIdSet)
 {
-    if (mu::contains(propertyIdSet, Pid::BARLINE_TYPE)) {
+    if (muse::contains(propertyIdSet, Pid::BARLINE_TYPE)) {
         loadPropertyItem(m_type, [](const QVariant& elementPropertyValue) -> QVariant {
             return elementPropertyValue.toInt();
         });
     }
 
-    if (mu::contains(propertyIdSet, Pid::BARLINE_SPAN)) {
+    if (muse::contains(propertyIdSet, Pid::BARLINE_SPAN)) {
         loadPropertyItem(m_isSpanToNextStaff, [](const QVariant& elementPropertyValue) -> QVariant {
             return elementPropertyValue.toBool();
         });
     }
 
-    if (mu::contains(propertyIdSet, Pid::BARLINE_SPAN_FROM)) {
+    if (muse::contains(propertyIdSet, Pid::BARLINE_SPAN_FROM)) {
         loadPropertyItem(m_spanFrom, [](const QVariant& elementPropertyValue) -> QVariant {
             return elementPropertyValue.toInt();
         });
     }
 
-    if (mu::contains(propertyIdSet, Pid::BARLINE_SPAN_TO)) {
+    if (muse::contains(propertyIdSet, Pid::BARLINE_SPAN_TO)) {
         loadPropertyItem(m_spanTo, [](const QVariant& elementPropertyValue) -> QVariant {
             return elementPropertyValue.toInt();
         });
     }
 
-    if (mu::contains(propertyIdSet, Pid::BARLINE_SHOW_TIPS)) {
+    if (muse::contains(propertyIdSet, Pid::BARLINE_SHOW_TIPS)) {
         loadPropertyItem(m_hasToShowTips);
     }
 }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -41,7 +41,7 @@ static const QString SPECIAL_CHARACTERS_DIALOG_NAME("SpecialCharactersDialog");
 using namespace mu::engraving;
 using namespace mu::notation;
 using namespace mu::palette;
-using namespace mu::ui;
+using namespace muse::ui;
 
 static constexpr SymId commonScoreSymbols[] = {
     SymId::accidentalFlat,
@@ -433,7 +433,7 @@ SpecialCharactersDialog::SpecialCharactersDialog(QWidget* parent)
     psa->setRestrictHeight(false);
 
     tabWidget->clear();
-    tabWidget->addTab(psa, mu::qtrc("palette", "Common symbols"));
+    tabWidget->addTab(psa, muse::qtrc("palette", "Common symbols"));
 
     psa = new PaletteScrollArea(m_pSmufl);
     psa->setRestrictHeight(false);
@@ -442,7 +442,7 @@ SpecialCharactersDialog::SpecialCharactersDialog(QWidget* parent)
     m_lws = new QListWidget;
 
     QStringList keys;
-    std::vector<String> symbols = mu::keys(Smufl::smuflRanges());
+    std::vector<String> symbols = muse::keys(Smufl::smuflRanges());
     for (const String& s : symbols) {
         keys << s.toQString();
     }
@@ -453,7 +453,7 @@ SpecialCharactersDialog::SpecialCharactersDialog(QWidget* parent)
     ws->addWidget(m_lws);
     ws->addWidget(psa);
 
-    tabWidget->addTab(ws, mu::qtrc("palette", "Musical symbols"));
+    tabWidget->addTab(ws, muse::qtrc("palette", "Musical symbols"));
 
     psa = new PaletteScrollArea(m_pUnicode);
     psa->setRestrictHeight(false);
@@ -464,7 +464,7 @@ SpecialCharactersDialog::SpecialCharactersDialog(QWidget* parent)
 
     int index = 0;
     for (const UnicodeRange& range : unicodeRanges) {
-        QListWidgetItem* newItem = new QListWidgetItem(mu::qtrc("palette/unicodeRanges", range.name));
+        QListWidgetItem* newItem = new QListWidgetItem(muse::qtrc("palette/unicodeRanges", range.name));
         newItem->setData(Qt::UserRole, index);
         m_lwu->addItem(newItem);
         if (index == 0) {
@@ -476,7 +476,7 @@ SpecialCharactersDialog::SpecialCharactersDialog(QWidget* parent)
     wu->addWidget(m_lwu);
     wu->addWidget(psa);
 
-    tabWidget->addTab(wu, mu::qtrc("palette", "Unicode symbols"));
+    tabWidget->addTab(wu, muse::qtrc("palette", "Unicode symbols"));
 
     connect(m_lws, &QListWidget::currentRowChanged, this, &SpecialCharactersDialog::populateSmufl);
     connect(m_lwu, &QListWidget::currentRowChanged, this, &SpecialCharactersDialog::populateUnicode);
@@ -496,14 +496,6 @@ SpecialCharactersDialog::SpecialCharactersDialog(QWidget* parent)
 
     WidgetStateStore::restoreGeometry(this);
 }
-
-#ifdef MU_QT5_COMPAT
-SpecialCharactersDialog::SpecialCharactersDialog(const SpecialCharactersDialog& other)
-    : TopLevelDialog(other.parentWidget())
-{
-}
-
-#endif
 
 void SpecialCharactersDialog::hideEvent(QHideEvent* event)
 {
@@ -670,7 +662,7 @@ void SpecialCharactersDialog::populateCommon()
         std::shared_ptr<FSymbol> fs = std::make_shared<FSymbol>(gpaletteScore->dummy());
         fs->setCode(id);
         fs->setFont(m_font);
-        m_pCommon->appendElement(fs, QChar(id));
+        m_pCommon->appendElement(fs, QString::fromUcs4(&id, 1));
     }
 
     for (SymId id : commonScoreSymbols) {
@@ -683,7 +675,7 @@ void SpecialCharactersDialog::populateCommon()
         std::shared_ptr<FSymbol> fs = std::make_shared<FSymbol>(gpaletteScore->dummy());
         fs->setCode(id);
         fs->setFont(m_font);
-        m_pCommon->appendElement(fs, QChar(id));
+        m_pCommon->appendElement(fs, QString::fromUcs4(&id, 1));
     }
 }
 
@@ -695,7 +687,7 @@ void SpecialCharactersDialog::populateSmufl()
 {
     int row = m_lws->currentRow();
 
-    QString key = mu::keys(Smufl::smuflRanges()).at(row).toQString();
+    QString key = muse::keys(Smufl::smuflRanges()).at(row).toQString();
     QStringList smuflNames = Smufl::smuflRanges().at(key).toQStringList();
 
     m_pSmufl->clear();

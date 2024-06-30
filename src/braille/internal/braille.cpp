@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -1892,7 +1892,7 @@ QString Braille::brailleChordInterval(Note* rootNote, const std::vector<Note*>& 
     if (interval == 1 && rootNote->octave() == note->octave()) {
         noteOctaveBraille = brailleOctave(note->octave());
     }
-    size_t noteIdx = mu::indexOf(notes, note);
+    size_t noteIdx = muse::indexOf(notes, note);
     int intervalWithPreviousNoteInChord = computeInterval(notes.at(noteIdx - 1), note, false);
     // (b) it is the first or only interval and is more than an octave from the written note,
     if (noteIdx == 1 && intervalWithPreviousNoteInChord > 8) {

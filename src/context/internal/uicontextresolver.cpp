@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,13 +24,17 @@
 #include "diagnostics/diagnosticutils.h"
 
 #include "shortcutcontext.h"
+
+#include "muse_framework_config.h"
+
 #include "log.h"
 
 using namespace mu::context;
-using namespace mu::ui;
+using namespace muse;
+using namespace muse::ui;
 
-static const mu::Uri HOME_PAGE_URI("musescore://home");
-static const mu::Uri NOTATION_PAGE_URI("musescore://notation");
+static const muse::Uri HOME_PAGE_URI("musescore://home");
+static const muse::Uri NOTATION_PAGE_URI("musescore://notation");
 
 static const QString NOTATION_NAVIGATION_PANEL("ScoreView");
 
@@ -89,7 +93,7 @@ UiContext UiContextResolver::currentUiContext() const
     TRACEFUNC;
     Uri currentUri = interactive()->currentUri().val;
 
-#ifdef MUE_BUILD_DIAGNOSTICS_MODULE
+#ifdef MUSE_MODULE_DIAGNOSTICS
     currentUri = diagnostics::diagnosticCurrentUri(interactive()->stack());
 #endif
 
@@ -118,7 +122,7 @@ UiContext UiContextResolver::currentUiContext() const
     return context::UiCtxUnknown;
 }
 
-bool UiContextResolver::match(const ui::UiContext& currentCtx, const ui::UiContext& actCtx) const
+bool UiContextResolver::match(const muse::ui::UiContext& currentCtx, const muse::ui::UiContext& actCtx) const
 {
     if (actCtx == context::UiCtxAny) {
         return true;
@@ -134,7 +138,7 @@ bool UiContextResolver::match(const ui::UiContext& currentCtx, const ui::UiConte
 
 bool UiContextResolver::matchWithCurrent(const UiContext& ctx) const
 {
-    if (ctx == ui::UiCtxAny) {
+    if (ctx == muse::ui::UiCtxAny) {
         return true;
     }
 
@@ -142,7 +146,7 @@ bool UiContextResolver::matchWithCurrent(const UiContext& ctx) const
     return match(currentCtx, ctx);
 }
 
-mu::async::Notification UiContextResolver::currentUiContextChanged() const
+muse::async::Notification UiContextResolver::currentUiContextChanged() const
 {
     return m_currentUiContextChanged;
 }

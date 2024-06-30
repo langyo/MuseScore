@@ -26,10 +26,10 @@
 
 #include "log.h"
 
-using namespace mu;
+using namespace muse;
 using namespace muse::audio;
 using namespace muse::audio::synth;
-using namespace mu::mpe;
+using namespace muse::mpe;
 
 EventAudioSource::EventAudioSource(const TrackId trackId, const mpe::PlaybackData& playbackData,
                                    OnOffStreamEventsReceived onOffStreamReceived)
@@ -37,15 +37,15 @@ EventAudioSource::EventAudioSource(const TrackId trackId, const mpe::PlaybackDat
 {
     ONLY_AUDIO_WORKER_THREAD;
 
-    m_playbackData.offStream.onReceive(this, [onOffStreamReceived, trackId](const PlaybackEventsMap&, const PlaybackParamMap&) {
+    m_playbackData.offStream.onReceive(this, [onOffStreamReceived, trackId](const PlaybackEventsMap&, const PlaybackParamList&) {
         onOffStreamReceived(trackId);
     });
 
-    m_playbackData.mainStream.onReceive(this, [this](const PlaybackEventsMap& events, const DynamicLevelMap& dynamics,
-                                                     const PlaybackParamMap& params) {
+    m_playbackData.mainStream.onReceive(this, [this](const PlaybackEventsMap& events, const DynamicLevelLayers& dynamics,
+                                                     const PlaybackParamLayers& params) {
         m_playbackData.originEvents = events;
-        m_playbackData.dynamicLevelMap = dynamics;
-        m_playbackData.paramMap = params;
+        m_playbackData.dynamics = dynamics;
+        m_playbackData.params = params;
     });
 }
 
@@ -153,6 +153,10 @@ void EventAudioSource::applyInputParams(const AudioInputParams& requiredParams)
 
     if (!m_synth) {
         m_synth = synthResolver()->resolveDefaultSynth(m_trackId);
+        IF_ASSERT_FAILED(m_synth) {
+            LOGE() << "Default synth not found!";
+            return;
+        }
     }
 
     m_synth->paramsChanged().onReceive(this, [this](const AudioInputParams& params) {

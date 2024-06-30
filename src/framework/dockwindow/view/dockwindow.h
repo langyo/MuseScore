@@ -38,9 +38,7 @@
 #include "idockwindow.h"
 #include "internal/dockbase.h"
 
-#ifndef MU_QT5_COMPAT
 Q_MOC_INCLUDE(< QQuickWindow >)
-#endif
 
 namespace KDDockWidgets {
 class MainWindowBase;
@@ -51,7 +49,7 @@ namespace muse::dock {
 class DockToolBarView;
 class DockingHolderView;
 class DockPageView;
-class DockWindow : public QQuickItem, public IDockWindow, public async::Asyncable
+class DockWindow : public QQuickItem, public IDockWindow, public muse::Injectable, public async::Asyncable
 {
     Q_OBJECT
 
@@ -62,9 +60,9 @@ class DockWindow : public QQuickItem, public IDockWindow, public async::Asyncabl
 
     Q_PROPERTY(QQuickWindow * window READ windowProperty NOTIFY windowPropertyChanged)
 
-    INJECT(mu::ui::IUiConfiguration, uiConfiguration)
-    INJECT(mu::workspace::IWorkspaceManager, workspaceManager)
-    INJECT(IDockWindowProvider, dockWindowProvider)
+    muse::Inject<ui::IUiConfiguration> uiConfiguration = { this };
+    muse::Inject<muse::workspace::IWorkspaceManager> workspaceManager = { this };
+    muse::Inject<IDockWindowProvider> dockWindowProvider = { this };
 
 public:
     explicit DockWindow(QQuickItem* parent = nullptr);
@@ -109,11 +107,7 @@ private:
     bool doLoadPage(const QString& uri, const QVariantMap& params = {});
 
     void componentComplete() override;
-#ifdef MU_QT5_COMPAT
-    void geometryChanged(const QRectF& newGeometry, const QRectF& oldGeometry) override;
-#else
     void geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) override;
-#endif
 
     void loadPageContent(const DockPageView* page);
     void loadToolBars(const DockPageView* page);
@@ -143,8 +137,8 @@ private:
 
     KDDockWidgets::MainWindowBase* m_mainWindow = nullptr;
     DockPageView* m_currentPage = nullptr;
-    mu::uicomponents::QmlListProperty<DockToolBarView> m_toolBars;
-    mu::uicomponents::QmlListProperty<DockPageView> m_pages;
+    uicomponents::QmlListProperty<DockToolBarView> m_toolBars;
+    uicomponents::QmlListProperty<DockPageView> m_pages;
     async::Channel<QStringList> m_docksOpenStatusChanged;
 
     bool m_hasGeometryBeenRestored = false;

@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
-# MuseScore-CLA-applies
+# MuseScore-Studio-CLA-applies
 #
-# MuseScore
+# MuseScore Studio
 # Music Composition & Notation
 #
-# Copyright (C) 2021 MuseScore BVBA and others
+# Copyright (C) 2021 MuseScore Limited
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 3 as
@@ -17,7 +17,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-set(MODULE "inspector")
+declare_module("inspector")
 
 set(MODULE_QRC ${CMAKE_CURRENT_LIST_DIR}/view/inspector_resources.qrc )
 
@@ -48,6 +48,7 @@ set(MODULE_SRC
     ${CMAKE_CURRENT_LIST_DIR}/types/commontypes.h
     ${CMAKE_CURRENT_LIST_DIR}/types/tremolobartypes.h
     ${CMAKE_CURRENT_LIST_DIR}/types/tremolotypes.h
+    ${CMAKE_CURRENT_LIST_DIR}/types/voicetypes.h
     ${CMAKE_CURRENT_LIST_DIR}/models/iinspectormodelcreator.h
     ${CMAKE_CURRENT_LIST_DIR}/models/inspectormodelcreator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/models/inspectormodelcreator.h
@@ -61,6 +62,8 @@ set(MODULE_SRC
     ${CMAKE_CURRENT_LIST_DIR}/models/propertyitem.h
     ${CMAKE_CURRENT_LIST_DIR}/models/pointfpropertyitem.cpp
     ${CMAKE_CURRENT_LIST_DIR}/models/pointfpropertyitem.h
+    ${CMAKE_CURRENT_LIST_DIR}/models/inspectormodelwithvoiceandpositionoptions.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/models/inspectormodelwithvoiceandpositionoptions.h
     ${CMAKE_CURRENT_LIST_DIR}/models/general/generalsettingsmodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/models/general/generalsettingsmodel.h
     ${CMAKE_CURRENT_LIST_DIR}/models/general/appearance/appearancesettingsmodel.cpp
@@ -229,9 +232,15 @@ if (NOT MSVC AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VER
 endif (NOT MSVC AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 9.0)
 
 set(MODULE_LINK
-    uicomponents
+    muse::uicomponents
     engraving
     )
 
 set(MODULE_USE_UNITBUILD ON)
-include(${PROJECT_SOURCE_DIR}/build/module.cmake)
+setup_module()
+
+target_sources(inspector
+  PRIVATE
+    types/voicetypes.h
+    models/inspectormodelwithvoiceandpositionoptions.h models/inspectormodelwithvoiceandpositionoptions.cpp
+)

@@ -34,16 +34,17 @@
 #include "internal/encoders/abstractaudioencoder.h"
 
 namespace muse::audio::soundtrack {
-class SoundTrackWriter : public async::Asyncable
+class SoundTrackWriter : public muse::Injectable, public async::Asyncable
 {
-    INJECT_STATIC(IAudioConfiguration, config)
+    muse::Inject<IAudioConfiguration> config = { this };
 public:
-    SoundTrackWriter(const io::path_t& destination, const SoundTrackFormat& format, const msecs_t totalDuration, IAudioSourcePtr source);
+    SoundTrackWriter(const io::path_t& destination, const SoundTrackFormat& format, const msecs_t totalDuration, IAudioSourcePtr source,
+                     const muse::modularity::ContextPtr& iocCtx);
 
     Ret write();
     void abort();
 
-    mu::Progress progress();
+    Progress progress();
 
 private:
     encode::AbstractAudioEncoderPtr createEncoder(const SoundTrackType& type) const;
@@ -58,7 +59,7 @@ private:
 
     encode::AbstractAudioEncoderPtr m_encoderPtr = nullptr;
 
-    mu::Progress m_progress;
+    Progress m_progress;
     std::atomic<bool> m_isAborted = false;
 };
 }

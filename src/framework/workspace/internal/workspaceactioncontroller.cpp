@@ -23,7 +23,7 @@
 
 #include "types/val.h"
 
-using namespace mu::workspace;
+using namespace muse::workspace;
 using namespace muse::actions;
 
 void WorkspaceActionController::init()
@@ -40,7 +40,7 @@ void WorkspaceActionController::selectWorkspace(const ActionData& args)
 
 void WorkspaceActionController::openConfigureWorkspacesDialog()
 {
-    RetVal<Val> result = interactive()->open("musescore://workspace/select?sync=true");
+    RetVal<Val> result = interactive()->open("muse://workspace/select?sync=true");
     if (!result.ret) {
         return;
     }

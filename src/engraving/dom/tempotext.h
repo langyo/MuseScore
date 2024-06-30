@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -77,6 +77,8 @@ public:
     bool followText() const { return m_followText; }
     void setFollowText(bool v) { m_followText = v; }
     void undoSetFollowText(bool v);
+
+    void updateTempo();
     void updateRelative();
 
     TDuration duration() const;
@@ -98,7 +100,6 @@ protected:
     void undoChangeProperty(Pid id, const PropertyValue&, PropertyFlags ps) override;
 
     void updateScore();
-    void updateTempo();
 
     TempoTextType m_tempoTextType;
     BeatsPerSecond m_tempo;             // beats per second

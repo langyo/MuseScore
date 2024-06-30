@@ -19,12 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_UPDATE_UPDATECONFIGURATIONSTUB_H
-#define MU_UPDATE_UPDATECONFIGURATIONSTUB_H
+#ifndef MUSE_UPDATE_UPDATECONFIGURATIONSTUB_H
+#define MUSE_UPDATE_UPDATECONFIGURATIONSTUB_H
 
 #include "update/iupdateconfiguration.h"
 
-namespace mu::update {
+namespace muse::update {
 class UpdateConfigurationStub : public IUpdateConfiguration
 {
 public:
@@ -37,12 +37,16 @@ public:
     void setNeedCheckForUpdate(bool needCheck) override;
 
     std::string skippedReleaseVersion() const override;
-    void setSkippedReleaseVersion(const std::string& version) const override;
+    void setSkippedReleaseVersion(const std::string& version) override;
 
-    std::string checkForUpdateUrl() const override;
-    std::string previousReleasesNotesUrl() const override;
+    std::string lastShownMuseSoundsReleaseVersion() const override;
+    void setLastShownMuseSoundsReleaseVersion(const std::string& version) override;
 
-    network::RequestHeaders updateHeaders() const override;
+    std::string checkForAppUpdateUrl() const override;
+    std::string previousAppReleasesNotesUrl() const override;
+    std::string checkForMuseSamplerUpdateUrl() const override;
+
+    muse::network::RequestHeaders updateHeaders() const override;
 
     std::string museScoreUrl() const override;
     std::string museScorePrivacyPolicyUrl() const override;
@@ -51,4 +55,4 @@ public:
 };
 }
 
-#endif // MU_UPDATE_UPDATECONFIGURATIONSTUB_H
+#endif // MUSE_UPDATE_UPDATECONFIGURATIONSTUB_H

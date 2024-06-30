@@ -19,28 +19,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_MI_MULTIINSTANCESUIACTIONS_H
-#define MU_MI_MULTIINSTANCESUIACTIONS_H
+#ifndef MUSE_MI_MULTIINSTANCESUIACTIONS_H
+#define MUSE_MI_MULTIINSTANCESUIACTIONS_H
 
 #include "ui/iuiactionsmodule.h"
 
-namespace mu::mi {
-class MultiInstancesUiActions : public ui::IUiActionsModule
+namespace muse::mi {
+class MultiInstancesUiActions : public muse::ui::IUiActionsModule
 {
 public:
 
     MultiInstancesUiActions() = default;
 
-    const ui::UiActionList& actionsList() const override;
-    bool actionEnabled(const ui::UiAction& act) const override;
+    const muse::ui::UiActionList& actionsList() const override;
+    bool actionEnabled(const muse::ui::UiAction& act) const override;
     async::Channel<muse::actions::ActionCodeList> actionEnabledChanged() const override;
 
-    bool actionChecked(const ui::UiAction& act) const override;
+    bool actionChecked(const muse::ui::UiAction& act) const override;
     async::Channel<muse::actions::ActionCodeList> actionCheckedChanged() const override;
 
 private:
-    static const ui::UiActionList m_actions;
+    static const muse::ui::UiActionList m_actions;
 };
 }
 
-#endif // MU_MI_MULTIINSTANCESUIACTIONS_H
+#endif // MUSE_MI_MULTIINSTANCESUIACTIONS_H

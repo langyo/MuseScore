@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -33,6 +33,7 @@
 #include "engraving/dom/text.h"
 #include "engraving/dom/timesig.h"
 #include "engraving/dom/utils.h"
+#include "engraving/rendering/dev/tlayout.h"
 
 #include "engraving/style/style.h"
 #include "engraving/style/textstyle.h"
@@ -49,17 +50,19 @@
 #include "log.h"
 
 using namespace mu;
+using namespace muse;
 using namespace muse::draw;
 using namespace mu::engraving;
+using namespace mu::engraving::rendering::dev;
 
 static std::shared_ptr<mu::iex::musicxml::IMusicXmlConfiguration> configuration()
 {
-    return mu::modularity::ioc()->resolve<mu::iex::musicxml::IMusicXmlConfiguration>("iex_musicxml");
+    return muse::modularity::globalIoc()->resolve<mu::iex::musicxml::IMusicXmlConfiguration>("iex_musicxml");
 }
 
 static std::shared_ptr<mu::engraving::IEngravingFontsProvider> engravingFonts()
 {
-    return mu::modularity::ioc()->resolve<mu::engraving::IEngravingFontsProvider>("iex_musicxml");
+    return muse::modularity::globalIoc()->resolve<mu::engraving::IEngravingFontsProvider>("iex_musicxml");
 }
 
 static bool musicxmlImportBreaks()
@@ -116,7 +119,7 @@ static void allocateStaves(VoiceList& vcLst)
             }
         }
         if (key > 0) {
-            int prefSt = mu::value(vcLst, key).preferredStaff();
+            int prefSt = muse::value(vcLst, key).preferredStaff();
             if (voicesAllocated[prefSt] < static_cast<int>(VOICES)) {
                 vcLst[key].setStaff(prefSt);
                 voicesAllocated[prefSt]++;
@@ -267,7 +270,7 @@ bool MusicXMLParserPass1::determineMeasureLength(std::vector<Fraction>& ml) cons
 
     // determine number of measures: max number of measures in any part
     size_t nMeasures = 0;
-    for (const MusicXmlPart& part : mu::values(m_parts)) {
+    for (const MusicXmlPart& part : muse::values(m_parts)) {
         if (part.nMeasures() > nMeasures) {
             nMeasures = part.nMeasures();
         }
@@ -276,7 +279,7 @@ bool MusicXMLParserPass1::determineMeasureLength(std::vector<Fraction>& ml) cons
     // determine max length of a specific measure in all parts
     for (size_t i = 0; i < nMeasures; ++i) {
         Fraction maxMeasDur;
-        for (const MusicXmlPart& part : mu::values(m_parts)) {
+        for (const MusicXmlPart& part : muse::values(m_parts)) {
             if (i < part.nMeasures()) {
                 Fraction measDurPartJ = part.measureDuration(i);
                 if (measDurPartJ > maxMeasDur) {
@@ -301,7 +304,7 @@ bool MusicXMLParserPass1::determineMeasureLength(std::vector<Fraction>& ml) cons
 
 VoiceList MusicXMLParserPass1::getVoiceList(const String& id) const
 {
-    if (mu::contains(m_parts, id)) {
+    if (muse::contains(m_parts, id)) {
         return m_parts.at(id).voicelist;
     }
     return VoiceList();
@@ -318,7 +321,7 @@ VoiceList MusicXMLParserPass1::getVoiceList(const String& id) const
 
 MusicXmlInstrList MusicXMLParserPass1::getInstrList(const String& id) const
 {
-    if (mu::contains(m_parts, id)) {
+    if (muse::contains(m_parts, id)) {
         return m_parts.at(id)._instrList;
     }
     return MusicXmlInstrList();
@@ -335,7 +338,7 @@ MusicXmlInstrList MusicXMLParserPass1::getInstrList(const String& id) const
 
 MusicXmlIntervalList MusicXMLParserPass1::getIntervals(const String& id) const
 {
-    if (mu::contains(m_parts, id)) {
+    if (muse::contains(m_parts, id)) {
         return m_parts.at(id)._intervals;
     }
     return MusicXmlIntervalList();
@@ -357,7 +360,7 @@ void MusicXMLParserPass1::setDrumsetDefault(const String& id,
                                             const int line,
                                             const DirectionV sd)
 {
-    if (mu::contains(m_instruments, id) && mu::contains(m_instruments.at(id), instrId)) {
+    if (muse::contains(m_instruments, id) && muse::contains(m_instruments.at(id), instrId)) {
         m_instruments[id][instrId].notehead = hg;
         m_instruments[id][instrId].line = line;
         m_instruments[id][instrId].stemDirection = sd;
@@ -397,16 +400,16 @@ bool MusicXMLParserPass1::determineStaffMoveVoice(const String& id, const int mx
     //LOGD("voice mapper before: voice='%s' staff=%d", muPrintable(mxVoice), mxStaff);
     int s;   // staff mapped by voice mapper
     int v;   // voice mapped by voice mapper
-    if (mu::value(voicelist, mxVoice).overlaps()) {
+    if (muse::value(voicelist, mxVoice).overlaps()) {
         // for overlapping voices, the staff does not change
         // and the voice is mapped and staff-dependent
         s = mxStaff;
-        v = mu::value(voicelist, mxVoice).voice(s);
+        v = muse::value(voicelist, mxVoice).voice(s);
     } else {
         // for non-overlapping voices, both staff and voice are
         // set by the voice mapper
-        s = mu::value(voicelist, mxVoice).staff();
-        v = mu::value(voicelist, mxVoice).voice();
+        s = muse::value(voicelist, mxVoice).staff();
+        v = muse::value(voicelist, mxVoice).voice();
     }
 
     //LOGD("voice mapper mapped: s=%d v=%d", s, v);
@@ -420,7 +423,7 @@ bool MusicXMLParserPass1::determineStaffMoveVoice(const String& id, const int mx
     msVoice = v;
 
     // make score-relative instead on part-relative
-    Part* part = mu::value(m_partMap, id);
+    Part* part = muse::value(m_partMap, id);
     IF_ASSERT_FAILED(part) {
         return false;
     }
@@ -445,7 +448,7 @@ bool MusicXMLParserPass1::determineStaffMoveVoice(const String& id, const int mx
 
 bool MusicXMLParserPass1::hasPart(const String& id) const
 {
-    return mu::contains(m_parts, id);
+    return muse::contains(m_parts, id);
 }
 
 //---------------------------------------------------------
@@ -458,9 +461,9 @@ bool MusicXMLParserPass1::hasPart(const String& id) const
 
 track_idx_t MusicXMLParserPass1::trackForPart(const String& id) const
 {
-    Part* part = mu::value(m_partMap, id);
+    Part* part = muse::value(m_partMap, id);
     IF_ASSERT_FAILED(part) {
-        return mu::nidx;
+        return muse::nidx;
     }
     staff_idx_t scoreRelStaff = m_score->staffIdx(part);   // zero-based number of parts first staff in the score
     return scoreRelStaff * VOICES;
@@ -493,7 +496,7 @@ Fraction MusicXMLParserPass1::getMeasureStart(const size_t i) const
 
 int MusicXMLParserPass1::octaveShift(const String& id, const staff_idx_t staff, const Fraction& f) const
 {
-    if (mu::contains(m_parts, id)) {
+    if (muse::contains(m_parts, id)) {
         return m_parts.at(id).octaveShift(staff, f);
     }
 
@@ -531,7 +534,7 @@ static void addBreak(Score* const, MeasureBase* const mb, const LayoutBreakType 
 
 static void addBreakToPreviousMeasureBase(Score* const score, MeasureBase* const mb, const LayoutBreakType type)
 {
-    const auto pm = mb->prev();
+    MeasureBase* const pm = mb->prev();
     if (pm && musicxmlImportBreaks()) {
         addBreak(score, pm, type);
     }
@@ -566,19 +569,21 @@ static bool overrideTextStyleForComposer(const String& creditString)
 //   addText2
 //---------------------------------------------------------
 
+static void scaleTitle(Score* score, Text* text);
+
 /**
  Add text \a strTxt to VBox \a vbx using Tid \a stl.
  Also sets Align and Yoff.
  */
 
-static void addText2(VBox* vbx, Score*, const String& strTxt, const TextStyleType stl, const Align align, const double yoffs)
+static void addText2(VBox* vbx, Score* score, const String& strTxt, const TextStyleType stl, const Align align, const double yoffs)
 {
-    if (overrideTextStyleForComposer(strTxt)) {
+    if (stl != TextStyleType::COMPOSER && overrideTextStyleForComposer(strTxt)) {
         // HACK: in some Dolet 8 files the composer is written as a subtitle, which leads to stupid formatting.
         // This overrides the formatting and introduces proper composer text
         Text* text = Factory::createText(vbx, TextStyleType::COMPOSER);
         text->setXmlText(strTxt.trimmed());
-        text->setOffset(mu::PointF(0.0, yoffs));
+        text->setOffset(muse::PointF(0.0, yoffs));
         text->setPropertyFlags(Pid::OFFSET, PropertyFlags::UNSTYLED);
         vbx->add(text);
     } else if (!strTxt.isEmpty()) {
@@ -586,9 +591,12 @@ static void addText2(VBox* vbx, Score*, const String& strTxt, const TextStyleTyp
         text->setXmlText(strTxt.trimmed());
         text->setAlign(align);
         text->setPropertyFlags(Pid::ALIGN, PropertyFlags::UNSTYLED);
-        text->setOffset(mu::PointF(0.0, yoffs));
+        text->setOffset(muse::PointF(0.0, yoffs));
         text->setPropertyFlags(Pid::OFFSET, PropertyFlags::UNSTYLED);
         vbx->add(text);
+        if (stl == TextStyleType::TITLE) {
+            scaleTitle(score, text);
+        }
     }
 }
 
@@ -607,7 +615,7 @@ static void findYMinYMaxInWords(const std::vector<const CreditWords*>& words, in
 
     miny = words.at(0)->defaultY;
     maxy = words.at(0)->defaultY;
-    for (const auto w : words) {
+    for (const CreditWords* w : words) {
         if (w->defaultY < miny) {
             miny = w->defaultY;
         }
@@ -621,7 +629,7 @@ static void findYMinYMaxInWords(const std::vector<const CreditWords*>& words, in
 //   alignForCreditWords
 //---------------------------------------------------------
 
-static Align alignForCreditWords(const CreditWords* const w, const int pageWidth)
+static Align alignForCreditWords(const CreditWords* const w, const int pageWidth, const TextStyleType tid)
 {
     Align align = AlignH::LEFT;
     if (w->defaultX > (pageWidth / 3)) {
@@ -630,6 +638,9 @@ static Align alignForCreditWords(const CreditWords* const w, const int pageWidth
         } else {
             align = AlignH::RIGHT;
         }
+    }
+    if (tid == TextStyleType::COMPOSER) {
+        align.vertical = AlignV::BOTTOM;
     }
     return align;
 }
@@ -666,9 +677,9 @@ static TextStyleType creditWordTypeToTid(const String& type)
 
 static TextStyleType creditWordTypeGuess(const CreditWords* const word, std::vector<const CreditWords*>& words, const int pageWidth)
 {
-    const auto pw1 = pageWidth / 3;
-    const auto pw2 = pageWidth * 2 / 3;
-    const auto defx = word->defaultX;
+    const double pw1 = pageWidth / 3;
+    const double pw2 = pageWidth * 2 / 3;
+    const double defx = word->defaultX;
     // composer is in the right column
     if (pw2 < defx) {
         // found composer
@@ -682,7 +693,7 @@ static TextStyleType creditWordTypeGuess(const CreditWords* const word, std::vec
     // title is in the middle column
     else {
         // if another word in the middle column has a larger font size, this word is not the title
-        for (const auto w : words) {
+        for (const CreditWords* w : words) {
             if (w == word) {
                 continue;                 // it's me
             }
@@ -719,7 +730,7 @@ static TextStyleType tidForCreditWords(const CreditWords* const word, std::vecto
 
 VBox* MusicXMLParserPass1::createAndAddVBoxForCreditWords(Score* score, const int miny, const int maxy)
 {
-    auto vbox = Factory::createVBox(score->dummy()->system());
+    VBox* vbox = Factory::createVBox(score->dummy()->system());
     double vboxHeight = 10;                           // default height in tenths
     double diff = maxy - miny;                       // calculate height in tenths
     if (diff > vboxHeight) {                         // and size is reasonable
@@ -731,6 +742,54 @@ VBox* MusicXMLParserPass1::createAndAddVBoxForCreditWords(Score* score, const in
     vbox->setBoxHeight(Spatium(vboxHeight));
     score->measures()->add(vbox);
     return vbox;
+}
+
+//---------------------------------------------------------
+//   reformatHeaderVBox
+//---------------------------------------------------------
+/**
+ Due to inconsistencies with spacing and inferred text,
+ the header VBox frequently has collisions. This cleans
+ those (as a temporary fix for a more robust collision-prevention
+ system in Boxes).
+ */
+
+void MusicXMLParserPass1::reformatHeaderVBox(MeasureBase* mb)
+{
+    if (!mb->isVBox()) {
+        return;
+    }
+
+    VBox* headerVBox = toVBox(mb);
+    double totalHeight = 0;
+    double offsetHeight = 0;
+    double lineSpacingMultiplier = 0.5;
+
+    for (auto e : headerVBox->el()) {
+        if (!e->isText()) {
+            continue;
+        }
+        Text* t = toText(e);
+        TLayout::layoutText(t, t->mutldata());
+
+        totalHeight += t->height();
+        if (t->align() == AlignV::TOP) {
+            totalHeight += t->lineHeight() * lineSpacingMultiplier;
+            t->setOffset(t->offset().x(), offsetHeight);
+            t->setPropertyFlags(Pid::OFFSET, PropertyFlags::UNSTYLED);
+            offsetHeight += t->height();
+            offsetHeight += t->lineHeight() * lineSpacingMultiplier;
+        }
+    }
+
+    // 1mm of
+    static const double VBOX_BOTTOM_PADDING = 1;
+    totalHeight += VBOX_BOTTOM_PADDING;
+    headerVBox->setBottomMargin(VBOX_BOTTOM_PADDING);
+    headerVBox->setPropertyFlags(Pid::BOTTOM_MARGIN, PropertyFlags::UNSTYLED);
+
+    headerVBox->setBoxHeight(Spatium(totalHeight / headerVBox->spatium()));
+    headerVBox->setPropertyFlags(Pid::BOX_HEIGHT, PropertyFlags::UNSTYLED);
 }
 
 //---------------------------------------------------------
@@ -767,6 +826,11 @@ bool isLikelyCreditText(const String& text, const bool caseInsensitive = true)
     std::regex::flag_type caseOption = caseInsensitive ? std::regex::icase : std::regex::ECMAScript;
     return text.trimmed().contains(std::wregex(L"^((Words|Music|Lyrics|Composed),?(\\sand|\\s&amp;|\\s&)?\\s)*[Bb]y\\s+(?!$)", caseOption))
            || text.trimmed().contains(std::wregex(L"^(Traditional|Trad\\.)", caseOption));
+}
+
+static bool isLikelyRightsText(const String& text)
+{
+    return text.contains(u"all rights reserved", CaseSensitivity::CaseInsensitive) || text.contains(u"\u00A9");
 }
 
 //---------------------------------------------------------
@@ -808,7 +872,7 @@ static VBox* addCreditWords(Score* score, const CreditWordsList& crWords,
 
     std::vector<const CreditWords*> headerWords;
     std::vector<const CreditWords*> footerWords;
-    for (const auto w : crWords) {
+    for (const CreditWords* w : crWords) {
         if (w->page == pageNr) {
             if (w->defaultY > (pageSize.height() / 2)) {
                 headerWords.push_back(w);
@@ -839,15 +903,21 @@ static VBox* addCreditWords(Score* score, const CreditWordsList& crWords,
     int maxy = 0;
     findYMinYMaxInWords(words, miny, maxy);
 
-    for (const auto w : words) {
+    for (const CreditWords* w : words) {
         if (mustAddWordToVbox(w->type)) {
-            const auto align = alignForCreditWords(w, pageSize.width());
-            const auto tid = (pageNr == 1 && top) ? tidForCreditWords(w, words, pageSize.width()) : TextStyleType::DEFAULT;
-            double yoffs = (maxy - w->defaultY) * score->style().spatium() / 10;
+            const TextStyleType tid = (pageNr == 1 && top) ? tidForCreditWords(w, words, pageSize.width()) : TextStyleType::DEFAULT;
+            const Align align = alignForCreditWords(w, pageSize.width(), tid);
+            double yoffs = tid == TextStyleType::COMPOSER ? 0.0 : (maxy - w->defaultY) * score->style().spatium() / 10;
             if (!vbox) {
                 vbox = MusicXMLParserPass1::createAndAddVBoxForCreditWords(score, miny, maxy);
             }
             addText2(vbox, score, w->words, tid, align, yoffs);
+        } else if (w->type == u"rights" && score->metaTag(u"copyright").empty()) {
+            // Add rights to footer, not a vbox
+            static const std::regex tagRe("(<.*?>)");
+            String rights = w->words;
+            rights.remove(tagRe);
+            score->setMetaTag(u"copyright", rights);
         }
     }
 
@@ -905,7 +975,7 @@ void MusicXMLParserPass1::createDefaultHeader(Score* score)
         strTranslator = metaTranslator;
     }
 
-    const auto vbox = MusicXMLParserPass1::createAndAddVBoxForCreditWords(score);
+    VBox* const vbox = MusicXMLParserPass1::createAndAddVBoxForCreditWords(score);
     vbox->setExcludeFromOtherParts(false);
     addText(vbox, score, strTitle.toXmlEscaped(),      TextStyleType::TITLE);
     addText(vbox, score, strSubTitle.toXmlEscaped(),   TextStyleType::SUBTITLE);
@@ -1033,7 +1103,7 @@ Err MusicXMLParserPass1::parse(const ByteArray& data)
     m_logger->logDebugTrace(u"MusicXMLParserPass1::parse device");
     m_parts.clear();
     m_e.setData(data);
-    auto res = parse();
+    Err res = parse();
     if (res != Err::NoError) {
         return res;
     }
@@ -1114,7 +1184,7 @@ static bool allStaffGroupsIdentical(Part const* const p)
 
 static bool isRedundantBracket(Staff const* const staff, const BracketType bracketType, const size_t span)
 {
-    for (auto bracket : staff->brackets()) {
+    for (const BracketItem* bracket : staff->brackets()) {
         if (bracket->bracketType() == bracketType && bracket->bracketSpan() == span) {
             return true;
         }
@@ -1194,7 +1264,7 @@ void MusicXMLParserPass1::scorePartwise()
             stavesSpan += spannedPart->nstaves();
 
             if (pg->barlineSpan) {
-                for (auto spannedStaff : spannedPart->staves()) {
+                for (Staff* spannedStaff : spannedPart->staves()) {
                     if ((j == pg->span - 1) && (spannedStaff == spannedPart->staves().back())) {
                         // Very last staff of group,
                         continue;
@@ -1220,13 +1290,13 @@ void MusicXMLParserPass1::scorePartwise()
     // handle the implicit brackets:
     // multi-staff parts w/o explicit brackets get a brace
     for (const Part* p : il) {
-        if (p->nstaves() > 1 && !mu::contains(partSet, p)) {
+        if (p->nstaves() > 1 && !muse::contains(partSet, p)) {
             const size_t column = p->staff(0)->bracketLevels() + 1;
             p->staff(0)->setBracketType(column, BracketType::BRACE);
             p->staff(0)->setBracketSpan(column, p->nstaves());
             if (allStaffGroupsIdentical(p)) {
                 // span only if the same types
-                for (auto spannedStaff : p->staves()) {
+                for (Staff* spannedStaff : p->staves()) {
                     if (spannedStaff != p->staves().back()) { // not last staff
                         spannedStaff->setBarLineSpan(true);
                     }
@@ -1330,7 +1400,7 @@ static String text2syms(const String& t)
         AsciiStringView sym;
         while (maxMatch > 0) {
             String toBeMatched = in.left(maxMatch);
-            if (mu::contains(map, toBeMatched)) {
+            if (muse::contains(map, toBeMatched)) {
                 sym = SymNames::nameForSymId(map.at(toBeMatched));
                 break;
             }
@@ -1457,7 +1527,7 @@ void MusicXMLParserPass1::credit(CreditWordsList& credits)
 {
     m_logger->logDebugTrace(u"MusicXMLParserPass1::credit", &m_e);
 
-    const auto page = m_e.intAttribute("page");         // ignoring errors implies incorrect conversion defaults to the first page
+    const int page = m_e.intAttribute("page");         // ignoring errors implies incorrect conversion defaults to the first page
     // multiple credit-words elements may be present,
     // which are appended
     // use the position info from the first one
@@ -1471,6 +1541,7 @@ void MusicXMLParserPass1::credit(CreditWordsList& credits)
     String valign;
     StringList crtypes;
     String crwords;
+    bool hasRights = false;
     while (m_e.readNextStartElement()) {
         if (m_e.name() == "credit-words") {
             // IMPORT_LAYOUT
@@ -1487,12 +1558,17 @@ void MusicXMLParserPass1::credit(CreditWordsList& credits)
         } else if (m_e.name() == "credit-type") {
             // multiple credit-type elements may be present, supported by
             // e.g. Finale v26.3 for Mac.
-            crtypes.push_back(m_e.readText());
+            String type = m_e.readText();
+            crtypes.push_back(type);
+            hasRights = hasRights || type == u"rights";
         } else {
             skipLogCurrElem();
         }
     }
-    if (crwords != "") {
+    if (!hasRights && isLikelyRightsText(crwords)) {
+        crtypes.push_back(u"rights");
+    }
+    if (!crwords.empty()) {
         // as the meaning of multiple credit-types is undocumented,
         // use credit-type only if exactly one was found
         String crtype = (crtypes.size() == 1) ? crtypes.at(0) : String();
@@ -1542,15 +1618,15 @@ static void updateStyles(Score* score,
                          const String& wordFamily, const String& wordSize,
                          const String& lyricFamily, const String& lyricSize)
 {
-    const auto dblWordSize = wordSize.toDouble();     // note conversion error results in value 0.0
-    const auto dblLyricSize = lyricSize.toDouble();   // but avoid comparing (double) floating point number with exact value later
-    const auto epsilon = 0.001;                       // use epsilon instead
+    const double dblWordSize = wordSize.toDouble();     // note conversion error results in value 0.0
+    const double dblLyricSize = lyricSize.toDouble();   // but avoid comparing (double) floating point number with exact value later
+    const double epsilon = 0.001;                       // use epsilon instead
 
     bool needUseDefaultFont = configuration()->needUseDefaultFont();
 
     // loop over all text styles (except the empty, always hidden, first one)
     // set all text styles to the MusicXML defaults
-    for (const auto tid : allTextStyles()) {
+    for (const TextStyleType tid : allTextStyles()) {
         // The MusicXML specification does not specify to which kinds of text
         // the word-font setting applies. Setting all sizes to the size specified
         // gives bad results, so a selection is made:
@@ -1568,7 +1644,7 @@ static void updateStyles(Score* score,
                                   || isHarpPedalStyle(tid);
 
         const TextStyle* ts = textStyle(tid);
-        for (const auto& a :*ts) {
+        for (const TextStyleProperty& a :*ts) {
             if (a.pid == Pid::FONT_FACE && !needUseDefaultFont) {
                 score->style().set(a.sid, wordFamily);
             } else if (a.pid == Pid::FONT_SIZE && dblWordSize > epsilon && !needUseDefaultSize) {
@@ -1606,30 +1682,55 @@ static void setPageFormat(Score* score, const PageFormat& pf)
     score->style().set(Sid::pageTwosided, pf.twosided);
 }
 
-static void scaleCopyrightText(Score* score)
+static double scaleText(const String& str, const Sid fontFaceSid, const double fontSize, const Score* score)
 {
     // Scale text to fit within margins
+    const MStyle style = score->style();
+    const String fontFace = style.styleV(fontFaceSid).value<String>();
+    Font font(fontFace, Font::Type::Unknown);
+    font.setPointSizeF(fontSize);
+    const FontMetrics fm(font);
+
+    const double pagePrintableWidth = style.styleV(Sid::pagePrintableWidth).value<double>() * DPI;
+    const double pageWidth = style.styleV(Sid::pageWidth).value<double>() * DPI;
+    const double pageHeight = style.styleV(Sid::pageHeight).value<double>() * DPI;
+    const double textWidth = fm.boundingRect(RectF(0, 0, pageWidth, pageHeight), TextShowMnemonic, str).width();
+
+    return pagePrintableWidth / textWidth;
+}
+
+static void scaleCopyrightText(Score* score)
+{
     String copyright = score->metaTag(u"copyright");
     if (copyright.empty()) {
         return;
     }
 
-    MStyle style = score->style();
-    String fontFace = style.styleV(Sid::footerFontFace).value<String>();
-    Font footerFont(fontFace, Font::Type::Unknown);
-    double footerFontSize = style.styleV(Sid::footerFontSize).value<double>();
-    footerFont.setPointSizeF(footerFontSize);
-    FontMetrics fm(footerFont);
-
-    double pagePrintableWidth = style.styleV(Sid::pagePrintableWidth).value<double>() * DPI;
-    double pageWidth = style.styleV(Sid::pageWidth).value<double>() * DPI;
-    double pageHeight = style.styleV(Sid::pageHeight).value<double>() * DPI;
-    double textWidth = fm.boundingRect(RectF(0, 0, pageWidth, pageHeight), TextShowMnemonic, copyright).width();
-    double sizeRatio = pagePrintableWidth / textWidth;
+    const double fontSize = score->style().styleV(Sid::footerFontSize).value<double>();
+    const double sizeRatio = scaleText(copyright, Sid::footerFontFace, fontSize, score);
 
     if (sizeRatio < 1) {
-        double newSize = floor(footerFontSize * sizeRatio * 10) / 10;
+        const double newSize = floor(fontSize * sizeRatio * 10) / 10;
         score->style().set(Sid::footerFontSize, newSize);
+    }
+}
+
+static void scaleTitle(Score* score, Text* t)
+{
+    String title = score->metaTag(u"workTitle");
+    if (title.empty()) {
+        return;
+    }
+
+    const double fontSize = score->style().styleV(Sid::titleFontSize).value<double>();
+    const double sizeRatio = scaleText(title, Sid::titleFontFace, fontSize, score);
+
+    if (sizeRatio < 1) {
+        const double newSize = floor(fontSize * sizeRatio * 10) / 10;
+        // Need to layout text to generate fragments before changing its size
+        TLayout::layoutText(t, t->mutldata());
+        t->setProperty(Pid::FONT_SIZE, newSize);
+        t->setPropertyFlags(Pid::FONT_SIZE, PropertyFlags::UNSTYLED);
     }
 }
 
@@ -1920,12 +2021,13 @@ void MusicXMLParserPass1::partList(MusicXmlPartGroupList& partGroupList)
 
     int scoreParts = 0;   // number of score-parts read sofar
     MusicXmlPartGroupMap partGroups;
+    String curPartGroupName;
 
     while (m_e.readNextStartElement()) {
         if (m_e.name() == "part-group") {
-            partGroup(scoreParts, partGroupList, partGroups);
+            partGroup(scoreParts, partGroupList, partGroups, curPartGroupName);
         } else if (m_e.name() == "score-part") {
-            scorePart();
+            scorePart(curPartGroupName);
             scoreParts++;
         } else {
             skipLogCurrElem();
@@ -2036,7 +2138,7 @@ static void partGroupStop(MusicXmlPartGroupMap& pgs, int n, int p,
 
 void MusicXMLParserPass1::partGroup(const int scoreParts,
                                     MusicXmlPartGroupList& partGroupList,
-                                    MusicXmlPartGroupMap& partGroups)
+                                    MusicXmlPartGroupMap& partGroups, String& curPartGroupName)
 {
     m_logger->logDebugTrace(u"MusicXMLParserPass1::partGroup", &m_e);
     bool barlineSpan = true;
@@ -2049,7 +2151,7 @@ void MusicXMLParserPass1::partGroup(const int scoreParts,
 
     while (m_e.readNextStartElement()) {
         if (m_e.name() == "group-name") {
-            m_e.skipCurrentElement();        // skip but don't log
+            curPartGroupName = m_e.readText();
         } else if (m_e.name() == "group-abbreviation") {
             symbol = m_e.readText();
         } else if (m_e.name() == "group-symbol") {
@@ -2083,12 +2185,12 @@ void MusicXMLParserPass1::partGroup(const int scoreParts,
  which is invalid MusicXML but is (sometimes ?) generated by NWC2MusicXML.
  */
 
-void MusicXMLParserPass1::scorePart()
+void MusicXMLParserPass1::scorePart(const String& curPartGroupName)
 {
     m_logger->logDebugTrace(u"MusicXMLParserPass1::scorePart", &m_e);
     String id = m_e.attribute("id").trimmed();
 
-    if (mu::contains(m_parts, id)) {
+    if (muse::contains(m_parts, id)) {
         m_logger->logError(String(u"duplicate part id '%1'").arg(id), &m_e);
         skipLogCurrElem();
         return;
@@ -2108,8 +2210,19 @@ void MusicXMLParserPass1::scorePart()
             String name = m_e.readText();
             m_parts[id].setName(name);
         } else if (m_e.name() == "part-name-display") {
-            // TODO
-            m_e.skipCurrentElement();       // skip but don't log
+            String name;
+            while (m_e.readNextStartElement()) {
+                if (m_e.name() == "display-text") {
+                    name += m_e.readText();
+                } else if (m_e.name() == "accidental-text") {
+                    name += mxmlAccidentalTextToChar(m_e.readText());
+                } else {
+                    skipLogCurrElem();
+                }
+            }
+            if (!name.empty()) {
+                m_parts[id].setName(name);
+            }
         } else if (m_e.name() == "part-abbreviation") {
             // EngravingItem part-name contains the displayed (abbreviated) part name
             // It is displayed by default, but can be suppressed (print-object=”no”)
@@ -2119,9 +2232,27 @@ void MusicXMLParserPass1::scorePart()
             String name = m_e.readText();
             m_parts[id].setAbbr(name);
         } else if (m_e.name() == "part-abbreviation-display") {
-            m_e.skipCurrentElement();        // skip but don't log
+            String name;
+            while (m_e.readNextStartElement()) {
+                if (m_e.name() == "display-text") {
+                    name += m_e.readText();
+                } else if (m_e.name() == "accidental-text") {
+                    name += mxmlAccidentalTextToChar(m_e.readText());
+                } else {
+                    skipLogCurrElem();
+                }
+            }
+            if (!name.empty()) {
+                m_parts[id].setAbbr(name);
+            }
+        } else if (m_e.name() == "group") {
+            // TODO
+            m_e.skipCurrentElement();          // skip but don't log
         } else if (m_e.name() == "score-instrument") {
-            scoreInstrument(id);
+            scoreInstrument(id, curPartGroupName);
+        } else if (m_e.name() == "player") {
+            // unsupported
+            m_e.skipCurrentElement();          // skip but don't log
         } else if (m_e.name() == "midi-device") {
             if (!m_e.hasAttribute("port")) {
                 m_e.readText();         // empty string
@@ -2135,7 +2266,7 @@ void MusicXMLParserPass1::scorePart()
                 for (auto it = m_instruments[id].cbegin(); it != m_instruments[id].cend(); ++it) {
                     m_instruments[id][it->first].midiPort = port.toInt() - 1;
                 }
-            } else if (mu::contains(m_instruments.at(id), instrId)) {
+            } else if (muse::contains(m_instruments.at(id), instrId)) {
                 m_instruments[id][instrId].midiPort = port.toInt() - 1;
             }
 
@@ -2156,7 +2287,7 @@ void MusicXMLParserPass1::scorePart()
  Parse the /score-partwise/part-list/score-part/score-instrument node.
  */
 
-void MusicXMLParserPass1::scoreInstrument(const String& partId)
+void MusicXMLParserPass1::scoreInstrument(const String& partId, const String& curPartGroupName)
 {
     m_logger->logDebugTrace(u"MusicXMLParserPass1::scoreInstrument", &m_e);
     String instrId = m_e.attribute("id");
@@ -2173,27 +2304,35 @@ void MusicXMLParserPass1::scoreInstrument(const String& partId)
                    muPrintable(instrName)
                    );
              */
+
+            // Finale exports all instrument names as 'Grand Piano' - use part name
+            if (m_exporterString.contains(u"finale")) {
+                instrName = m_parts[partId].getName();
+                if (instrName.size() <= 1) {
+                    instrName = curPartGroupName;
+                }
+            }
             m_instruments[partId].insert({ instrId, MusicXMLInstrument(instrName) });
             // EngravingItem instrument-name is typically not displayed in the score,
             // but used only internally
-            if (mu::contains(m_instruments.at(partId), instrId)) {
+            if (muse::contains(m_instruments.at(partId), instrId)) {
                 m_instruments[partId][instrId].name = instrName;
             }
         } else if (m_e.name() == "instrument-sound") {
             String instrSound = m_e.readText();
-            if (mu::contains(m_instruments.at(partId), instrId)) {
+            if (muse::contains(m_instruments.at(partId), instrId)) {
                 m_instruments[partId][instrId].sound = instrSound;
             }
         } else if (m_e.name() == "virtual-instrument") {
             while (m_e.readNextStartElement()) {
                 if (m_e.name() == "virtual-library") {
                     String virtualLibrary = m_e.readText();
-                    if (mu::contains(m_instruments.at(partId), instrId)) {
+                    if (muse::contains(m_instruments.at(partId), instrId)) {
                         m_instruments[partId][instrId].virtLib = virtualLibrary;
                     }
                 } else if (m_e.name() == "virtual-name") {
                     String virtualName = m_e.readText();
-                    if (mu::contains(m_instruments.at(partId), instrId)) {
+                    if (muse::contains(m_instruments.at(partId), instrId)) {
                         m_instruments[partId][instrId].virtName = virtualName;
                     }
                 } else {
@@ -2231,7 +2370,7 @@ void MusicXMLParserPass1::midiInstrument(const String& partId)
                 m_logger->logError(String(u"incorrect midi-channel: %1").arg(channel), &m_e);
                 channel = 16;
             }
-            if (mu::contains(m_instruments.at(partId), instrId)) {
+            if (muse::contains(m_instruments.at(partId), instrId)) {
                 m_instruments[partId][instrId].midiChannel = channel - 1;
             }
         } else if (m_e.name() == "midi-program") {
@@ -2245,17 +2384,17 @@ void MusicXMLParserPass1::midiInstrument(const String& partId)
                 m_logger->logError(String(u"incorrect midi-program: %1").arg(program), &m_e);
                 program = 128;
             }
-            if (mu::contains(m_instruments.at(partId), instrId)) {
+            if (muse::contains(m_instruments.at(partId), instrId)) {
                 m_instruments[partId][instrId].midiProgram = program - 1;
             }
         } else if (m_e.name() == "midi-unpitched") {
-            if (mu::contains(m_instruments.at(partId), instrId)) {
+            if (muse::contains(m_instruments.at(partId), instrId)) {
                 m_instruments[partId][instrId].unpitched = m_e.readText().toInt() - 1;
             }
         } else if (m_e.name() == "volume") {
             double vol = m_e.readText().toDouble();
             if (vol >= 0 && vol <= 100) {
-                if (mu::contains(m_instruments.at(partId), instrId)) {
+                if (muse::contains(m_instruments.at(partId), instrId)) {
                     m_instruments[partId][instrId].midiVolume = static_cast<int>((vol / 100) * 127);
                 }
             } else {
@@ -2264,7 +2403,7 @@ void MusicXMLParserPass1::midiInstrument(const String& partId)
         } else if (m_e.name() == "pan") {
             double pan = m_e.readText().toDouble();
             if (pan >= -90 && pan <= 90) {
-                if (mu::contains(m_instruments.at(partId), instrId)) {
+                if (muse::contains(m_instruments.at(partId), instrId)) {
                     m_instruments[partId][instrId].midiPan = static_cast<int>(((pan + 90) / 180) * 127);
                 }
             } else {
@@ -2325,7 +2464,7 @@ void MusicXMLParserPass1::part()
     m_logger->logDebugTrace(u"MusicXMLParserPass1::part", &m_e);
     const String id = m_e.attribute("id").trimmed();
 
-    if (!mu::contains(m_parts, id)) {
+    if (!muse::contains(m_parts, id)) {
         m_logger->logError(String(u"cannot find part '%1'").arg(id), &m_e);
         skipLogCurrElem();
         return;
@@ -2349,7 +2488,7 @@ void MusicXMLParserPass1::part()
     }
 
     // Bug fix for Cubase 6.5.5..9.5.10 which generate <staff>2</staff> in a single staff part
-    setNumberOfStavesForPart(mu::value(m_partMap, id), m_parts[id].maxStaff() + 1);
+    setNumberOfStavesForPart(muse::value(m_partMap, id), m_parts[id].maxStaff() + 1);
     // allocate MuseScore staff to MusicXML voices
     allocateStaves(m_parts[id].voicelist);
     // allocate MuseScore voice to MusicXML voices
@@ -2623,18 +2762,18 @@ void MusicXMLParserPass1::attributes(const String& partId, const Fraction cTime)
         }
         DO_ASSERT(staffIndex == m_parts[partId].staffNumberToIndex().size());
 
-        setNumberOfStavesForPart(mu::value(m_partMap, partId), staves - static_cast<int>(hiddenStaves.size()));
+        setNumberOfStavesForPart(muse::value(m_partMap, partId), staves - static_cast<int>(hiddenStaves.size()));
     } else {
         // Otherwise, don't discard any staves
         // And set hidden staves to HideMode::AUTO
         // (MuseScore doesn't currently have a mechanism
         // for hiding non-empty staves, so this is an approximation
         // of the correct implementation)
-        setNumberOfStavesForPart(mu::value(m_partMap, partId), staves);
+        setNumberOfStavesForPart(muse::value(m_partMap, partId), staves);
         for (int hiddenStaff : hiddenStaves) {
-            int hiddenStaffIndex = mu::value(m_parts, partId).staffNumberToIndex(hiddenStaff);
+            int hiddenStaffIndex = muse::value(m_parts, partId).staffNumberToIndex(hiddenStaff);
             if (hiddenStaffIndex >= 0) {
-                mu::value(m_partMap, partId)->staff(hiddenStaffIndex)->setHideWhenEmpty(Staff::HideMode::AUTO);
+                muse::value(m_partMap, partId)->staff(hiddenStaffIndex)->setHideWhenEmpty(Staff::HideMode::AUTO);
             }
         }
     }
@@ -2837,7 +2976,7 @@ void MusicXMLParserPass1::direction(const String& partId, const Fraction& cTime)
 
     // handle the stops first
     for (const MxmlOctaveShiftDesc& desc : stops) {
-        if (mu::contains(m_octaveShifts, static_cast<int>(desc.num))) {
+        if (muse::contains(m_octaveShifts, static_cast<int>(desc.num))) {
             MxmlOctaveShiftDesc prevDesc = m_octaveShifts.at(desc.num);
             if (prevDesc.tp == MxmlOctaveShiftDesc::Type::UP
                 || prevDesc.tp == MxmlOctaveShiftDesc::Type::DOWN) {
@@ -2847,7 +2986,7 @@ void MusicXMLParserPass1::direction(const String& partId, const Fraction& cTime)
             } else {
                 m_logger->logError(u"double octave-shift stop", &m_e);
             }
-            mu::remove(m_octaveShifts, desc.num);
+            muse::remove(m_octaveShifts, desc.num);
         } else {
             m_octaveShifts.insert({ desc.num, desc });
         }
@@ -2855,7 +2994,7 @@ void MusicXMLParserPass1::direction(const String& partId, const Fraction& cTime)
 
     // then handle the starts
     for (const MxmlOctaveShiftDesc& desc : starts) {
-        if (mu::contains(m_octaveShifts, static_cast<int>(desc.num))) {
+        if (muse::contains(m_octaveShifts, static_cast<int>(desc.num))) {
             MxmlOctaveShiftDesc prevDesc = m_octaveShifts.at(desc.num);
             if (prevDesc.tp == MxmlOctaveShiftDesc::Type::STOP) {
                 // a complete pair
@@ -2864,7 +3003,7 @@ void MusicXMLParserPass1::direction(const String& partId, const Fraction& cTime)
             } else {
                 m_logger->logError(u"double octave-shift start", &m_e);
             }
-            mu::remove(m_octaveShifts, desc.num);
+            muse::remove(m_octaveShifts, desc.num);
         } else {
             m_octaveShifts.insert({ desc.num, desc });
         }
@@ -2887,7 +3026,7 @@ void MusicXMLParserPass1::directionType(const Fraction cTime,
         if (m_e.name() == "octave-shift") {
             String number = m_e.attribute("number");
             int n = 0;
-            if (number != "") {
+            if (!number.empty()) {
                 n = number.toInt();
                 if (n <= 0) {
                     m_logger->logError(String(u"invalid number %1").arg(number), &m_e);
@@ -3177,7 +3316,7 @@ static bool isTupletFilled(const MxmlTupletState& state, const TDuration normalT
 {
     UNUSED(timeMod);
     bool res = false;
-    const auto actualNotes = state.actualNotes;
+    const int actualNotes = state.actualNotes;
     /*
     const auto normalNotes = state.m_normalNotes;
     LOGD("duration %s normalType %s timeMod %s normalNotes %d actualNotes %d",
@@ -3189,8 +3328,8 @@ static bool isTupletFilled(const MxmlTupletState& state, const TDuration normalT
            );
     */
 
-    auto tupletType = state.tupletType;
-    auto tupletCount = state.tupletCount;
+    int tupletType = state.tupletType;
+    int tupletCount = state.tupletCount;
 
     if (normalType.isValid()) {
         int matchedNormalType  = int(normalType.type());
@@ -3232,7 +3371,7 @@ Fraction missingTupletDuration(const Fraction duration)
     Fraction tupletFullDuration;
 
     determineTupletFractionAndFullDuration(duration, tupletFraction, tupletFullDuration);
-    auto missing = (Fraction(1, 1) - tupletFraction) * tupletFullDuration;
+    Fraction missing = (Fraction(1, 1) - tupletFraction) * tupletFullDuration;
 
     return missing;
 }
@@ -3278,8 +3417,8 @@ MxmlTupletFlags MxmlTupletState::determineTupletAction(const Fraction noteDurati
                                                        Fraction& missingPreviousDuration,
                                                        Fraction& missingCurrentDuration)
 {
-    const auto actNotes = timeMod.denominator();
-    const auto norNotes = timeMod.numerator();
+    const int actNotes = timeMod.denominator();
+    const int norNotes = timeMod.numerator();
     MxmlTupletFlags res = MxmlTupletFlag::NONE;
 
     // check for unexpected termination of previous tuplet
@@ -3428,11 +3567,11 @@ void MusicXMLParserPass1::note(const String& partId,
             bRest = true;
             rest();
         } else if (m_e.name() == "staff") {
-            auto ok = false;
-            auto strStaff = m_e.readText();
+            bool ok = false;
+            String strStaff = m_e.readText();
             staff = m_parts[partId].staffNumberToIndex(strStaff.toInt(&ok));
             m_parts[partId].setMaxStaff(staff);
-            Part* part = mu::value(m_partMap, partId);
+            Part* part = muse::value(m_partMap, partId);
             IF_ASSERT_FAILED(part) {
                 continue;
             }
@@ -3474,9 +3613,9 @@ void MusicXMLParserPass1::note(const String& partId,
 
     // check for timing error(s) and set dura
     // keep in this order as checkTiming() might change dura
-    auto errorStr = mnd.checkTiming(type, bRest, grace);
+    String errorStr = mnd.checkTiming(type, bRest, grace);
     dura = mnd.duration();
-    if (errorStr != "") {
+    if (!errorStr.empty()) {
         m_logger->logError(errorStr, &m_e);
     }
 
@@ -3490,8 +3629,8 @@ void MusicXMLParserPass1::note(const String& partId,
 
     if (!chord && !grace) {
         // do tuplet
-        auto timeMod = mnd.timeMod();
-        auto& tupletState = tupletStates[voice];
+        Fraction timeMod = mnd.timeMod();
+        MxmlTupletState& tupletState = tupletStates[voice];
         tupletState.determineTupletAction(mnd.duration(), timeMod, tupletStartStop, mnd.normalType(), missingPrev, missingCurr);
     }
 
@@ -3499,7 +3638,7 @@ void MusicXMLParserPass1::note(const String& partId,
     if (dura.isValid() && dura > Fraction(0, 1)) {
         // count the chords
         int voiceInt = voiceToInt(voice);
-        if (!mu::contains(mu::value(m_parts, partId).voicelist, voiceInt)) {
+        if (!muse::contains(muse::value(m_parts, partId).voicelist, voiceInt)) {
             VoiceDesc vs;
             m_parts[partId].voicelist.insert({ voiceInt, vs });
         }
@@ -3567,10 +3706,10 @@ Fraction MusicXMLParserPass1::calcTicks(const int& intTicks, const int& _divisio
         // There are two strategies:
         // 1. Use a lookup table of previous adjustments
         // 2. Check if within maxDiff of a seenDenominator
-        if (mu::contains(m_adjustedDurations, dura)) {
+        if (muse::contains(m_adjustedDurations, dura)) {
             dura = m_adjustedDurations.at(dura);
         } else if (dura.reduced().denominator() > 64) {
-            for (auto seenDenominator : m_seenDenominators) {
+            for (int seenDenominator : m_seenDenominators) {
                 int seenDenominatorTicks = Fraction(1, seenDenominator).ticks();
                 if (std::abs(dura.ticks() % seenDenominatorTicks) <= m_maxDiff) {
                     Fraction roundedDura = Fraction(std::round(dura.ticks() / double(seenDenominatorTicks)), seenDenominator);
@@ -3599,7 +3738,7 @@ Fraction MusicXMLParserPass1::calcTicks(const int& intTicks, const int& _divisio
  Parse the /score-partwise/part/measure/note/duration node.
  */
 
-void MusicXMLParserPass1::duration(Fraction& dura, XmlStreamReader& e)
+void MusicXMLParserPass1::duration(Fraction& dura, muse::XmlStreamReader& e)
 {
     DO_ASSERT(e.isStartElement() && e.name() == "duration");
     m_logger->logDebugTrace(u"MusicXMLParserPass1::duration", &e);

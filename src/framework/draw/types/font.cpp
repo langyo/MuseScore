@@ -22,7 +22,7 @@
 #include "font.h"
 #include "global/realfn.h"
 
-using namespace mu;
+using namespace muse;
 using namespace muse::draw;
 
 bool Font::g_disableFontMerging = false;

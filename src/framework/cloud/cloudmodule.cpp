@@ -27,7 +27,9 @@
 #include "ui/iinteractiveuriregister.h"
 #include "ui/iuiengine.h"
 
+#ifdef MUSE_MODULE_CLOUD_MUSESCORECOM
 #include "musescorecom/musescorecomservice.h"
+#endif
 #include "audiocom/audiocomservice.h"
 #include "internal/cloudconfiguration.h"
 
@@ -36,9 +38,9 @@
 
 #include "cloudqmltypes.h"
 
-using namespace mu;
+using namespace muse;
 using namespace muse::cloud;
-using namespace mu::modularity;
+using namespace muse::modularity;
 
 static void cloud_init_qrc()
 {
@@ -53,11 +55,12 @@ std::string CloudModule::moduleName() const
 void CloudModule::registerExports()
 {
     m_cloudConfiguration = std::make_shared<CloudConfiguration>();
-    m_museScoreComService = std::make_shared<MuseScoreComService>();
-    m_audioComService = std::make_shared<AudioComService>();
-
     ioc()->registerExport<ICloudConfiguration>(moduleName(), m_cloudConfiguration);
+#ifdef MUSE_MODULE_CLOUD_MUSESCORECOM
+    m_museScoreComService = std::make_shared<MuseScoreComService>();
     ioc()->registerExport<IMuseScoreComService>(moduleName(), m_museScoreComService);
+#endif
+    m_audioComService = std::make_shared<AudioComService>();
     ioc()->registerExport<IAudioComService>(moduleName(), m_audioComService);
 }
 
@@ -65,7 +68,7 @@ void CloudModule::resolveImports()
 {
     auto ir = ioc()->resolve<ui::IInteractiveUriRegister>(moduleName());
     if (ir) {
-        ir->registerQmlUri(Uri("musescore://cloud/requireauthorization"), "MuseScore/Cloud/RequireAuthorizationDialog.qml");
+        ir->registerQmlUri(Uri("muse://cloud/requireauthorization"), "Muse/Cloud/RequireAuthorizationDialog.qml");
     }
 }
 
@@ -76,16 +79,16 @@ void CloudModule::registerResources()
 
 void CloudModule::registerUiTypes()
 {
-    qmlRegisterType<CloudsModel>("MuseScore.Cloud", 1, 0, "CloudsModel");
-    qmlRegisterType<MuseScoreComAuthorizationModel>("MuseScore.Cloud", 1, 0, "MuseScoreComAuthorizationModel");
+    qmlRegisterType<CloudsModel>("Muse.Cloud", 1, 0, "CloudsModel");
+    qmlRegisterType<MuseScoreComAuthorizationModel>("Muse.Cloud", 1, 0, "MuseScoreComAuthorizationModel");
 
-    qmlRegisterUncreatableType<QMLCloudVisibility>("MuseScore.Cloud", 1, 0, "CloudVisibility",
+    qmlRegisterUncreatableType<QMLCloudVisibility>("Muse.Cloud", 1, 0, "CloudVisibility",
                                                    "Not creatable as it is an enum type");
 
-    qmlRegisterUncreatableType<QMLSaveToCloudResponse>("MuseScore.Cloud", 1, 0, "SaveToCloudResponse",
+    qmlRegisterUncreatableType<QMLSaveToCloudResponse>("Muse.Cloud", 1, 0, "SaveToCloudResponse",
                                                        "Not creatable as it is an enum type");
 
-    modularity::ioc()->resolve<ui::IUiEngine>(moduleName())->addSourceImportPath(cloud_QML_IMPORT);
+    ioc()->resolve<ui::IUiEngine>(moduleName())->addSourceImportPath(muse_cloud_QML_IMPORT);
 }
 
 void CloudModule::onInit(const IApplication::RunMode& mode)
@@ -95,6 +98,8 @@ void CloudModule::onInit(const IApplication::RunMode& mode)
     }
 
     m_cloudConfiguration->init();
+#ifdef MUSE_MODULE_CLOUD_MUSESCORECOM
     m_museScoreComService->init();
+#endif
     m_audioComService->init();
 }

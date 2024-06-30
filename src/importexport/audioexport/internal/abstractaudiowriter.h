@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -32,8 +32,9 @@
 #include "project/inotationwriter.h"
 
 namespace mu::iex::audioexport {
-class AbstractAudioWriter : public project::INotationWriter, public async::Asyncable
+class AbstractAudioWriter : public project::INotationWriter, public muse::async::Asyncable
 {
+public:
     INJECT(muse::audio::IPlayback, playback)
     INJECT(IAudioExportConfiguration, configuration)
     INJECT(context::IGlobalContext, globalContext)
@@ -43,21 +44,22 @@ public:
     std::vector<UnitType> supportedUnitTypes() const override;
     bool supportsUnitType(UnitType unitType) const override;
 
-    Ret write(notation::INotationPtr notation, io::IODevice& dstDevice, const Options& options = Options()) override;
-    Ret writeList(const notation::INotationPtrList& notations, io::IODevice& dstDevice, const Options& options = Options()) override;
+    muse::Ret write(notation::INotationPtr notation, muse::io::IODevice& dstDevice, const Options& options = Options()) override;
+    muse::Ret writeList(const notation::INotationPtrList& notations, muse::io::IODevice& dstDevice,
+                        const Options& options = Options()) override;
 
-    mu::Progress* progress() override;
+    muse::Progress* progress() override;
     void abort() override;
 
 protected:
-    Ret doWriteAndWait(notation::INotationPtr notation, io::IODevice& dstDevice, const muse::audio::SoundTrackFormat& format);
+    muse::Ret doWriteAndWait(notation::INotationPtr notation, muse::io::IODevice& dstDevice, const muse::audio::SoundTrackFormat& format);
 
 private:
     UnitType unitTypeFromOptions(const Options& options) const;
 
-    mu::Progress m_progress;
+    muse::Progress m_progress;
     bool m_isCompleted = false;
-    Ret m_writeRet;
+    muse::Ret m_writeRet;
 };
 }
 

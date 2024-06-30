@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -323,6 +323,8 @@ public:
     bool isDifferentInstrument(const Instrument& i) const;
 
     String id() const { return m_id; }
+    const String& soundId() const { return m_soundId; }
+    void setSoundId(const String& id) { m_soundId = id; }
     String family() const;
     void setId(const String& id) { m_id = id; }
     void setMinPitchP(int v) { m_minPitchP = v; }
@@ -340,8 +342,8 @@ public:
     void setUseDrumset(bool val);
     void setAmateurPitchRange(int a, int b) { m_minPitchA = a; m_maxPitchA = b; }
     void setProfessionalPitchRange(int a, int b) { m_minPitchP = a; m_maxPitchP = b; }
-    InstrChannel* channel(int idx) { return mu::value(m_channel, idx); }
-    const InstrChannel* channel(int idx) const { return mu::value(m_channel, idx); }
+    InstrChannel* channel(int idx) { return muse::value(m_channel, idx); }
+    const InstrChannel* channel(int idx) const { return muse::value(m_channel, idx); }
     InstrChannel* playbackChannel(int idx, MasterScore*);
     const InstrChannel* playbackChannel(int idx, const MasterScore*) const;
     size_t cleffTypeCount() const;
@@ -356,7 +358,7 @@ public:
 
     const std::vector<InstrChannel*>& channel() const { return m_channel; }
     void appendChannel(InstrChannel* c) { m_channel.push_back(c); }
-    void removeChannel(InstrChannel* c) { mu::remove(m_channel, c); }
+    void removeChannel(InstrChannel* c) { muse::remove(m_channel, c); }
     void clearChannels() { m_channel.clear(); }
 
     void setMidiActions(const std::list<NamedEventList>& l) { m_midiActions = l; }
@@ -406,12 +408,16 @@ public:
     bool getSingleNoteDynamicsFromTemplate() const;
     void switchExpressive(MasterScore* score, Synthesizer* synth, bool expressive, bool force = false);
 
+    bool isVocalInstrument() const;
+    bool isNormallyMultiStaveInstrument() const;
+
 private:
 
     StaffNameList m_longNames;
     StaffNameList m_shortNames;
     String m_trackName;
     String m_id;
+    String m_soundId;
 
     int m_minPitchA = 0;
     int m_maxPitchA = 0;

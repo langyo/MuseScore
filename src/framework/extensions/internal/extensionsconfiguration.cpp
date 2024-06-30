@@ -29,9 +29,10 @@
 
 #include "log.h"
 
+using namespace muse;
 using namespace muse::extensions;
 
-static const mu::Settings::Key USER_PLUGINS_PATH("plugins", "application/paths/myPlugins");
+static const muse::Settings::Key USER_PLUGINS_PATH("plugins", "application/paths/myPlugins");
 
 static const std::string EXTENSIONS_RESOURCE_NAME("EXTENSIONS");
 
@@ -47,22 +48,22 @@ void ExtensionsConfiguration::init()
     }
 }
 
-mu::io::path_t ExtensionsConfiguration::defaultPath() const
+io::path_t ExtensionsConfiguration::defaultPath() const
 {
     return globalConfiguration()->appDataPath() + "/extensions";
 }
 
-mu::io::path_t ExtensionsConfiguration::userPath() const
+io::path_t ExtensionsConfiguration::userPath() const
 {
     return globalConfiguration()->userAppDataPath() + "/extensions";
 }
 
-mu::io::path_t ExtensionsConfiguration::pluginsDefaultPath() const
+io::path_t ExtensionsConfiguration::pluginsDefaultPath() const
 {
     return globalConfiguration()->appDataPath() + "/plugins";
 }
 
-mu::io::path_t ExtensionsConfiguration::pluginsUserPath() const
+io::path_t ExtensionsConfiguration::pluginsUserPath() const
 {
     return settings()->value(USER_PLUGINS_PATH).toPath();
 }
@@ -72,19 +73,28 @@ void ExtensionsConfiguration::setUserPluginsPath(const io::path_t& path)
     settings()->setSharedValue(USER_PLUGINS_PATH, Val(path));
 }
 
-mu::async::Channel<mu::io::path_t> ExtensionsConfiguration::pluginsUserPathChanged() const
+async::Channel<io::path_t> ExtensionsConfiguration::pluginsUserPathChanged() const
 {
     return m_pluginsUserPathChanged;
 }
 
-mu::Ret ExtensionsConfiguration::setManifestConfigs(const std::map<Uri, Manifest::Config>& configs)
+Ret ExtensionsConfiguration::setManifestConfigs(const std::map<Uri, Manifest::Config>& configs)
 {
     JsonArray arr;
     for (const auto& p : configs) {
         JsonObject obj;
         obj["uri"] = p.first.toString();
-        obj["enabled"] = p.second.enabled;
-        obj["shortcuts"] = p.second.shortcuts;
+
+        const Manifest::Config& c = p.second;
+        JsonArray acts;
+        for (const auto& a : c.actions) {
+            JsonObject act;
+            act["code"] = a.first;
+            act["exec_point"] = a.second.execPoint;
+            act["shortcut"] = a.second.shortcut;
+            acts.append(act);
+        }
+        obj["actions"] = acts;
 
         arr.append(obj);
     }
@@ -103,13 +113,13 @@ mu::Ret ExtensionsConfiguration::setManifestConfigs(const std::map<Uri, Manifest
     return ret;
 }
 
-std::map<mu::Uri, Manifest::Config> ExtensionsConfiguration::manifestConfigs() const
+std::map<muse::Uri, Manifest::Config> ExtensionsConfiguration::manifestConfigs() const
 {
     ByteArray data;
     {
         TRACEFUNC;
 
-        mu::io::path_t configPath = pluginsUserPath() + "/config.json";
+        io::path_t configPath = pluginsUserPath() + "/config.json";
         mi::ReadResourceLockGuard lock_guard(multiInstancesProvider.get(), EXTENSIONS_RESOURCE_NAME);
         Ret ret = io::File::readFile(configPath, data);
         if (!ret) {
@@ -133,20 +143,44 @@ std::map<mu::Uri, Manifest::Config> ExtensionsConfiguration::manifestConfigs() c
 
     JsonArray arr = doc.rootArray();
 
-    std::map<mu::Uri, Manifest::Config> result;
+    std::map<Uri, Manifest::Config> result;
     for (size_t i = 0; i < arr.size(); ++i) {
         JsonObject obj = arr.at(i).toObject();
 
         Uri uri;
         Manifest::Config c;
-        if (obj.contains("uri")) {
-            uri = Uri(obj.value("uri").toStdString());
-        } else {
-            uri = Uri("musescore://extensions/v1/" + obj.value("codeKey").toStdString());
-        }
+        // old plugins format
+        if (obj.contains("codeKey")) {
+            uri = Uri("muse://extensions/v1/" + obj.value("codeKey").toStdString());
+            bool enabled = obj.value("enabled").toBool();
+            Action::Config ac;
+            ac.shortcut = obj.value("shortcuts").toStdString();
+            ac.execPoint = enabled ? EXEC_MANUALLY : EXEC_DISABLED;
 
-        c.enabled = obj.value("enabled").toBool();
-        c.shortcuts = obj.value("shortcuts").toStdString();
+            c.actions["main"] = ac;
+        }
+        // extensions format
+        else {
+            uri = Uri(obj.value("uri").toStdString());
+            JsonValue actsVal = obj.value("actions");
+            // old extensions format
+            if (actsVal.isNull()) {
+                continue;
+            }
+
+            // current extensions format
+            JsonArray acts = actsVal.toArray();
+            for (size_t ai = 0; ai < acts.size(); ++ai) {
+                JsonObject ao = acts.at(ai).toObject();
+
+                std::string code = ao.value("code").toStdString();
+                Action::Config ac;
+                ac.execPoint = ao.value("exec_point").toStdString();
+                ac.shortcut = ao.value("shortcut").toStdString();
+
+                c.actions[code] = ac;
+            }
+        }
 
         if (uri.isValid()) {
             result[uri] = c;

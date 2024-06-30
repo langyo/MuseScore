@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -240,12 +240,12 @@ EngravingItem* Marker::nextSegmentElement()
     Segment* seg;
     if (markerType() == MarkerType::FINE) {
         seg = measure()->last();
-        return seg->firstElement(staffIdx());
+        return seg->firstElementForNavigation(staffIdx());
     }
     Measure* prevMeasure = measure()->prevMeasureMM();
     if (prevMeasure) {
         seg = prevMeasure->last();
-        return seg->firstElement(staffIdx());
+        return seg->firstElementForNavigation(staffIdx());
     }
     return EngravingItem::nextSegmentElement();
 }

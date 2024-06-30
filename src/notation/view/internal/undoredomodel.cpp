@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -25,7 +25,7 @@
 #include "uicomponents/view/menuitem.h"
 
 using namespace mu::notation;
-using namespace mu::uicomponents;
+using namespace muse::uicomponents;
 
 UndoRedoModel::UndoRedoModel(QObject* parent)
     : QObject(parent)
@@ -36,7 +36,7 @@ QVariant UndoRedoModel::makeUndoItem()
 {
     MenuItem* item = new MenuItem(actionsRegister()->action("undo"), this);
 
-    ui::UiActionState state;
+    muse::ui::UiActionState state;
     state.enabled = undoStack() ? undoStack()->canUndo() : false;
     item->setState(state);
 
@@ -47,7 +47,7 @@ QVariant UndoRedoModel::makeRedoItem()
 {
     MenuItem* item = new MenuItem(actionsRegister()->action("redo"), this);
 
-    ui::UiActionState state;
+    muse::ui::UiActionState state;
     state.enabled = undoStack() ? undoStack()->canRedo() : false;
     item->setState(state);
 

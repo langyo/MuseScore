@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -32,11 +32,11 @@
 
 namespace mu::engraving {
 class EngravingObject;
-class XmlWriter : public XmlStreamWriter
+class XmlWriter : public muse::XmlStreamWriter
 {
 public:
     XmlWriter() = default;
-    XmlWriter(mu::io::IODevice* dev);
+    XmlWriter(muse::io::IODevice* dev);
     ~XmlWriter();
 
     const std::vector<std::pair<const EngravingObject*, AsciiStringView> >& elements() const { return _elements; }
@@ -57,7 +57,7 @@ public:
     void tagProperty(const AsciiStringView&, const PropertyValue& data, const PropertyValue& def = PropertyValue());
 
     void tagFraction(const AsciiStringView& name, const Fraction& v, const Fraction& def = Fraction());
-    void tagPoint(const AsciiStringView& name, const mu::PointF& v);
+    void tagPoint(const AsciiStringView& name, const PointF& v);
 
     void writeXml(const String&, String s);
 

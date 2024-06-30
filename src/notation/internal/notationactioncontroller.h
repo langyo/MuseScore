@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -39,13 +39,13 @@
 #include "inotation.h"
 
 namespace mu::notation {
-class NotationActionController : public muse::actions::Actionable, public async::Asyncable
+class NotationActionController : public muse::actions::Actionable, public muse::async::Asyncable
 {
     INJECT(muse::actions::IActionsDispatcher, dispatcher)
-    INJECT(ui::IUiActionsRegister, actionRegister)
+    INJECT(muse::ui::IUiActionsRegister, actionRegister)
     INJECT(context::IGlobalContext, globalContext)
     INJECT(context::IUiContextResolver, uiContextResolver)
-    INJECT(IInteractive, interactive)
+    INJECT(muse::IInteractive, interactive)
     INJECT(playback::IPlaybackController, playbackController)
     INJECT(INotationConfiguration, configuration)
     INJECT(engraving::IEngravingConfiguration, engravingConfiguration)
@@ -55,15 +55,15 @@ public:
 
     bool canReceiveAction(const muse::actions::ActionCode& code) const override;
 
-    async::Notification currentNotationChanged() const;
+    muse::async::Notification currentNotationChanged() const;
 
     INotationNoteInputPtr currentNotationNoteInput() const;
-    async::Notification currentNotationNoteInputChanged() const;
+    muse::async::Notification currentNotationNoteInputChanged() const;
 
     INotationInteractionPtr currentNotationInteraction() const;
 
     INotationStylePtr currentNotationStyle() const;
-    async::Notification currentNotationStyleChanged() const;
+    muse::async::Notification currentNotationStyleChanged() const;
 
     INotationAccessibilityPtr currentNotationAccessibility() const;
 
@@ -113,7 +113,7 @@ private:
 
     void insertClef(mu::engraving::ClefType type);
 
-    IInteractive::Result showErrorMessage(const std::string& message) const;
+    muse::IInteractive::Result showErrorMessage(const std::string& message) const;
 
     bool isElementsSelected(const std::vector<ElementType>& elementsTypes) const;
 
@@ -153,7 +153,7 @@ private:
     void openMeasurePropertiesDialog();
     void openEditGridSizeDialog();
     void openRealizeChordSymbolsDialog();
-    mu::io::path_t selectStyleFile(bool forLoad);
+    muse::io::path_t selectStyleFile(bool forLoad);
     void loadStyle();
     void saveStyle();
 
@@ -254,7 +254,7 @@ private:
     void notifyAccessibilityAboutActionTriggered(const muse::actions::ActionCode& actionCode);
     void notifyAccessibilityAboutVoiceInfo(const std::string& info);
 
-    async::Notification m_currentNotationNoteInputChanged;
+    muse::async::Notification m_currentNotationNoteInputChanged;
 
     using IsActionEnabledFunc = std::function<bool ()>;
     std::map<muse::actions::ActionCode, IsActionEnabledFunc> m_isEnabledMap;

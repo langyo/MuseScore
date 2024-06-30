@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -210,7 +210,7 @@ TEST_F(MidiRenderer_Tests, onePercussionNote)
     EventsHolder events = renderMidiEvents(u"one_percussion_note.mscx");
 
     EXPECT_EQ(events.size(), 1);
-    EXPECT_EQ(events[DEFAULT_CHANNEL].size(), 1);
+    EXPECT_EQ(events[DEFAULT_CHANNEL].size(), 2);
 
     EXPECT_EQ(events[DEFAULT_CHANNEL].find(0)->second, noteEvent(41, defVol, DEFAULT_CHANNEL));
 }

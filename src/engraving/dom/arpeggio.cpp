@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -73,7 +73,7 @@ Arpeggio::~Arpeggio()
     }
 }
 
-const TranslatableString& Arpeggio::arpeggioTypeName() const
+const muse::TranslatableString& Arpeggio::arpeggioTypeName() const
 {
     return TConv::userName(m_arpeggioType);
 }
@@ -428,7 +428,7 @@ void Arpeggio::reset()
 
 bool Arpeggio::crossStaff() const
 {
-    return (track() + span() - 1) / VOICES != staffIdx();
+    return (track() + span() - 1) / VOICES != vStaffIdx();
 }
 
 staff_idx_t Arpeggio::vStaffIdx() const

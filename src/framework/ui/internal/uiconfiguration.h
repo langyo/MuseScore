@@ -20,11 +20,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_UI_UICONFIGURATION_H
-#define MU_UI_UICONFIGURATION_H
+#ifndef MUSE_UI_UICONFIGURATION_H
+#define MUSE_UI_UICONFIGURATION_H
 
 #include "iuiconfiguration.h"
 
+#include "iglobalconfiguration.h"
+#include "global/types/config.h"
 #include "modularity/ioc.h"
 #include "imainwindow.h"
 #include "internal/iplatformtheme.h"
@@ -33,13 +35,18 @@
 #include "uiarrangement.h"
 #include "async/asyncable.h"
 
-namespace mu::ui {
-class UiConfiguration : public IUiConfiguration, public async::Asyncable
+namespace muse::ui {
+class UiConfiguration : public IUiConfiguration, public Injectable, public async::Asyncable
 {
-    INJECT(IMainWindow, mainWindow)
-    INJECT(IPlatformTheme, platformTheme)
+    Inject<IMainWindow> mainWindow = { this };
+    Inject<IPlatformTheme> platformTheme = { this };
+    Inject<IGlobalConfiguration> globalConfiguration = { this };
 
 public:
+
+    UiConfiguration(const modularity::ContextPtr& iocCtx)
+        : Injectable(iocCtx), m_uiArrangement(iocCtx) {}
+
     void init();
     void load();
     void deinit();
@@ -146,4 +153,4 @@ private:
 };
 }
 
-#endif // MU_UI_UICONFIGURATION_H
+#endif // MUSE_UI_UICONFIGURATION_H

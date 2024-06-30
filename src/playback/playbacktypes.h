@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -99,8 +99,8 @@ enum class SoundProfileType {
     Custom
 };
 
-using SoundProfileName = String;
-using SoundProfileData = std::map<mpe::PlaybackSetupData, muse::audio::AudioResourceMeta>;
+using SoundProfileName = muse::String;
+using SoundProfileData = std::map<muse::mpe::PlaybackSetupData, muse::audio::AudioResourceMeta>;
 
 struct SoundProfile {
     SoundProfileType type = SoundProfileType::Undefined;
@@ -108,7 +108,7 @@ struct SoundProfile {
 
     SoundProfileData data;
 
-    const muse::audio::AudioResourceMeta& findResource(const mpe::PlaybackSetupData& key) const
+    const muse::audio::AudioResourceMeta& findResource(const muse::mpe::PlaybackSetupData& key) const
     {
         auto search = data.find(key);
         if (search != data.cend()) {

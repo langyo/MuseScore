@@ -20,13 +20,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_UICOMPONENTS_QMLLISTPROPERTY_H
-#define MU_UICOMPONENTS_QMLLISTPROPERTY_H
+#ifndef MUSE_UICOMPONENTS_QMLLISTPROPERTY_H
+#define MUSE_UICOMPONENTS_QMLLISTPROPERTY_H
 
 #include <QObject>
 #include <QQmlListProperty>
 
-namespace mu::uicomponents {
+namespace muse::uicomponents {
 class QmlListPropertyNotifier : public QObject
 {
     Q_OBJECT
@@ -52,31 +52,13 @@ public:
     {}
     ~QmlListProperty() { delete _notifier; }
 
-#ifdef MU_QT5_COMPAT
-    static int s_count_qt5(QQmlListProperty<T>* list)
-    {
-        return static_cast<int>(QmlListProperty::s_count(list));
-    }
-
-    static T* s_at_qt5(QQmlListProperty<T>* list, int index)
-    {
-        return QmlListProperty::s_at(list, static_cast<int>(index));
-    }
-
-#endif
-
     QQmlListProperty<T> property()
     {
         return QQmlListProperty<T>(_parent,
                                    this,
                                    &QmlListProperty::s_append,
-#ifdef MU_QT5_COMPAT
-                                   &s_count_qt5,
-                                   &s_at_qt5,
-#else
                                    &QmlListProperty::s_count,
                                    &QmlListProperty::s_at,
-#endif
                                    &QmlListProperty::s_clear);
     }
 
@@ -145,4 +127,4 @@ private:
 };
 }
 
-#endif // MU_UICOMPONENTS_QMLLISTPROPERTY_H
+#endif // MUSE_UICOMPONENTS_QMLLISTPROPERTY_H

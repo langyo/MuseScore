@@ -27,10 +27,11 @@
 
 #include "log.h"
 
+using namespace muse;
 using namespace muse::audio;
-using namespace mu::vst;
+using namespace muse::vst;
 
-namespace mu::vst {
+namespace muse::vst {
 static bool hasNativeEditorSupport()
 {
 #ifdef Q_OS_LINUX
@@ -48,7 +49,7 @@ bool VstPluginMetaReader::canReadMeta(const io::path_t& pluginPath) const
     return io::suffix(pluginPath) == VST3_PACKAGE_EXTENSION;
 }
 
-mu::RetVal<AudioResourceMetaList> VstPluginMetaReader::readMeta(const io::path_t& pluginPath) const
+RetVal<AudioResourceMetaList> VstPluginMetaReader::readMeta(const io::path_t& pluginPath) const
 {
     PluginModulePtr module = createModule(pluginPath);
     if (!module) {
@@ -63,10 +64,10 @@ mu::RetVal<AudioResourceMetaList> VstPluginMetaReader::readMeta(const io::path_t
             continue;
         }
 
-        audio::AudioResourceMeta meta;
+        muse::audio::AudioResourceMeta meta;
         meta.id = io::completeBasename(pluginPath).toStdString();
-        meta.type = audio::AudioResourceType::VstPlugin;
-        meta.attributes.emplace(audio::CATEGORIES_ATTRIBUTE, String::fromStdString(classInfo.subCategoriesString()));
+        meta.type = muse::audio::AudioResourceType::VstPlugin;
+        meta.attributes.emplace(muse::audio::CATEGORIES_ATTRIBUTE, String::fromStdString(classInfo.subCategoriesString()));
         meta.vendor = classInfo.vendor();
         meta.hasNativeEditorSupport = hasNativeEditorSupport();
 

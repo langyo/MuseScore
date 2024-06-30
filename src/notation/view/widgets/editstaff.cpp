@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -46,7 +46,8 @@
 #include "log.h"
 
 using namespace mu::notation;
-using namespace mu::ui;
+using namespace muse;
+using namespace muse::ui;
 using namespace mu::engraving;
 
 static const QChar GO_UP_ICON = iconCodeToChar(IconCode::Code::ARROW_UP);
@@ -54,7 +55,7 @@ static const QChar GO_DOWN_ICON = iconCodeToChar(IconCode::Code::ARROW_DOWN);
 static const QChar EDIT_ICON = iconCodeToChar(IconCode::Code::EDIT);
 
 EditStaff::EditStaff(QWidget* parent)
-    : QDialog(parent)
+    : QDialog(parent), muse::Injectable(muse::iocCtxForQWidget(this))
 {
     setObjectName("EditStaff");
     setupUi(this);
@@ -85,16 +86,12 @@ EditStaff::EditStaff(QWidget* parent)
 
     connect(color, &Awl::ColorLabel::colorChanged, this, &EditStaff::colorChanged);
 
-    connect(mag, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-            this, &EditStaff::magChanged);
+    connect(mag, &QDoubleSpinBox::valueChanged, this, &EditStaff::magChanged);
 
-    connect(iList, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, &EditStaff::transpositionChanged);
+    connect(iList, &QComboBox::currentIndexChanged, this, &EditStaff::transpositionChanged);
 
-    connect(lines, QOverload<int>::of(&QSpinBox::valueChanged),
-            this, &EditStaff::numOfLinesChanged);
-    connect(lineDistance, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-            this, &EditStaff::lineDistanceChanged);
+    connect(lines, &QSpinBox::valueChanged, this, &EditStaff::numOfLinesChanged);
+    connect(lineDistance, &QDoubleSpinBox::valueChanged, this, &EditStaff::lineDistanceChanged);
 
     WidgetUtils::setWidgetIcon(nextButton, IconCode::Code::ARROW_DOWN);
     WidgetUtils::setWidgetIcon(previousButton, IconCode::Code::ARROW_UP);
@@ -108,14 +105,6 @@ EditStaff::EditStaff(QWidget* parent)
     //! NOTE: It is necessary for the correct start of navigation in the dialog
     setFocus();
 }
-
-#ifdef MU_QT5_COMPAT
-EditStaff::EditStaff(const EditStaff& other)
-    : QDialog(other.parentWidget())
-{
-}
-
-#endif
 
 void EditStaff::setStaff(Staff* s, const Fraction& tick)
 {
@@ -132,7 +121,7 @@ void EditStaff::setStaff(Staff* s, const Fraction& tick)
     Part* part = m_orgStaff->part();
     mu::engraving::Score* score = part->score();
 
-    auto it = mu::findLessOrEqual(part->instruments(), tick.ticks());
+    auto it = muse::findLessOrEqual(part->instruments(), tick.ticks());
     if (it == part->instruments().cend()) {
         return;
     }
@@ -217,7 +206,7 @@ void EditStaff::updateInstrument()
     if (templ) {
         instrumentName->setText(formatInstrumentTitle(templ->trackName, templ->trait));
     } else {
-        instrumentName->setText(qtrc("notation/editstaff", "Unknown"));
+        instrumentName->setText(muse::qtrc("notation/editstaff", "Unknown"));
     }
 
     m_minPitchA = m_instrument.minPitchA();
@@ -531,8 +520,8 @@ void EditStaff::applyPartProperties()
     String _sn = shortName->toPlainText();
     String _ln = longName->toPlainText();
     if (!mu::engraving::Text::validateText(_sn) || !mu::engraving::Text::validateText(_ln)) {
-        interactive()->warning(trc("notation/staffpartproperties", "Invalid instrument name"),
-                               trc("notation/staffpartproperties", "The instrument name is invalid."));
+        interactive()->warning(muse::trc("notation/staffpartproperties", "Invalid instrument name"),
+                               muse::trc("notation/staffpartproperties", "The instrument name is invalid."));
         return;
     }
     QString sn = _sn;
@@ -661,7 +650,7 @@ void EditStaff::editStringDataClicked()
 
 QString EditStaff::midiCodeToStr(int midiCode)
 {
-    return QString::fromStdString(mu::pitchToString(midiCode));
+    return QString::fromStdString(muse::pitchToString(midiCode));
 }
 
 void EditStaff::showStaffTypeDialog()

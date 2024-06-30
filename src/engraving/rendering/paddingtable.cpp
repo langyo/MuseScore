@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -88,7 +88,7 @@ void PaddingTable::createTable(const MStyle& style)
                                                                   Sid::dotDotDistance));
     table[ElementType::NOTEDOT][ElementType::LEDGER_LINE]
         = std::max(table[ElementType::NOTEDOT][ElementType::NOTE] - ledgerLength, ledgerPad);
-    table[ElementType::NOTEDOT][ElementType::ACCIDENTAL] = table[ElementType::NOTEDOT][ElementType::NOTE];
+    table[ElementType::NOTEDOT][ElementType::ACCIDENTAL] = 0.35 * spatium;
     table[ElementType::NOTEDOT][ElementType::REST] = table[ElementType::NOTEDOT][ElementType::NOTE];
     table[ElementType::NOTEDOT][ElementType::CLEF] = 1.0 * spatium;
     table[ElementType::NOTEDOT][ElementType::ARPEGGIO] = 0.5 * spatium;
@@ -178,9 +178,6 @@ void PaddingTable::createTable(const MStyle& style)
         elem[ElementType::BREATH] = 1.0 * spatium;
     }
 
-    // Temporary hack, because some padding is already constructed inside the lyrics themselves.
-    table[ElementType::BAR_LINE][ElementType::LYRICS] = 0.0 * spatium;
-
     // Harmony
     table[ElementType::BAR_LINE][ElementType::HARMONY] = 0.5 * style.styleMM(Sid::minHarmonyDistance);
     table[ElementType::HARMONY][ElementType::HARMONY] = style.styleMM(Sid::minHarmonyDistance);
@@ -199,7 +196,9 @@ void PaddingTable::createTable(const MStyle& style)
     }
 
     // This is needed for beamlets, not beams themselves
-    table[ElementType::BEAM][ElementType::BEAM] = 0.4 * spatium;
+    table[ElementType::BEAM].fill(0.35 * spatium);
+
+    table[ElementType::TREMOLO_SINGLECHORD] = table[ElementType::BEAM];
 
     // Symbols (semi-hack: the only symbol for which
     // this is relevant is noteHead parenthesis)
@@ -209,4 +208,16 @@ void PaddingTable::createTable(const MStyle& style)
         elem[ElementType::SYMBOL] = elem[ElementType::ACCIDENTAL];
     }
     table[ElementType::NOTEDOT][ElementType::SYMBOL] = 0.2 * spatium;
+
+    double lyricsSpacing = style.styleMM(Sid::lyricsMinDistance);
+    table[ElementType::LYRICS].fill(lyricsSpacing);
+    for (auto& elem : table) {
+        elem[ElementType::LYRICS] = lyricsSpacing;
+    }
+    table[ElementType::NOTE][ElementType::LYRICS] = style.styleMM(Sid::lyricsMelismaPad);
+
+    // Accidental -> padding (used by accidental placement algorithm)
+    table[ElementType::ACCIDENTAL][ElementType::NOTE] = style.styleMM(Sid::accidentalNoteDistance);
+    table[ElementType::ACCIDENTAL][ElementType::LEDGER_LINE] = 0.18 * spatium;
+    table[ElementType::ACCIDENTAL][ElementType::STEM] = table[ElementType::ACCIDENTAL][ElementType::NOTE];
 }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -103,11 +103,15 @@ public:
 
     static AccidentalVal subtype2value(AccidentalType);               // return effective pitch offset
     static SymId subtype2symbol(AccidentalType);
-    static mu::AsciiStringView subtype2name(AccidentalType);
+    static AsciiStringView subtype2name(AccidentalType);
     static AccidentalType value2subtype(AccidentalVal);
-    static AccidentalType name2subtype(const mu::AsciiStringView&);
+    static AccidentalType name2subtype(const AsciiStringView&);
     static bool isMicrotonal(AccidentalType t) { return t > AccidentalType::FLAT3; }
     static double subtype2centOffset(AccidentalType);
+
+    int stackingOrder() const { return ldata()->stackingNumber + m_stackingOrderOffset; }
+
+    int line() const;
 
     String accessibleInfo() const override;
 
@@ -124,9 +128,18 @@ public:
 
         std::vector<Sym> syms;
 
+        ld_field<int> stackingNumber = { "[Accidental] stackingNumber", 0 };
+        ld_field<int> verticalSubgroup = { "[Accidental] verticalSubgroup", 0 };
+        ld_field<int> column = { "[Accidental] column", 0 };
+        ld_field<std::vector<Accidental*> > octaves = { "[Accidental] octaves", std::vector<Accidental*> {} };
+        ld_field<std::vector<Accidental*> > seconds = { "[Accidental] seconds", std::vector<Accidental*> {} };
+
         bool isValid() const override { return EngravingItem::LayoutData::isValid() && !syms.empty(); }
     };
     DECLARE_LAYOUTDATA_METHODS(Accidental)
+
+    int stackingOrderOffset() const { return m_stackingOrderOffset; }
+    void setStackingOrderOffset(int v) { m_stackingOrderOffset = v; }
 
 private:
 
@@ -138,6 +151,7 @@ private:
     AccidentalBracket m_bracket = AccidentalBracket::NONE;
     AccidentalRole m_role = AccidentalRole::AUTO;
     bool m_isSmall = false;
+    int m_stackingOrderOffset = 0;
 };
 
 extern AccidentalVal sym2accidentalVal(SymId id);

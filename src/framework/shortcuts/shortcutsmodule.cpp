@@ -48,13 +48,15 @@
 
 #include "ui/iuiengine.h"
 
-#ifdef MUE_BUILD_DIAGNOSTICS_MODULE
+#include "muse_framework_config.h"
+
+#ifdef MUSE_MODULE_DIAGNOSTICS
 #include "diagnostics/idiagnosticspathsregister.h"
 #endif
 
-using namespace mu::shortcuts;
-using namespace mu::modularity;
-using namespace mu::ui;
+using namespace muse::shortcuts;
+using namespace muse::modularity;
+using namespace muse::ui;
 
 static void shortcuts_init_qrc()
 {
@@ -81,11 +83,11 @@ void ShortcutsModule::registerExports()
 
 void ShortcutsModule::registerApi()
 {
-    using namespace mu::api;
+    using namespace muse::api;
 
     auto api = ioc()->resolve<IApiRegister>(moduleName());
     if (api) {
-        api->regApiCreator(moduleName(), "api.shortcuts", new ApiCreator<ShortcutsApi>());
+        api->regApiCreator(moduleName(), "api.shortcuts", new ApiCreator<api::ShortcutsApi>());
     }
 }
 
@@ -97,17 +99,17 @@ void ShortcutsModule::registerResources()
 void ShortcutsModule::registerUiTypes()
 {
 #if defined(Q_OS_MACOS)
-    qmlRegisterType<MacOSShortcutsInstanceModel>("MuseScore.Shortcuts", 1, 0, "ShortcutsInstanceModel");
+    qmlRegisterType<MacOSShortcutsInstanceModel>("Muse.Shortcuts", 1, 0, "ShortcutsInstanceModel");
 #else
-    qmlRegisterType<ShortcutsInstanceModel>("MuseScore.Shortcuts", 1, 0, "ShortcutsInstanceModel");
+    qmlRegisterType<ShortcutsInstanceModel>("Muse.Shortcuts", 1, 0, "ShortcutsInstanceModel");
 #endif
 
-    qmlRegisterType<ShortcutsModel>("MuseScore.Shortcuts", 1, 0, "ShortcutsModel");
-    qmlRegisterType<EditShortcutModel>("MuseScore.Shortcuts", 1, 0, "EditShortcutModel");
-    qmlRegisterType<MidiDeviceMappingModel>("MuseScore.Shortcuts", 1, 0, "MidiDeviceMappingModel");
-    qmlRegisterType<EditMidiMappingModel>("MuseScore.Shortcuts", 1, 0, "EditMidiMappingModel");
+    qmlRegisterType<ShortcutsModel>("Muse.Shortcuts", 1, 0, "ShortcutsModel");
+    qmlRegisterType<EditShortcutModel>("Muse.Shortcuts", 1, 0, "EditShortcutModel");
+    qmlRegisterType<MidiDeviceMappingModel>("Muse.Shortcuts", 1, 0, "MidiDeviceMappingModel");
+    qmlRegisterType<EditMidiMappingModel>("Muse.Shortcuts", 1, 0, "EditMidiMappingModel");
 
-    ioc()->resolve<IUiEngine>(moduleName())->addSourceImportPath(shortcuts_QML_IMPORT);
+    ioc()->resolve<IUiEngine>(moduleName())->addSourceImportPath(muse_shortcuts_QML_IMPORT);
 }
 
 void ShortcutsModule::onInit(const IApplication::RunMode& mode)
@@ -121,8 +123,8 @@ void ShortcutsModule::onInit(const IApplication::RunMode& mode)
     m_shortcutsRegister->init();
     m_midiRemote->init();
 
-#ifdef MUE_BUILD_DIAGNOSTICS_MODULE
-    auto pr = ioc()->resolve<diagnostics::IDiagnosticsPathsRegister>(moduleName());
+#ifdef MUSE_MODULE_DIAGNOSTICS
+    auto pr = ioc()->resolve<muse::diagnostics::IDiagnosticsPathsRegister>(moduleName());
     if (pr) {
         pr->reg("shortcutsUserAppDataPath", m_configuration->shortcutsUserAppDataPath());
         pr->reg("shortcutsAppDataPath", m_configuration->shortcutsAppDataPath());

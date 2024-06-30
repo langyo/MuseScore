@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_SHORTCUTS_SHORTCUTSREGISTER_H
-#define MU_SHORTCUTS_SHORTCUTSREGISTER_H
+#ifndef MUSE_SHORTCUTS_SHORTCUTSREGISTER_H
+#define MUSE_SHORTCUTS_SHORTCUTSREGISTER_H
 
 #include <unordered_map>
 
@@ -32,18 +32,18 @@
 #include "io/ifilesystem.h"
 #include "multiinstances/imultiinstancesprovider.h"
 
-namespace mu::deprecated {
+namespace muse::deprecated {
 class XmlReader;
 class XmlWriter;
 }
 
-namespace mu::shortcuts {
+namespace muse::shortcuts {
 class ShortcutsRegister : public IShortcutsRegister, public async::Asyncable
 {
     INJECT(IShortcutsConfiguration, configuration)
     INJECT(io::IFileSystem, fileSystem)
     INJECT(mi::IMultiInstancesProvider, multiInstancesProvider)
-    INJECT(ui::IUiActionsRegister, uiactionsRegister)
+    INJECT(muse::ui::IUiActionsRegister, uiactionsRegister)
 
 public:
     ShortcutsRegister() = default;
@@ -98,4 +98,4 @@ private:
 };
 }
 
-#endif // MU_SHORTCUTS_SHORTCUTSREGISTER_H
+#endif // MUSE_SHORTCUTS_SHORTCUTSREGISTER_H

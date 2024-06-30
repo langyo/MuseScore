@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -38,7 +38,7 @@
 #include "internal/mixerchannelitem.h"
 
 namespace mu::playback {
-class MixerPanelModel : public QAbstractListModel, public async::Asyncable
+class MixerPanelModel : public QAbstractListModel, public muse::async::Asyncable
 {
     Q_OBJECT
 
@@ -48,7 +48,7 @@ class MixerPanelModel : public QAbstractListModel, public async::Asyncable
     INJECT(IPlaybackConfiguration, configuration)
 
     Q_PROPERTY(
-        mu::ui::NavigationSection * navigationSection READ navigationSection WRITE setNavigationSection NOTIFY navigationSectionChanged)
+        muse::ui::NavigationSection * navigationSection READ navigationSection WRITE setNavigationSection NOTIFY navigationSectionChanged)
 
     Q_PROPERTY(int count READ rowCount NOTIFY rowCountChanged)
 
@@ -62,8 +62,8 @@ public:
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    ui::NavigationSection* navigationSection() const;
-    void setNavigationSection(ui::NavigationSection* navigationSection);
+    muse::ui::NavigationSection* navigationSection() const;
+    void setNavigationSection(muse::ui::NavigationSection* navigationSection);
 
 signals:
     void navigationSectionChanged();
@@ -106,7 +106,7 @@ private:
     MixerChannelItem* m_masterChannelItem = nullptr;
     muse::audio::TrackSequenceId m_currentTrackSequenceId = -1;
 
-    ui::NavigationSection* m_navigationSection = nullptr;
+    muse::ui::NavigationSection* m_navigationSection = nullptr;
 };
 }
 

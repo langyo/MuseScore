@@ -35,7 +35,7 @@ public:
     FontFaceFT();
     ~FontFaceFT();
 
-    bool load(const FaceKey& key, const mu::io::path_t& path, bool isSymbolMode) override;
+    bool load(const FaceKey& key, const io::path_t& path, bool isSymbolMode) override;
 
     const FaceKey& key() const override;
     bool isSymbolMode() const override;
@@ -53,7 +53,9 @@ public:
     FBBox glyphBbox(glyph_idx_t idx) const override;
     f26dot6_t glyphAdvance(glyph_idx_t idx) const override;
 
+#ifndef MUSE_MODULE_DRAW_USE_QTTEXTDRAW
     const msdfgen::Shape& glyphShape(glyph_idx_t idx) const override;
+#endif
 
 private:
 
@@ -63,7 +65,9 @@ private:
     FaceKey m_key;
     bool m_isSymbolMode = false;
     FData* m_data = nullptr;
+#ifndef MUSE_MODULE_DRAW_USE_QTTEXTDRAW
     mutable std::unordered_map<glyph_idx_t, msdfgen::Shape> m_cache;
+#endif
 };
 }
 

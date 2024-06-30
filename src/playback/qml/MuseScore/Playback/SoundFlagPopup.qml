@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2024 MuseScore BVBA and others
+ * Copyright (C) 2024 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,8 +22,8 @@
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
+import Muse.Ui 1.0
+import Muse.UiComponents 1.0
 
 import MuseScore.Playback 1.0
 
@@ -50,9 +50,8 @@ StyledPopupView {
     signal elementRectChanged(var elementRect)
 
     function updatePosition() {
-        const marginFromElement = 12
         var popupHeight = root.contentHeight + root.margins * 2 + root.padding * 2
-        root.y = -popupHeight - marginFromElement
+        root.y = -popupHeight
         root.x = (root.parent.width / 2) - (root.width / 2) + root.margins
 
         root.setOpensUpward(true)
@@ -108,6 +107,7 @@ StyledPopupView {
                 horizontalAlignment: Text.AlignLeft
 
                 NavigationControl {
+                    id: navCtrl
                     name: "SoundFlagTitle"
                     enabled: titleLabel.enabled && titleLabel.visible
                     panel: navPanel
@@ -118,6 +118,10 @@ StyledPopupView {
                     accessible.visualItem: titleLabel
                     accessible.name: titleLabel.text
                 }
+
+                NavigationFocusBorder {
+                    navigationCtrl: navCtrl
+                }
             }
 
             MenuButton {
@@ -125,6 +129,8 @@ StyledPopupView {
                 Layout.preferredHeight: width
 
                 menuModel: soundFlagModel.contextMenuModel
+
+                enabled: !museSoundsParams.noOptions
 
                 navigation.panel: navPanel
                 navigation.order: 2

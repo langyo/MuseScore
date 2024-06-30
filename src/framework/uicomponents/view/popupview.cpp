@@ -24,13 +24,14 @@
 
 #include <functional>
 #include <QQuickView>
-#include <QQuickWidget>
 #include <QQmlEngine>
 #include <QUrl>
 #include <QQmlContext>
 #include <QApplication>
 #include <QTimer>
 #include <QScreen>
+
+#include "ui/inavigation.h"
 
 #include "popupwindow/popupwindow_qquickview.h"
 
@@ -42,10 +43,10 @@
 
 #include "log.h"
 
-using namespace mu::uicomponents;
+using namespace muse::uicomponents;
 
 PopupView::PopupView(QQuickItem* parent)
-    : QObject(parent)
+    : QObject(parent), Injectable(muse::iocCtxForQmlObject(this))
 {
     setObjectName("PopupView");
     setErrCode(Ret::Code::Ok);
@@ -131,7 +132,7 @@ void PopupView::init()
         return;
     }
 
-    m_window = new PopupWindow_QQuickView();
+    m_window = new PopupWindow_QQuickView(muse::iocCtxForQmlEngine(engine));
     m_window->init(engine, isDialog(), frameless());
     m_window->setOnHidden([this]() { onHidden(); });
     m_window->setContent(m_component, m_contentItem);
@@ -155,11 +156,11 @@ void PopupView::init()
 void PopupView::initCloseController()
 {
 #if defined(Q_OS_MAC)
-    m_closeController = new MacOSPopupViewCloseController();
+    m_closeController = new MacOSPopupViewCloseController(muse::iocCtxForQmlEngine(this->engine()));
 #elif defined(Q_OS_WIN)
-    m_closeController = new WinPopupViewCloseController();
+    m_closeController = new WinPopupViewCloseController(muse::iocCtxForQmlEngine(this->engine()));
 #else
-    m_closeController = new PopupViewCloseController();
+    m_closeController = new PopupViewCloseController(muse::iocCtxForQmlEngine(this->engine()));
 #endif
 
     m_closeController->init();
@@ -203,6 +204,10 @@ void PopupView::open()
     doOpen();
 }
 
+void PopupView::beforeOpen()
+{
+}
+
 void PopupView::doOpen()
 {
     if (isOpened()) {
@@ -213,6 +218,8 @@ void PopupView::doOpen()
     IF_ASSERT_FAILED(m_window) {
         return;
     }
+
+    beforeOpen();
 
     updateGeometry();
 
@@ -331,7 +338,7 @@ bool PopupView::activateParentOnClose() const
     return m_activateParentOnClose;
 }
 
-mu::ui::INavigationControl* PopupView::navigationParentControl() const
+muse::ui::INavigationControl* PopupView::navigationParentControl() const
 {
     return m_navigationParentControl;
 }
@@ -767,12 +774,6 @@ void PopupView::updateContentPosition()
             setArrowX(viewGeometry.width() / 2);
         } else {
             setArrowX(parentTopLeft.x() + (parent->width() / 2) - m_globalPos.x());
-        }
-    } else {
-        if (opensUpward()) {
-            contentItem()->setY(padding());
-        } else {
-            contentItem()->setY(-padding());
         }
     }
 }

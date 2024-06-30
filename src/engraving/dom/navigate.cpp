@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -834,6 +834,7 @@ EngravingItem* Score::nextElement()
         }
         case ElementType::LAYOUT_BREAK: {
             staffId = 0;             // otherwise it will equal -1, which breaks the navigation
+            break;
         }
         case ElementType::SOUND_FLAG:
             if (EngravingItem* parent = toSoundFlag(e)->parentItem()) {
@@ -993,7 +994,7 @@ EngravingItem* Score::prevElement()
                 staff_idx_t si = cr ? cr->staffIdx() : 0;
                 Segment* s = toMeasure(mb)->last();
                 if (s) {
-                    return s->lastElement(si);
+                    return s->lastElementForNavigation(si);
                 }
             } else {
                 return mb;
@@ -1002,6 +1003,7 @@ EngravingItem* Score::prevElement()
         break;
         case ElementType::LAYOUT_BREAK: {
             staffId = 0;             // otherwise it will equal -1, which breaks the navigation
+            break;
         }
         default:
             break;
@@ -1019,17 +1021,20 @@ EngravingItem* Score::prevElement()
 
 Lyrics* prevLyrics(const Lyrics* lyrics)
 {
-    track_idx_t currTrack = lyrics->track();
-    Segment* seg = lyrics->segment();
+    Segment* seg = lyrics->explicitParent() ? lyrics->segment() : nullptr;
     if (!seg) {
         return nullptr;
     }
     Segment* prevSegment = seg;
     while ((prevSegment = prevSegment->prev1(mu::engraving::SegmentType::ChordRest))) {
-        EngravingItem* el = prevSegment->element(currTrack);
-        Lyrics* prevLyrics = el && el->isChord() ? toChordRest(el)->lyrics(lyrics->no(), lyrics->placement()) : nullptr;
-        if (prevLyrics) {
-            return prevLyrics;
+        const track_idx_t strack = lyrics->staffIdx() * VOICES;
+        const track_idx_t etrack = strack + VOICES;
+        for (track_idx_t track = strack; track < etrack; ++track) {
+            EngravingItem* el = prevSegment->element(track);
+            Lyrics* prevLyrics = el && el->isChord() ? toChordRest(el)->lyrics(lyrics->no(), lyrics->placement()) : nullptr;
+            if (prevLyrics) {
+                return prevLyrics;
+            }
         }
     }
     return nullptr;

@@ -24,7 +24,7 @@
 
 #include "log.h"
 
-using namespace mu::uicomponents;
+using namespace muse::uicomponents;
 
 static const QString MENU_VIEW_CONTENT_OBJECT_NAME("_MenuViewContent");
 
@@ -134,6 +134,15 @@ void MenuView::updateGeometry()
 
     // remove padding for arrow
     movePos(m_globalPos.x() - padding(), m_globalPos.y());
+}
+
+void MenuView::updateContentPosition()
+{
+    if (opensUpward()) {
+        contentItem()->setY(padding());
+    } else {
+        contentItem()->setY(-padding());
+    }
 }
 
 QRect MenuView::viewGeometry() const

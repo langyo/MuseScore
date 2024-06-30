@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -33,8 +33,8 @@ RestSettingsProxyModel::RestSettingsProxyModel(QObject* parent, IElementReposito
     : AbstractInspectorProxyModel(parent, repository)
 {
     setModelType(InspectorModelType::TYPE_REST);
-    setTitle(qtrc("inspector", "Rest"));
-    setIcon(ui::IconCode::Code::REST_8TH);
+    setTitle(muse::qtrc("inspector", "Rest"));
+    setIcon(muse::ui::IconCode::Code::REST_8TH);
 
     QList<AbstractInspectorModel*> models;
     for (InspectorModelType modelType : REST_PART_TYPES) {

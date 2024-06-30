@@ -27,6 +27,7 @@
 #include <set>
 #include <string>
 
+#include "global/types/number.h"
 #include "global/realfn.h"
 #include "global/types/string.h"
 #include "global/async/channel.h"
@@ -37,7 +38,14 @@
 
 namespace muse::audio {
 using msecs_t = int64_t;
-using secs_t = int64_t;
+using secs_t = number_t<double>;
+
+inline secs_t milisecsToSecs(msecs_t ms) { return secs_t(ms / 1000.0); }
+inline secs_t microsecsToSecs(msecs_t us) { return secs_t(us / 1000000.0); }
+
+inline msecs_t secsToMilisecs(secs_t s) { return msecs_t(s * 1000.0); }
+inline msecs_t secsToMicrosecs(secs_t s) { return msecs_t(s * 1000000.0); }
+
 using samples_t = uint64_t;
 using sample_rate_t = uint64_t;
 using audioch_t = uint8_t;
@@ -55,7 +63,7 @@ using TrackName = std::string;
 
 using aux_channel_idx_t = uint8_t;
 
-using PlaybackData = std::variant<mpe::PlaybackData, mu::io::IODevice*>;
+using PlaybackData = std::variant<mpe::PlaybackData, io::IODevice*>;
 using PlaybackSetupData = mpe::PlaybackSetupData;
 
 static constexpr TrackId INVALID_TRACK_ID = -1;
@@ -257,7 +265,7 @@ struct AuxSendParams {
 
     bool operator ==(const AuxSendParams& other) const
     {
-        return mu::RealIsEqual(signalAmount, other.signalAmount) && active == other.active;
+        return RealIsEqual(signalAmount, other.signalAmount) && active == other.active;
     }
 };
 
@@ -275,8 +283,8 @@ struct AudioOutputParams {
     bool operator ==(const AudioOutputParams& other) const
     {
         return fxChain == other.fxChain
-               && mu::RealIsEqual(volume, other.volume)
-               && mu::RealIsEqual(balance, other.balance)
+               && RealIsEqual(volume, other.volume)
+               && RealIsEqual(balance, other.balance)
                && auxSends == other.auxSends
                && solo == other.solo
                && muted == other.muted
@@ -348,7 +356,7 @@ struct AudioSignalsNotifier {
 
         volume_dbfs_t validatedPressure = std::max(newPressure, MINIMUM_OPERABLE_DBFS_LEVEL);
 
-        if (mu::RealIsEqual(signalVal.pressure, validatedPressure)) {
+        if (RealIsEqual(signalVal.pressure, validatedPressure)) {
             return;
         }
 

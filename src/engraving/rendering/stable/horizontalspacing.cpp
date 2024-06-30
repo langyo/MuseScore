@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -74,10 +74,6 @@ double HorizontalSpacing::minHorizontalDistance(const Shape& f, const Shape& s, 
                 || (!item1 && item2 && item2->isLyrics())  // Temporary hack: avoids collision with melisma line
                 || kerningType == KerningType::NON_KERNING) {
                 dist = std::max(dist, r1.right() - r2.left() + padding);
-            }
-            if (kerningType == KerningType::KERNING_UNTIL_ORIGIN) { //prepared for future user option, for now always false
-                double origin = r1.left();
-                dist = std::max(dist, origin - r2.left());
             }
         }
     }

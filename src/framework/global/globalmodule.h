@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_GLOBAL_GLOBALMODULE_H
-#define MU_GLOBAL_GLOBALMODULE_H
+#ifndef MUSE_GLOBAL_GLOBALMODULE_H
+#define MUSE_GLOBAL_GLOBALMODULE_H
 
 #include <memory>
 #include <optional>
@@ -31,14 +31,14 @@
 #include "modularity/ioc.h"
 #include "io/ifilesystem.h"
 
-namespace mu {
+namespace muse {
 class SystemInfo;
 class Invoker;
 class GlobalConfiguration;
-class Application;
+class BaseApplication;
 class GlobalModule : public modularity::IModuleSetup
 {
-    Inject<io::IFileSystem> fileSystem;
+    GlobalInject<io::IFileSystem> fileSystem;
 
 public:
 
@@ -53,19 +53,16 @@ public:
 
     static void invokeQueuedCalls();
 
-    void setLoggerLevel(const mu::logger::Level& level);
-
-    std::shared_ptr<Application> app() const;
+    void setLoggerLevel(const muse::logger::Level& level);
 
 private:
-    std::shared_ptr<Application> m_application;
     std::shared_ptr<GlobalConfiguration> m_configuration;
     std::shared_ptr<SystemInfo> m_systemInfo;
 
-    std::optional<mu::logger::Level> m_loggerLevel;
+    std::optional<muse::logger::Level> m_loggerLevel;
 
     static std::shared_ptr<Invoker> s_asyncInvoker;
 };
 }
 
-#endif // MU_GLOBAL_GLOBALMODULE_H
+#endif // MUSE_GLOBAL_GLOBALMODULE_H

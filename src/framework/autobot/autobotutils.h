@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_AUTOBOT_AUTOBOTUTILS_H
-#define MU_AUTOBOT_AUTOBOTUTILS_H
+#ifndef MUSE_AUTOBOT_AUTOBOTUTILS_H
+#define MUSE_AUTOBOT_AUTOBOTUTILS_H
 
 #include <QJSValue>
 
@@ -29,7 +29,7 @@
 #include "api/iapiengine.h"
 #include "log.h"
 
-namespace mu::autobot {
+namespace muse::autobot {
 inline Ret jsValueToRet(const QJSValue& val)
 {
     if (val.isError()) {
@@ -95,4 +95,4 @@ inline QJSValue toQJSValue(const JsonValue& jv, api::IApiEngine* e = nullptr)
 }
 }
 
-#endif // MU_AUTOBOT_AUTOBOTUTILS_H
+#endif // MUSE_AUTOBOT_AUTOBOTUTILS_H

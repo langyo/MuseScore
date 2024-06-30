@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -60,7 +60,7 @@ void CloudScoresModel::reload()
     beginResetModel();
 
     m_items.clear();
-    m_totalItems = mu::nidx;
+    m_totalItems = muse::nidx;
     m_desiredRowCount = 0;
 
     endResetModel();
@@ -88,7 +88,7 @@ void CloudScoresModel::setState(State state)
 
 bool CloudScoresModel::hasMore() const
 {
-    return m_totalItems == mu::nidx || m_items.size() < m_totalItems;
+    return m_totalItems == muse::nidx || m_items.size() < m_totalItems;
 }
 
 int CloudScoresModel::desiredRowCount() const

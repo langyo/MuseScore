@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -89,7 +89,7 @@ private:
     void spatiumChanged(double oldValue, double newValue) override;
 
     double m_lw = 0.0;
-    mu::RectF m_iconBorderRect;
+    RectF m_iconBorderRect;
     muse::draw::PainterPath m_iconPath;
     double m_pause = 0.0;
     bool m_startWithLongNames = false;

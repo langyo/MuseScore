@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,7 +30,7 @@
 
 #include "log.h"
 
-using namespace mu::workspace;
+using namespace mu::workspacescene;
 
 NewWorkspaceModel::NewWorkspaceModel(QObject* parent)
     : QObject(parent)
@@ -41,7 +41,7 @@ void NewWorkspaceModel::load(const QString& workspaceNames)
 {
     m_workspaceNames = workspaceNames.split(',');
 
-    setWorkspaceName(qtrc("workspace", "My new workspace"));
+    setWorkspaceName(muse::qtrc("workspace", "My new workspace"));
     setUseUiPreferences(true);
     setUseUiArrangement(true);
     setUsePalettes(true);
@@ -99,14 +99,14 @@ void NewWorkspaceModel::validateWorkspaceName()
     m_errorMessage.clear();
 
     if (m_workspaceNames.contains(m_workspaceName)) {
-        m_errorMessage = qtrc("workspace", "A workspace with the name “%1” already exists. Please choose a different name.")
+        m_errorMessage = muse::qtrc("workspace", "A workspace with the name “%1” already exists. Please choose a different name.")
                          .arg(m_workspaceName);
         return;
     }
 
     //! NOTE A file will be created with this name, so let's check if the name is valid for the file name
-    if (!io::isAllowedFileName(io::path_t(m_workspaceName))) {
-        m_errorMessage = qtrc("workspace", "“%1” cannot be used as a workspace name. Please choose a different name.")
+    if (!muse::io::isAllowedFileName(muse::io::path_t(m_workspaceName))) {
+        m_errorMessage = muse::qtrc("workspace", "“%1” cannot be used as a workspace name. Please choose a different name.")
                          .arg(m_workspaceName);
         return;
     }
@@ -156,9 +156,9 @@ QVariant NewWorkspaceModel::createWorkspace() const
 {
     QVariantMap meta;
     meta["name"] = m_workspaceName;
-    meta[ui::WS_UiSettings] = useUiPreferences();
-    meta[ui::WS_UiStates] = useUiArrangement();
-    meta[ui::WS_UiToolConfigs] = useToolbarCustomization();
+    meta[muse::ui::WS_UiSettings] = useUiPreferences();
+    meta[muse::ui::WS_UiStates] = useUiArrangement();
+    meta[muse::ui::WS_UiToolConfigs] = useToolbarCustomization();
     meta[palette::WS_Palettes] = usePalettes();
     return meta;
 }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -73,12 +73,12 @@ public:
 
     void scanElements(void* data, void (* func)(void*, EngravingItem*), bool all=true) override;
 
-    std::vector<EngravingItem*> items(const mu::RectF& r);
-    std::vector<EngravingItem*> items(const mu::PointF& p);
+    std::vector<EngravingItem*> items(const RectF& r);
+    std::vector<EngravingItem*> items(const PointF& p);
     void invalidateBspTree() { m_bspTreeValid = false; }
-    mu::PointF pagePos() const override { return mu::PointF(); }       ///< position in page coordinates
+    PointF pagePos() const override { return PointF(); }       ///< position in page coordinates
     std::vector<EngravingItem*> elements() const;              ///< list of visible elements
-    mu::RectF tbbox() const;                             // tight bounding box, excluding white space
+    RectF tbbox() const;                             // tight bounding box, excluding white space
     Fraction endTick() const;
 
 #ifndef ENGRAVING_NO_ACCESSIBILITY

@@ -19,16 +19,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_GLOBAL_URI_H
-#define MU_GLOBAL_URI_H
+#ifndef MUSE_GLOBAL_URI_H
+#define MUSE_GLOBAL_URI_H
 
 #include <string>
 #include <vector>
 #include <map>
 
 #include "val.h"
+#include "global/logstream.h"
 
-namespace mu {
+namespace muse {
 class Uri
 {
 public:
@@ -97,9 +98,16 @@ private:
 };
 }
 
-namespace muse {
-using Uri = mu::Uri;
-using UriQuery = mu::UriQuery;
+inline muse::logger::Stream& operator<<(muse::logger::Stream& s, const muse::Uri& uri)
+{
+    s << uri.toString();
+    return s;
 }
 
-#endif // MU_GLOBAL_URI_H
+inline muse::logger::Stream& operator<<(muse::logger::Stream& s, const muse::UriQuery& q)
+{
+    s << q.toString();
+    return s;
+}
+
+#endif // MUSE_GLOBAL_URI_H

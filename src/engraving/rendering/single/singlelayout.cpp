@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -98,6 +98,7 @@
 
 #include "log.h"
 
+using namespace muse;
 using namespace muse::draw;
 using namespace mu::engraving;
 using namespace mu::engraving::rendering::dev;
@@ -368,7 +369,7 @@ void SingleLayout::layout(Ambitus* item, const Context& ctx)
                    ldata->bottomPos.y());
     // shorten line on each side by offsets
     double yDelta = ldata->bottomPos.y() - ldata->topPos.y();
-    if (yDelta != 0.0) {
+    if (!RealIsNull(yDelta)) {
         double off = spatium * Ambitus::LINEOFFSET_DEFAULT;
         PointF p1 = fullLine.pointAt(off / yDelta);
         PointF p2 = fullLine.pointAt(1 - (off / yDelta));
@@ -521,7 +522,7 @@ void SingleLayout::layout(BagpipeEmbellishment* item, const Context& ctx)
 
         // flag
         if (ldata->isDrawFlag) {
-            noteData.flagXY = mu::PointF(x - ldata->stemLineW * .5 + xcorr, y1 + ycorr);
+            noteData.flagXY = PointF(x - ldata->stemLineW * .5 + xcorr, y1 + ycorr);
             ldata->addBbox(flagBBox.translated(noteData.flagXY));
         }
 
@@ -547,7 +548,7 @@ void SingleLayout::layout(BarLine* item, const Context& ctx)
 
     double spatium = item->spatium();
     ldata->y1 = (spatium * .5 * item->spanFrom());
-    if (RealIsEqual(ldata->y2, 0.0)) {
+    if (muse::RealIsEqual(ldata->y2, 0.0)) {
         ldata->y2 = (spatium * .5 * (8.0 + item->spanTo()));
     }
 
@@ -821,17 +822,9 @@ void SingleLayout::layout(ChordLine* item, const Context& ctx)
         height = r.height();
         ldata->setBbox(x1, y1, width, height);
     } else {
-        RectF r = ctx.engravingFont()->bbox(ChordLine::WAVE_SYMBOLS, item->magS());
-        double angle = ChordLine::WAVE_ANGEL * M_PI / 180;
+        RectF r = ctx.engravingFont()->bbox(item->waveSym(), item->magS());
 
-        r.setHeight(r.height() + r.width() * sin(angle));
-
-        /// TODO: calculate properly the rect for wavy type
-        if (item->chordLineType() == ChordLineType::DOIT) {
-            r.setY(item->y() - r.height() * (item->onTabStaff() ? 1.25 : 1));
-        }
-
-        item->setbbox(r);
+        ldata->setBbox(r);
     }
 }
 

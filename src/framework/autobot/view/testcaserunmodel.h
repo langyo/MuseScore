@@ -19,26 +19,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_AUTOBOT_TESTCASERUNMODEL_H
-#define MU_AUTOBOT_TESTCASERUNMODEL_H
+#ifndef MUSE_AUTOBOT_TESTCASERUNMODEL_H
+#define MUSE_AUTOBOT_TESTCASERUNMODEL_H
 
 #include <QObject>
 #include <QVariant>
 
+#include "modularity/ioc.h"
 #include "internal/scriptengine.h"
 #include "autobottypes.h"
 #include "../iautobot.h"
 #include "async/asyncable.h"
 
-namespace mu::autobot {
-class TestCaseRunModel : public QObject, public async::Asyncable
+namespace muse::autobot {
+class TestCaseRunModel : public QObject, public Injectable, public async::Asyncable
 {
     Q_OBJECT
     Q_PROPERTY(QVariantMap testCase READ testCase NOTIFY testCaseChanged)
     Q_PROPERTY(QString status READ status NOTIFY statusChanged)
     Q_PROPERTY(QVariantList steps READ steps NOTIFY stepsChanged)
 
-    INJECT(IAutobot, autobot)
+    Inject<IAutobot> autobot = { this };
 
 public:
     TestCaseRunModel(QObject* parent = nullptr);
@@ -76,4 +77,4 @@ private:
 };
 }
 
-#endif // MU_AUTOBOT_TESTCASERUNMODEL_H
+#endif // MUSE_AUTOBOT_TESTCASERUNMODEL_H

@@ -32,7 +32,7 @@
 
 #include "log.h"
 
-using namespace mu;
+using namespace muse;
 
 constexpr unsigned char U8_BOM[] = { 239, 187, 191 };
 constexpr unsigned char U16LE_BOM[] = { 255, 254 };
@@ -262,6 +262,15 @@ bool UtfCodec::isValidUtf8(const std::string_view& src)
     return utf8::is_valid(src.begin(), src.end());
 }
 
+void UtfCodec::replaceInvalid(std::string_view src, std::string& dst)
+{
+    try {
+        utf8::replace_invalid(src.begin(), src.end(), std::back_inserter(dst));
+    } catch (const std::exception& e) {
+        LOGE() << e.what();
+    }
+}
+
 // ============================
 // String
 // ============================
@@ -274,7 +283,7 @@ String::String()
 String::String(const char16_t* str)
 {
     m_data = std::make_shared<std::u16string>(str ? str : u"");
-#ifdef STRING_DEBUG_HACK
+#ifdef MUSE_STRING_DEBUG_HACK
     updateDebugView();
 #endif
 }
@@ -283,7 +292,7 @@ String::String(const Char& ch)
 {
     m_data = std::make_shared<std::u16string>();
     *m_data.get() += ch.unicode();
-#ifdef STRING_DEBUG_HACK
+#ifdef MUSE_STRING_DEBUG_HACK
     updateDebugView();
 #endif
 }
@@ -297,18 +306,18 @@ String::String(const Char* unicode, size_t size)
 
     static_assert(sizeof(Char) == sizeof(char16_t));
     const char16_t* str = reinterpret_cast<const char16_t*>(unicode);
-    if (size == mu::nidx) {
+    if (size == muse::nidx) {
         m_data = std::make_shared<std::u16string>(str);
     } else {
         m_data = std::make_shared<std::u16string>(str, size);
     }
 
-#ifdef STRING_DEBUG_HACK
+#ifdef MUSE_STRING_DEBUG_HACK
     updateDebugView();
 #endif
 }
 
-#ifdef STRING_DEBUG_HACK
+#ifdef MUSE_STRING_DEBUG_HACK
 void String::updateDebugView()
 {
     try {
@@ -333,7 +342,7 @@ struct String::Mutator {
         : s(s), self(self) {}
     ~Mutator()
     {
-#ifdef STRING_DEBUG_HACK
+#ifdef MUSE_STRING_DEBUG_HACK
         self->updateDebugView();
 #endif
     }
@@ -498,6 +507,38 @@ String String::fromUtf16LE(const ByteArray& data)
     return u16;
 }
 
+String String::fromUtf16BE(const ByteArray& data)
+{
+    //make sure len is divisible by 2
+    size_t len = data.size();
+    if (len % 2) {
+        len--;
+    }
+
+    if (len < 2) {
+        return String();
+    }
+
+    String u16;
+    u16.reserve(len / 2);
+    String::Mutator mut = u16.mutStr();
+
+    const uint8_t* d = data.constData();
+    size_t start = 0;
+    if (std::memcmp(d, U16BE_BOM, 2) == 0) {
+        start += 2;
+    }
+
+    for (size_t i = start; i < len;) {
+        //big-endian
+        int hi = d[i++] & 0xFF;
+        int lo = d[i++] & 0xFF;
+        mut.push_back(hi << 8 | lo);
+    }
+
+    return u16;
+}
+
 String String::fromUtf8(const char* str)
 {
     if (!str) {
@@ -536,7 +577,7 @@ String String::fromAscii(const char* str, size_t size)
         return String();
     }
 
-    size = (size == mu::nidx) ? std::strlen(str) : size;
+    size = (size == muse::nidx) ? std::strlen(str) : size;
     String s;
     std::u16string& data = s.mutStr();
     data.resize(size);
@@ -588,7 +629,7 @@ std::u16string String::toStdU16String() const
 String String::fromUcs4(const char32_t* str, size_t size)
 {
     std::u32string_view v32;
-    if (size == mu::nidx) {
+    if (size == muse::nidx) {
         v32 = std::u32string_view(str);
     } else {
         v32 = std::u32string_view(str, size);
@@ -614,6 +655,35 @@ std::u32string String::toStdU32String() const
     std::u32string s32;
     UtfCodec::utf8to32(s, s32);
     return s32;
+}
+
+std::wstring String::toStdWString() const
+{
+    const std::u16string& u16 = constStr();
+    std::wstring ws;
+    ws.resize(u16.size());
+
+    static_assert(sizeof(wchar_t) >= sizeof(char16_t));
+
+    for (size_t i = 0; i < ws.size(); ++i) {
+        ws[i] = static_cast<wchar_t>(u16.at(i));
+    }
+
+    return ws;
+}
+
+const String String::fromStdWString(const std::wstring& str)
+{
+    String s;
+    s.mutStr().resize(str.size());
+
+    static_assert(sizeof(wchar_t) >= sizeof(char16_t));
+
+    for (size_t i = 0; i < str.size(); ++i) {
+        s[i] = static_cast<char16_t>(str.at(i));
+    }
+
+    return s;
 }
 
 #ifndef NO_QT_SUPPORT
@@ -679,15 +749,7 @@ bool String::contains(const String& str, CaseSensitivity cs) const
 
 bool String::contains(const std::wregex& re) const
 {
-    const std::u16string& u16 = constStr();
-    std::wstring ws;
-    ws.resize(u16.size());
-
-    static_assert(sizeof(wchar_t) >= sizeof(char16_t));
-
-    for (size_t i = 0; i < ws.size(); ++i) {
-        ws[i] = static_cast<wchar_t>(u16.at(i));
-    }
+    std::wstring ws = toStdWString();
 
     auto words_begin = std::wsregex_iterator(ws.begin(), ws.end(), re);
     if (words_begin != std::wsregex_iterator()) {
@@ -707,6 +769,18 @@ int String::count(const Char& ch) const
     return count;
 }
 
+int String::count(const String& str) const
+{
+    int count = 0;
+    std::string::size_type pos = 0;
+    std::u16string otherStr = str.constStr();
+    while ((pos = constStr().find(otherStr, pos)) != std::string::npos) {
+        ++count;
+        pos += str.size();
+    }
+    return count;
+}
+
 size_t String::indexOf(const Char& ch, size_t from) const
 {
     for (size_t i = from; i < constStr().size(); ++i) {
@@ -714,7 +788,7 @@ size_t String::indexOf(const Char& ch, size_t from) const
             return i;
         }
     }
-    return mu::nidx;
+    return muse::nidx;
 }
 
 size_t String::indexOf(const String& str, size_t from) const
@@ -736,7 +810,7 @@ size_t String::lastIndexOf(const Char& ch, size_t from) const
             return i;
         }
     }
-    return mu::nidx;
+    return muse::nidx;
 }
 
 bool String::startsWith(const String& str, CaseSensitivity cs) const
@@ -1011,7 +1085,7 @@ void String::doArgs(std::u16string& out, const std::vector<std::u16string_view>&
 {
     struct Part {
         std::u16string_view substr;
-        size_t argIdxToInsertAfter = mu::nidx;
+        size_t argIdxToInsertAfter = muse::nidx;
     };
 
     const std::u16string& str = constStr();
@@ -1042,7 +1116,7 @@ void String::doArgs(std::u16string& out, const std::vector<std::u16string_view>&
                 out += substr;
             }
 
-            if (argIdxToInsertAfter != mu::nidx) {
+            if (argIdxToInsertAfter != muse::nidx) {
                 if (argIdxToInsertAfter < args.size()) {
                     out += args.at(argIdxToInsertAfter);
                 } else {
@@ -1326,6 +1400,11 @@ void StringList::insert(size_t idx, const String& str)
     std::vector<String>::insert(begin() + idx, str);
 }
 
+void StringList::insert(const_iterator it, const String& str)
+{
+    std::vector<String>::insert(it, str);
+}
+
 void StringList::replace(size_t idx, const String& str)
 {
     this->operator [](idx) = str;
@@ -1405,7 +1484,7 @@ AsciiChar AsciiStringView::at(size_t i) const
 
 bool AsciiStringView::contains(char ch) const
 {
-    return indexOf(ch) != mu::nidx;
+    return indexOf(ch) != muse::nidx;
 }
 
 size_t AsciiStringView::indexOf(char ch) const
@@ -1415,7 +1494,7 @@ size_t AsciiStringView::indexOf(char ch) const
             return i;
         }
     }
-    return mu::nidx;
+    return muse::nidx;
 }
 
 int AsciiStringView::toInt(bool* ok, int base) const

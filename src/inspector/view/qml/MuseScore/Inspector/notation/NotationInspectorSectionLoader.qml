@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -22,8 +22,8 @@
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
 
-import MuseScore.Ui 1.0
-import MuseScore.UiComponents 1.0
+import Muse.Ui 1.0
+import Muse.UiComponents 1.0
 import MuseScore.Inspector 1.0
 
 import "../common"
@@ -104,15 +104,15 @@ Loader {
             case Inspector.TYPE_FRET_DIAGRAM: return fretDiagramComp
             case Inspector.TYPE_SPACER: return spacerComp
             case Inspector.TYPE_CLEF: return clefComp
-            case Inspector.TYPE_PEDAL:
             case Inspector.TYPE_HAIRPIN:
             case Inspector.TYPE_CRESCENDO:
-            case Inspector.TYPE_DIMINUENDO:
+            case Inspector.TYPE_DIMINUENDO: return hairpinLineComp
+            case Inspector.TYPE_PEDAL:
             case Inspector.TYPE_OTTAVA:
             case Inspector.TYPE_PALM_MUTE:
             case Inspector.TYPE_LET_RING:
             case Inspector.TYPE_VOLTA:
-            case Inspector.TYPE_GRADUAL_TEMPO_CHANGE:
+            case Inspector.TYPE_GRADUAL_TEMPO_CHANGE: return gradualTempoChangeComp
             case Inspector.TYPE_TEXT_LINE: return lineComp
             case Inspector.TYPE_STAFF_TYPE_CHANGES: return staffTypeComp
             case Inspector.TYPE_TEXT_FRAME: return textFrameComp
@@ -241,6 +241,16 @@ Loader {
     Component {
         id: lineComp
         LineSettings { }
+    }
+
+    Component {
+        id: hairpinLineComp
+        HairpinLineSettings { }
+    }
+
+    Component {
+        id: gradualTempoChangeComp
+        GradualTempoChangeSettings { }
     }
 
     Component {

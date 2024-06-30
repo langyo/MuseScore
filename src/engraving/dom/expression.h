@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -41,11 +41,9 @@ public:
 
     PropertyValue propertyDefault(Pid id) const override;
 
-    double computeDynamicExpressionDistance() const;
+    double computeDynamicExpressionDistance(const Dynamic* snappedDyn) const;
 
     std::unique_ptr<ElementGroup> getDragGroup(std::function<bool(const EngravingItem*)> isDragged) override;
-
-    void undoChangeProperty(Pid id, const PropertyValue& v, PropertyFlags ps) override;
 
     bool acceptDrop(EditData& ed) const override;
     EngravingItem* drop(EditData& ed) override;
@@ -54,12 +52,11 @@ public:
     bool setProperty(Pid propertyId, const PropertyValue& v) override;
     void mapPropertiesFromOldExpressions(StaffText* staffText);
 
-    Dynamic* snappedDynamic() const { return m_snappedDynamic; }
-    void setSnappedDynamic(Dynamic* d) { m_snappedDynamic = d; }
+    Dynamic* snappedDynamic() const;
 
-private:
+    bool hasVoiceApplicationProperties() const override { return true; }
 
-    Dynamic* m_snappedDynamic = nullptr;
+    void reset() override;
 };
 } // namespace mu::engraving
 #endif // MU_ENGRAVING_EXPRESSION_H

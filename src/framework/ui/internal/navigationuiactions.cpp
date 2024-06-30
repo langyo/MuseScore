@@ -24,77 +24,77 @@
 #include "../uiaction.h"
 #include "shortcuts/shortcutcontext.h"
 
-using namespace mu::ui;
+using namespace muse::ui;
 using namespace muse::actions;
 
 const UiActionList NavigationUiActions::m_actions = {
     UiAction("nav-dev-show-controls",
              ui::UiCtxAny,
-             mu::shortcuts::CTX_ANY
+             muse::shortcuts::CTX_ANY
              ),
     UiAction("nav-next-section",
              ui::UiCtxAny,
-             mu::shortcuts::CTX_ANY
+             muse::shortcuts::CTX_ANY
              ),
     UiAction("nav-prev-section",
              ui::UiCtxAny,
-             mu::shortcuts::CTX_ANY
+             muse::shortcuts::CTX_ANY
              ),
     UiAction("nav-next-panel",
              ui::UiCtxAny,
-             mu::shortcuts::CTX_ANY
+             muse::shortcuts::CTX_ANY
              ),
     UiAction("nav-prev-panel",
              ui::UiCtxAny,
-             mu::shortcuts::CTX_ANY
+             muse::shortcuts::CTX_ANY
              ),
     UiAction("nav-next-tab",
              ui::UiCtxAny,
-             mu::shortcuts::CTX_ANY
+             muse::shortcuts::CTX_ANY
              ),
     UiAction("nav-prev-tab",
              ui::UiCtxAny,
-             mu::shortcuts::CTX_ANY
+             muse::shortcuts::CTX_ANY
              ),
     UiAction("nav-right",
              ui::UiCtxAny,
-             mu::shortcuts::CTX_NOT_PROJECT_FOCUSED
+             muse::shortcuts::CTX_NOT_PROJECT_FOCUSED
              ),
     UiAction("nav-left",
              ui::UiCtxAny,
-             mu::shortcuts::CTX_NOT_PROJECT_FOCUSED
+             muse::shortcuts::CTX_NOT_PROJECT_FOCUSED
              ),
     UiAction("nav-up",
              ui::UiCtxAny,
-             mu::shortcuts::CTX_NOT_PROJECT_FOCUSED
+             muse::shortcuts::CTX_NOT_PROJECT_FOCUSED
              ),
     UiAction("nav-down",
              ui::UiCtxAny,
-             mu::shortcuts::CTX_NOT_PROJECT_FOCUSED
+             muse::shortcuts::CTX_NOT_PROJECT_FOCUSED
              ),
     UiAction("nav-escape",
              ui::UiCtxAny,
-             mu::shortcuts::CTX_NOT_PROJECT_FOCUSED
+             muse::shortcuts::CTX_NOT_PROJECT_FOCUSED
              ),
     UiAction("nav-trigger-control",
              ui::UiCtxAny,
-             mu::shortcuts::CTX_NOT_PROJECT_FOCUSED
+             muse::shortcuts::CTX_NOT_PROJECT_FOCUSED
              ),
     UiAction("nav-first-control",
              ui::UiCtxAny,
-             mu::shortcuts::CTX_NOT_PROJECT_FOCUSED
+             muse::shortcuts::CTX_NOT_PROJECT_FOCUSED
              ),
     UiAction("nav-last-control",
              ui::UiCtxAny,
-             mu::shortcuts::CTX_NOT_PROJECT_FOCUSED
+             muse::shortcuts::CTX_NOT_PROJECT_FOCUSED
              ),
     UiAction("nav-nextrow-control",
              ui::UiCtxAny,
-             mu::shortcuts::CTX_NOT_PROJECT_FOCUSED
+             muse::shortcuts::CTX_NOT_PROJECT_FOCUSED
              ),
     UiAction("nav-prevrow-control",
              ui::UiCtxAny,
-             mu::shortcuts::CTX_NOT_PROJECT_FOCUSED
+             muse::shortcuts::CTX_NOT_PROJECT_FOCUSED
              )
 };
 
@@ -108,7 +108,7 @@ bool NavigationUiActions::actionEnabled(const UiAction&) const
     return true;
 }
 
-mu::async::Channel<ActionCodeList> NavigationUiActions::actionEnabledChanged() const
+muse::async::Channel<ActionCodeList> NavigationUiActions::actionEnabledChanged() const
 {
     static async::Channel<ActionCodeList> ch;
     return ch;
@@ -119,7 +119,7 @@ bool NavigationUiActions::actionChecked(const UiAction&) const
     return false;
 }
 
-mu::async::Channel<ActionCodeList> NavigationUiActions::actionCheckedChanged() const
+muse::async::Channel<ActionCodeList> NavigationUiActions::actionCheckedChanged() const
 {
     static async::Channel<ActionCodeList> ch;
     return ch;

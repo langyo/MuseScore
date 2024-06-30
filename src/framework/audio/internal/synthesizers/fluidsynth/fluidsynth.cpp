@@ -30,11 +30,11 @@
 
 #include "log.h"
 
-using namespace mu;
-using namespace mu::midi;
+using namespace muse;
+using namespace muse::midi;
 using namespace muse::audio;
 using namespace muse::audio::synth;
-using namespace mu::mpe;
+using namespace muse::mpe;
 
 static constexpr double FLUID_GLOBAL_VOLUME_GAIN = 4.8;
 static constexpr int DEFAULT_MIDI_VOLUME = 100;
@@ -160,17 +160,17 @@ bool FluidSynth::handleEvent(const midi::Event& event)
         m_tuning.add(event.note(), event.pitchTuningCents());
     } break;
     case Event::Opcode::ControlChange: {
-        if (event.index() == mu::midi::EXPRESSION_CONTROLLER) {
+        if (event.index() == muse::midi::EXPRESSION_CONTROLLER) {
             ret = setExpressionLevel(event.data());
         } else {
-            ret = setControllerValue(event);
+            ret = setControllerValue(event.channel(), event.index(), event.data());
         }
     } break;
     case Event::Opcode::ProgramChange: {
         fluid_synth_program_change(m_fluid->synth, event.channel(), event.program());
     } break;
     case Event::Opcode::PitchBend: {
-        ret = fluid_synth_pitch_bend(m_fluid->synth, event.channel(), event.data());
+        ret = setPitchBend(event.channel(), event.data());
     } break;
     default: {
         LOGD() << "not supported event type: " << event.opcodeString();
@@ -200,7 +200,10 @@ void FluidSynth::setSampleRate(unsigned int sampleRate)
 
     createFluidInstance();
     addSoundFonts(std::vector<io::path_t>(m_sfontPaths.cbegin(), m_sfontPaths.cend()));
-    setupSound(m_setupData);
+
+    if (m_setupData.isValid()) {
+        setupSound(m_setupData);
+    }
 }
 
 Ret FluidSynth::addSoundFonts(const std::vector<io::path_t>& sfonts)
@@ -260,7 +263,7 @@ void FluidSynth::setupSound(const PlaybackSetupData& setupData)
     };
 
     m_sequencer.channelAdded().onReceive(this, setupChannel);
-    m_sequencer.init(setupData, m_preset);
+    m_sequencer.init(setupData, m_preset, setupData.supportsSingleNoteDynamics);
 
     for (const auto& voice : m_sequencer.channels().data()) {
         for (const auto& pair : voice.second) {
@@ -282,6 +285,12 @@ void FluidSynth::revokePlayingNotes()
     }
 
     fluid_synth_all_notes_off(m_fluid->synth, -1);
+
+    int lastChannelIdx = static_cast<int>(m_sequencer.channels().lastIndex());
+    for (int i = 0; i < lastChannelIdx; ++i) {
+        setControllerValue(i, midi::SUSTAIN_PEDAL_CONTROLLER, 0);
+        setPitchBend(i, 8192);
+    }
 }
 
 void FluidSynth::flushSound()
@@ -363,13 +372,11 @@ async::Channel<unsigned int> FluidSynth::audioChannelsCountChanged() const
 
 void FluidSynth::toggleExpressionController()
 {
-    int volume = DEFAULT_MIDI_VOLUME;
-
     if (isActive()) {
-        volume = m_sequencer.currentExpressionLevel();
+        setExpressionLevel(m_sequencer.currentExpressionLevel());
+    } else {
+        setExpressionLevel(m_sequencer.naturalExpressionLevel());
     }
-
-    setExpressionLevel(volume);
 }
 
 int FluidSynth::setExpressionLevel(int level)
@@ -377,20 +384,32 @@ int FluidSynth::setExpressionLevel(int level)
     midi::channel_t lastChannelIdx = m_sequencer.channels().lastIndex();
 
     for (midi::channel_t i = 0; i < lastChannelIdx; ++i) {
-        fluid_synth_cc(m_fluid->synth, i, mu::midi::EXPRESSION_CONTROLLER, level);
+        fluid_synth_cc(m_fluid->synth, i, muse::midi::EXPRESSION_CONTROLLER, level);
     }
 
     return FLUID_OK;
 }
 
-int FluidSynth::setControllerValue(const midi::Event& event)
+int FluidSynth::setControllerValue(int channel, int ctrl, int value)
 {
     int currentValue = 0;
-    fluid_synth_get_cc(m_fluid->synth, event.channel(), event.index(), &currentValue);
+    fluid_synth_get_cc(m_fluid->synth, channel, ctrl, &currentValue);
 
-    if (event.data() == static_cast<uint32_t>(currentValue)) {
+    if (value == currentValue) {
         return FLUID_OK;
     }
 
-    return fluid_synth_cc(m_fluid->synth, event.channel(), event.index(),  event.data());
+    return fluid_synth_cc(m_fluid->synth, channel, ctrl, value);
+}
+
+int FluidSynth::setPitchBend(int channel, int pitchBend)
+{
+    int currentValue = 0;
+    fluid_synth_get_pitch_bend(m_fluid->synth, channel, &currentValue);
+
+    if (pitchBend == currentValue) {
+        return FLUID_OK;
+    }
+
+    return fluid_synth_pitch_bend(m_fluid->synth, channel, pitchBend);
 }

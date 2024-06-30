@@ -30,7 +30,9 @@
 
 #include "global/defer.h"
 
-#ifdef MUE_BUILD_DIAGNOSTICS_MODULE
+#include "muse_framework_config.h"
+
+#ifdef MUSE_MODULE_DIAGNOSTICS
 #include "diagnostics/diagnosticutils.h"
 #endif
 
@@ -44,9 +46,9 @@
 #define MYLOG() LOGN()
 #endif
 
-using namespace mu::ui;
+using namespace muse::ui;
 
-static const mu::UriQuery DEV_SHOW_CONTROLS_URI("musescore://devtools/keynav/controls?sync=false&modal=false");
+static const muse::UriQuery DEV_SHOW_CONTROLS_URI("muse://devtools/keynav/controls?sync=false&modal=false");
 
 using MoveDirection = NavigationController::MoveDirection;
 using Event = INavigation::Event;
@@ -345,7 +347,7 @@ void NavigationController::setIsHighlight(bool isHighlight)
     m_highlightChanged.notify();
 }
 
-mu::async::Notification NavigationController::highlightChanged() const
+muse::async::Notification NavigationController::highlightChanged() const
 {
     return m_highlightChanged;
 }
@@ -361,8 +363,8 @@ void NavigationController::resetIfNeed(QObject* watched)
         return;
     }
 
-#ifdef MUE_BUILD_DIAGNOSTICS_MODULE
-    if (diagnostics::isDiagnosticHierarchy(watched)) {
+#ifdef MUSE_MODULE_DIAGNOSTICS
+    if (muse::diagnostics::isDiagnosticHierarchy(watched)) {
         return;
     }
 #endif
@@ -651,7 +653,7 @@ void NavigationController::setDefaultNavigationControl(INavigationControl* contr
     m_defaultNavigationControl = control;
 }
 
-mu::async::Notification NavigationController::navigationChanged() const
+muse::async::Notification NavigationController::navigationChanged() const
 {
     return m_navigationChanged;
 }

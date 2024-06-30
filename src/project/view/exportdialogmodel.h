@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -44,11 +44,11 @@
 class QItemSelectionModel;
 
 namespace mu::project {
-class ExportDialogModel : public QAbstractListModel, public async::Asyncable
+class ExportDialogModel : public QAbstractListModel, public muse::async::Asyncable
 {
     Q_OBJECT
 
-    INJECT(IInteractive, interactive)
+    INJECT(muse::IInteractive, interactive)
     INJECT(context::IGlobalContext, context)
     INJECT(IProjectConfiguration, configuration)
     INJECT(INotationWritersRegister, writers)
@@ -205,7 +205,7 @@ private:
 
     ExportTypeList m_exportTypeList {};
     ExportType m_selectedExportType = ExportType();
-    io::path_t m_exportPath;
+    muse::io::path_t m_exportPath;
     project::INotationWriter::UnitType m_selectedUnitType = project::INotationWriter::UnitType::PER_PART;
 };
 }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -89,7 +89,7 @@ static const mu::engraving::InstrumentTemplate* defaultInstrTemplate()
         mu::engraving::InstrChannel a;
         a.setChorus(0);
         a.setReverb(0);
-        a.setName(String::fromUtf8(mu::engraving::InstrChannel::DEFAULT_NAME));
+        a.setName(muse::String::fromUtf8(mu::engraving::InstrChannel::DEFAULT_NAME));
         a.setBank(0);
         a.setVolume(90);
         a.setPan(0);

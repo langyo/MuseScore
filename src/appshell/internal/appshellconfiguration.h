@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -38,17 +38,17 @@
 #include "iappshellconfiguration.h"
 
 namespace mu::appshell {
-class AppShellConfiguration : public IAppShellConfiguration, public async::Asyncable
+class AppShellConfiguration : public IAppShellConfiguration, public muse::async::Asyncable
 {
-    INJECT(IGlobalConfiguration, globalConfiguration)
-    INJECT(IApplication, application)
-    INJECT(io::IFileSystem, fileSystem)
-    INJECT(mi::IMultiInstancesProvider, multiInstancesProvider)
-    INJECT(ui::IUiConfiguration, uiConfiguration)
-    INJECT(project::IProjectConfiguration, projectConfiguration)
-    INJECT(notation::INotationConfiguration, notationConfiguration)
-    INJECT(playback::IPlaybackConfiguration, playbackConfiguration)
-    INJECT(muse::languages::ILanguagesConfiguration, languagesConfiguration)
+    muse::Inject<muse::IGlobalConfiguration> globalConfiguration;
+    muse::Inject<muse::IApplication> application;
+    muse::Inject<muse::io::IFileSystem> fileSystem;
+    muse::Inject<muse::mi::IMultiInstancesProvider> multiInstancesProvider;
+    muse::Inject<muse::ui::IUiConfiguration> uiConfiguration;
+    muse::Inject<project::IProjectConfiguration> projectConfiguration;
+    muse::Inject<notation::INotationConfiguration> notationConfiguration;
+    muse::Inject<playback::IPlaybackConfiguration> playbackConfiguration;
+    muse::Inject<muse::languages::ILanguagesConfiguration> languagesConfiguration;
 
 public:
     void init();
@@ -59,10 +59,10 @@ public:
     StartupModeType startupModeType() const override;
     void setStartupModeType(StartupModeType type) override;
 
-    io::path_t startupScorePath() const override;
-    void setStartupScorePath(const io::path_t& scorePath) override;
+    muse::io::path_t startupScorePath() const override;
+    void setStartupScorePath(const muse::io::path_t& scorePath) override;
 
-    io::path_t userDataPath() const override;
+    muse::io::path_t userDataPath() const override;
 
     std::string handbookUrl() const override;
     std::string askForHelpUrl() const override;
@@ -77,7 +77,7 @@ public:
 
     bool isNotationNavigatorVisible() const override;
     void setIsNotationNavigatorVisible(bool visible) const override;
-    async::Notification isNotationNavigatorVisibleChanged() const override;
+    muse::async::Notification isNotationNavigatorVisibleChanged() const override;
 
     bool needShowSplashScreen() const override;
     void setNeedShowSplashScreen(bool show) override;
@@ -88,21 +88,21 @@ public:
 
     void revertToFactorySettings(bool keepDefaultSettings = false, bool notifyAboutChanges = true) const override;
 
-    io::paths_t sessionProjectsPaths() const override;
-    Ret setSessionProjectsPaths(const io::paths_t& paths) override;
+    muse::io::paths_t sessionProjectsPaths() const override;
+    muse::Ret setSessionProjectsPaths(const muse::io::paths_t& paths) override;
 
 private:
     std::string utmParameters(const std::string& utmMedium) const;
 
     std::string currentLanguageCode() const;
 
-    io::path_t sessionDataPath() const;
-    io::path_t sessionFilePath() const;
+    muse::io::path_t sessionDataPath() const;
+    muse::io::path_t sessionFilePath() const;
 
-    RetVal<mu::ByteArray> readSessionState() const;
-    Ret writeSessionState(const QByteArray& data);
+    muse::RetVal<muse::ByteArray> readSessionState() const;
+    muse::Ret writeSessionState(const QByteArray& data);
 
-    io::paths_t parseSessionProjectsPaths(const QByteArray& json) const;
+    muse::io::paths_t parseSessionProjectsPaths(const QByteArray& json) const;
 };
 }
 

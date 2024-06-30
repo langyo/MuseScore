@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -27,6 +27,7 @@
 #include "chord.h"
 #include "chordrest.h"
 #include "measure.h"
+#include "note.h"
 #include "score.h"
 #include "segment.h"
 #include "stafftype.h"
@@ -117,35 +118,6 @@ bool LyricsLine::setProperty(Pid propertyId, const engraving::PropertyValue& v)
     return true;
 }
 
-PointF LyricsLine::linePos(Grip grip, System** system) const
-{
-    if (grip == Grip::START) {
-        return PointF(); // Start is computed elsewhere
-    }
-
-    EngravingItem* endEl = endElement();
-    ChordRest* endCr = endEl && endEl->isChordRest() ? toChordRest(endEl) : nullptr;
-    if (!endCr) {
-        return PointF();
-    }
-
-    if (endCr->track() != track()) {
-        EngravingItem* cr = endCr->segment()->elementAt(track());
-        if (cr) {
-            endCr = toChordRest(cr);
-        }
-    }
-
-    Segment* endSeg = endCr->segment();
-    *system = endSeg->measure()->system();
-    double x = endSeg->x() + endSeg->measure()->x();
-    if (endCr) {
-        x += endCr->isChord() ? toChord(endCr)->rightEdge() : endCr->width();
-    }
-
-    return PointF(x, 0.0);
-}
-
 void LyricsLine::doComputeEndElement()
 {
     if (!isEndMelisma()) {
@@ -153,26 +125,11 @@ void LyricsLine::doComputeEndElement()
         return;
     }
 
-    // TODO: review this hack
-    // lyrics endTick should already indicate the segment we want
-    // except for TEMP_MELISMA_TICKS case
-    Lyrics* l = lyrics();
-    Fraction tick = (l->ticks() == Lyrics::TEMP_MELISMA_TICKS) ? l->tick() : l->endTick();
-    Segment* s = score()->tick2segment(tick, true, SegmentType::ChordRest);
-    if (!s) {
-        LOGD("%s no end segment for tick %d", typeName(), tick.ticks());
-        return;
+    setEndElement(score()->findChordRestEndingBeforeTickInTrack(tick2(), track()));
+
+    if (!endElement()) {
+        setEndElement(score()->findChordRestEndingBeforeTickInStaff(tick2(), track2staff(track())));
     }
-    voice_idx_t t = trackZeroVoice(track2());
-    // take the first chordrest we can find;
-    // linePos will substitute one in current voice if available
-    for (voice_idx_t v = 0; v < VOICES; ++v) {
-        setEndElement(s->element(t + v));
-        if (endElement()) {
-            break;
-        }
-    }
-    return;
 }
 
 //=========================================================
@@ -183,5 +140,15 @@ LyricsLineSegment::LyricsLineSegment(LyricsLine* sp, System* parent)
     : LineSegment(ElementType::LYRICSLINE_SEGMENT, sp, parent, ElementFlag::ON_STAFF | ElementFlag::NOT_SELECTABLE)
 {
     setGenerated(true);
+}
+
+double LyricsLineSegment::baseLineShift() const
+{
+    if (lyricsLine()->isEndMelisma()) {
+        return -0.5 * lyricsLine()->lineWidth();
+    }
+
+    Lyrics* lyrics = lyricsLine()->lyrics();
+    return -style().styleD(Sid::lyricsDashYposRatio) * lyrics->fontMetrics().xHeight();
 }
 }

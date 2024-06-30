@@ -18,7 +18,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-set(MODULE accessibility)
+declare_module(muse_accessibility)
+set(MODULE_ALIAS muse::accessibility)
 
 set(MODULE_SRC
     ${CMAKE_CURRENT_LIST_DIR}/accessibilitymodule.cpp
@@ -47,11 +48,7 @@ set(MODULE_SRC
 
 if (OS_IS_LIN)
     # it needed to send a spontaneous event by activating navigation
-    if (MUE_COMPILE_QT5_COMPAT)
-        set(MODULE_INCLUDE ${Qt5Core_PRIVATE_INCLUDE_DIRS} )
-    else()
-        set(MODULE_INCLUDE ${Qt6Core_PRIVATE_INCLUDE_DIRS} )
-    endif()
+    set(MODULE_INCLUDE ${Qt6Core_PRIVATE_INCLUDE_DIRS} )
 endif()
 
 
@@ -59,7 +56,7 @@ if (MUSE_MODULE_ACCESSIBILITY_TRACE)
     set(MODULE_DEF ${MODULE_DEF} -DMUSE_MODULE_ACCESSIBILITY_TRACE )
 endif()
 
-include(SetupModule)
+setup_module()
 
 if (MUSE_MODULE_ACCESSIBILITY_TESTS)
     add_subdirectory(tests)

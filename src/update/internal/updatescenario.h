@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -35,11 +35,11 @@
 #include "../iupdatescenario.h"
 
 namespace mu::update {
-class UpdateScenario : public IUpdateScenario, public async::Asyncable
+class UpdateScenario : public IUpdateScenario, public muse::async::Asyncable
 {
-    INJECT(IInteractive, interactive)
+    INJECT(muse::IInteractive, interactive)
     INJECT(muse::actions::IActionsDispatcher, dispatcher)
-    INJECT(mi::IMultiInstancesProvider, multiInstancesProvider)
+    INJECT(muse::mi::IMultiInstancesProvider, multiInstancesProvider)
     INJECT(IUpdateConfiguration, configuration)
     INJECT(IUpdateService, updateService)
 
@@ -62,10 +62,10 @@ private:
     void showServerErrorMsg();
 
     void downloadRelease();
-    void closeAppAndStartInstallation(const io::path_t& installerPath);
+    void closeAppAndStartInstallation(const muse::io::path_t& installerPath);
 
     bool m_progress = false;
-    mu::ProgressPtr m_progressChannel = nullptr;
+    muse::ProgressPtr m_progressChannel = nullptr;
 };
 }
 

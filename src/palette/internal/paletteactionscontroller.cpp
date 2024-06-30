@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -23,13 +23,14 @@
 #include "paletteactionscontroller.h"
 
 using namespace mu::palette;
-using namespace mu::ui;
+using namespace muse;
+using namespace muse::ui;
 using namespace muse::actions;
 
-static const mu::UriQuery MASTER_PALETTE_URI("musescore://palette/masterpalette?sync=false&modal=false");
-static const mu::UriQuery SPECIAL_CHARACTERS_URI("musescore://palette/specialcharacters?sync=false");
-static const mu::UriQuery TIME_SIGNATURE_PROPERTIES_URI("musescore://palette/timesignatureproperties");
-static const mu::UriQuery EDIT_DRUMSET_URI("musescore://palette/editdrumset");
+static const muse::UriQuery MASTER_PALETTE_URI("musescore://palette/masterpalette?sync=false&modal=false");
+static const muse::UriQuery SPECIAL_CHARACTERS_URI("musescore://palette/specialcharacters?sync=false");
+static const muse::UriQuery TIME_SIGNATURE_PROPERTIES_URI("musescore://palette/timesignatureproperties");
+static const muse::UriQuery EDIT_DRUMSET_URI("musescore://palette/editdrumset");
 
 void PaletteActionsController::init()
 {
@@ -57,7 +58,7 @@ void PaletteActionsController::init()
     });
 }
 
-mu::ValCh<bool> PaletteActionsController::isMasterPaletteOpened() const
+ValCh<bool> PaletteActionsController::isMasterPaletteOpened() const
 {
     return m_masterPaletteOpened;
 }

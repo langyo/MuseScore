@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -35,6 +35,7 @@
 #include "log.h"
 
 using namespace mu::appshell;
+using namespace muse;
 using namespace muse::actions;
 
 void ApplicationActionController::preInit()
@@ -46,7 +47,7 @@ void ApplicationActionController::init()
 {
     dispatcher()->reg(this, "quit", [this](const ActionData& args) {
         bool isAllInstances = args.count() > 0 ? args.arg<bool>(0) : true;
-        io::path_t installatorPath = args.count() > 1 ? args.arg<io::path_t>(1) : "";
+        muse::io::path_t installatorPath = args.count() > 1 ? args.arg<muse::io::path_t>(1) : "";
         quit(isAllInstances, installatorPath);
     });
 
@@ -64,65 +65,10 @@ void ApplicationActionController::init()
     dispatcher()->reg(this, "preference-dialog", this, &ApplicationActionController::openPreferencesDialog);
 
     dispatcher()->reg(this, "revert-factory", this, &ApplicationActionController::revertToFactorySettings);
-}
 
-void ApplicationActionController::onDragEnterEvent(QDragEnterEvent* event)
-{
-    onDragMoveEvent(event);
-}
-
-void ApplicationActionController::onDragMoveEvent(QDragMoveEvent* event)
-{
-    const QMimeData* mime = event->mimeData();
-    QList<QUrl> urls = mime->urls();
-    if (urls.count() > 0) {
-        const QUrl& url = urls.front();
-        if (projectFilesController()->isUrlSupported(url)
-            || (url.isLocalFile() && muse::audio::synth::isSoundFont(io::path_t(url)))) {
-            event->setDropAction(Qt::LinkAction);
-            event->acceptProposedAction();
-        }
-    }
-}
-
-void ApplicationActionController::onDropEvent(QDropEvent* event)
-{
-    const QMimeData* mime = event->mimeData();
-    QList<QUrl> urls = mime->urls();
-    if (urls.count() > 0) {
-        const QUrl& url = urls.front();
-        LOGD() << url;
-
-        bool shouldBeHandled = false;
-
-        if (projectFilesController()->isUrlSupported(url)) {
-            async::Async::call(this, [this, url]() {
-                Ret ret = projectFilesController()->openProject(url);
-                if (!ret) {
-                    LOGE() << ret.toString();
-                }
-            });
-            shouldBeHandled = true;
-        } else if (url.isLocalFile()) {
-            io::path_t filePath { url };
-
-            if (muse::audio::synth::isSoundFont(filePath)) {
-                async::Async::call(this, [this, filePath]() {
-                    Ret ret = soundFontRepository()->addSoundFont(filePath);
-                    if (!ret) {
-                        LOGE() << ret.toString();
-                    }
-                });
-                shouldBeHandled = true;
-            }
-        }
-
-        if (shouldBeHandled) {
-            event->accept();
-        } else {
-            event->ignore();
-        }
-    }
+    dispatcher()->reg(this, "manage-plugins", [this]() {
+        interactive()->open("musescore://home?section=plugins");
+    });
 }
 
 bool ApplicationActionController::eventFilter(QObject* watched, QEvent* event)
@@ -135,25 +81,133 @@ bool ApplicationActionController::eventFilter(QObject* watched, QEvent* event)
         return true;
     }
 
-    if (event->type() == QEvent::FileOpen && watched == qApp) {
-        const QFileOpenEvent* openEvent = static_cast<const QFileOpenEvent*>(event);
-        const QUrl url = openEvent->url();
+    if (watched == qApp) {
+        if (event->type() == QEvent::FileOpen) {
+            const QFileOpenEvent* openEvent = static_cast<const QFileOpenEvent*>(event);
+            const QUrl url = openEvent->url();
 
-        if (projectFilesController()->isUrlSupported(url)) {
-            if (startupScenario()->startupCompleted()) {
-                dispatcher()->dispatch("file-open", ActionData::make_arg1<QUrl>(url));
-            } else {
-                startupScenario()->setStartupScoreFile(project::ProjectFile { url });
+            if (projectFilesController()->isUrlSupported(url)) {
+                if (startupScenario()->startupCompleted()) {
+                    dispatcher()->dispatch("file-open", ActionData::make_arg1<QUrl>(url));
+                } else {
+                    startupScenario()->setStartupScoreFile(project::ProjectFile { url });
+                }
+
+                return true;
             }
+        }
+    }
 
-            return true;
+    if (watched == mainWindow()->qWindow()) {
+        if (event->type() == QEvent::DragEnter) {
+            if (onDragEnterEvent(static_cast<QDragEnterEvent*>(event))) {
+                return true;
+            }
+        } else if (event->type() == QEvent::DragMove) {
+            if (onDragMoveEvent(static_cast<QDragMoveEvent*>(event))) {
+                return true;
+            }
+        } else if (event->type() == QEvent::Drop) {
+            if (onDropEvent(static_cast<QDropEvent*>(event))) {
+                return true;
+            }
         }
     }
 
     return QObject::eventFilter(watched, event);
 }
 
-bool ApplicationActionController::quit(bool isAllInstances, const io::path_t& installerPath)
+ApplicationActionController::DragTarget ApplicationActionController::dragTarget(const QUrl& url) const
+{
+    if (projectFilesController()->isUrlSupported(url)) {
+        return DragTarget::ProjectFile;
+    } else if (url.isLocalFile()) {
+        muse::io::path_t filePath = url.toLocalFile();
+        if (muse::audio::synth::isSoundFont(filePath)) {
+            return DragTarget::SoundFont;
+        } else if (extensionInstaller()->isFileSupported(filePath)) {
+            return DragTarget::Extension;
+        }
+    }
+    return DragTarget::Unknown;
+}
+
+bool ApplicationActionController::onDragEnterEvent(QDragEnterEvent* event)
+{
+    return onDragMoveEvent(event);
+}
+
+bool ApplicationActionController::onDragMoveEvent(QDragMoveEvent* event)
+{
+    const QMimeData* mime = event->mimeData();
+    QList<QUrl> urls = mime->urls();
+    if (urls.count() > 0) {
+        const QUrl& url = urls.front();
+        DragTarget target = dragTarget(url);
+        if (target != DragTarget::Unknown) {
+            event->setDropAction(Qt::LinkAction);
+            event->acceptProposedAction();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool ApplicationActionController::onDropEvent(QDropEvent* event)
+{
+    const QMimeData* mime = event->mimeData();
+    QList<QUrl> urls = mime->urls();
+    if (urls.count() > 0) {
+        const QUrl& url = urls.front();
+
+        bool shouldBeHandled = true;
+        DragTarget target = dragTarget(url);
+        switch (target) {
+        case DragTarget::ProjectFile: {
+            async::Async::call(this, [this, url]() {
+                    Ret ret = projectFilesController()->openProject(url);
+                    if (!ret) {
+                        LOGE() << ret.toString();
+                    }
+                });
+        } break;
+        case DragTarget::SoundFont: {
+            muse::io::path_t filePath = url.toLocalFile();
+            async::Async::call(this, [this, filePath]() {
+                    Ret ret = soundFontRepository()->addSoundFont(filePath);
+                    if (!ret) {
+                        LOGE() << ret.toString();
+                    }
+                });
+        } break;
+        case DragTarget::Extension: {
+            muse::io::path_t filePath = url.toLocalFile();
+            async::Async::call(this, [this, filePath]() {
+                    Ret ret = extensionInstaller()->installExtension(filePath);
+                    if (!ret) {
+                        LOGE() << ret.toString();
+                    }
+                });
+        } break;
+        case DragTarget::Unknown:
+            shouldBeHandled = false;
+            break;
+        }
+
+        if (shouldBeHandled) {
+            event->accept();
+        } else {
+            event->ignore();
+        }
+
+        return shouldBeHandled;
+    }
+
+    return false;
+}
+
+bool ApplicationActionController::quit(bool isAllInstances, const muse::io::path_t& installerPath)
 {
     if (m_quiting) {
         return false;
@@ -240,20 +294,20 @@ void ApplicationActionController::openPreferencesDialog()
         return;
     }
 
-    interactive()->open("musescore://preferences");
+    interactive()->open("muse://preferences");
 }
 
 void ApplicationActionController::revertToFactorySettings()
 {
-    std::string title = trc("appshell", "Are you sure you want to revert to factory settings?");
-    std::string question = trc("appshell", "This action will reset all your app preferences and delete all custom palettes and custom shortcuts. "
-                                           "The list of recent scores will also be cleared.\n\n"
-                                           "This action will not delete any of your scores.");
+    std::string title = muse::trc("appshell", "Are you sure you want to revert to factory settings?");
+    std::string question = muse::trc("appshell", "This action will reset all your app preferences and delete all custom palettes and custom shortcuts. "
+                                                 "The list of recent scores will also be cleared.\n\n"
+                                                 "This action will not delete any of your scores.");
 
     int revertBtn = int(IInteractive::Button::Apply);
     IInteractive::Result result = interactive()->warning(title, question,
                                                          { interactive()->buttonData(IInteractive::Button::Cancel),
-                                                           IInteractive::ButtonData(revertBtn, trc("appshell", "Revert"), true) },
+                                                           IInteractive::ButtonData(revertBtn, muse::trc("appshell", "Revert"), true) },
                                                          revertBtn);
 
     if (result.standardButton() == IInteractive::Button::Cancel) {
@@ -264,13 +318,13 @@ void ApplicationActionController::revertToFactorySettings()
     static constexpr bool NOTIFY_ABOUT_CHANGES = false;
     configuration()->revertToFactorySettings(KEEP_DEFAULT_SETTINGS, NOTIFY_ABOUT_CHANGES);
 
-    title = trc("appshell", "Would you like to restart MuseScore now?");
-    question = trc("appshell", "MuseScore needs to be restarted for these changes to take effect.");
+    title = muse::trc("appshell", "Would you like to restart MuseScore Studio now?");
+    question = muse::trc("appshell", "MuseScore Studio needs to be restarted for these changes to take effect.");
 
     int restartBtn = int(IInteractive::Button::Apply);
     result = interactive()->question(title, question,
                                      { interactive()->buttonData(IInteractive::Button::Cancel),
-                                       IInteractive::ButtonData(restartBtn, trc("appshell", "Restart"), true) },
+                                       IInteractive::ButtonData(restartBtn, muse::trc("appshell", "Restart"), true) },
                                      restartBtn);
 
     if (result.standardButton() == IInteractive::Button::Cancel) {

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -44,6 +44,6 @@ ChordTextLineBase::ChordTextLineBase(const ElementType& type, EngravingItem* par
 
 void ChordTextLineBase::doComputeEndElement()
 {
-    setEndElement(score()->findCRinStaff(tick2(), track2staff(track2())));
+    setEndElement(score()->findChordRestEndingBeforeTickInStaff(tick2(), track2staff(track2())));
 }
 }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -27,7 +27,7 @@
 
 #include "scorerw.h"
 
-using namespace mu::io;
+using namespace muse::io;
 using namespace mu::engraving;
 
 bool ScoreComp::saveCompareScore(Score* score, const String& saveName, const String& compareWithLocalPath)
@@ -39,7 +39,7 @@ bool ScoreComp::saveCompareScore(Score* score, const String& saveName, const Str
     return compareFiles(ScoreRW::rootPath() + u"/" + compareWithLocalPath, saveName);
 }
 
-bool ScoreComp::saveCompareMimeData(ByteArray mimeData, const String& saveName, const String& compareWithLocalPath)
+bool ScoreComp::saveCompareMimeData(muse::ByteArray mimeData, const muse::String& saveName, const muse::String& compareWithLocalPath)
 {
     if (!ScoreRW::saveMimeData(mimeData, saveName)) {
         return false;

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -34,7 +34,8 @@
 #include "log.h"
 
 using namespace mu;
-using namespace mu::io;
+using namespace muse;
+using namespace muse::io;
 using namespace muse::draw;
 using namespace mu::engraving;
 
@@ -42,8 +43,9 @@ using namespace mu::engraving;
 // ScoreFont
 // =============================================
 
-EngravingFont::EngravingFont(const std::string& name, const std::string& family, const path_t& filePath)
-    : m_symbols(static_cast<size_t>(SymId::lastSym) + 1),
+EngravingFont::EngravingFont(const std::string& name, const std::string& family, const path_t& filePath,
+                             const modularity::ContextPtr& iocCtx)
+    : muse::Injectable(iocCtx),  m_symbols(static_cast<size_t>(SymId::lastSym) + 1),
     m_name(name),
     m_family(family),
     m_fontPath(filePath)
@@ -51,6 +53,7 @@ EngravingFont::EngravingFont(const std::string& name, const std::string& family,
 }
 
 EngravingFont::EngravingFont(const EngravingFont& other)
+    : muse::Injectable(other.iocContext())
 {
     m_loaded = false;
     m_symbols  = other.m_symbols;
@@ -113,7 +116,7 @@ void EngravingFont::ensureLoad()
         computeMetrics(sym, code);
     }
 
-    File metadataFile(io::FileInfo(m_fontPath).path() + u"/metadata.json");
+    File metadataFile(FileInfo(m_fontPath).path() + u"/metadata.json");
     if (!metadataFile.open(IODevice::ReadOnly)) {
         LOGE() << "Failed to open glyph metadata file: " << metadataFile.filePath();
         return;
@@ -730,7 +733,7 @@ PointF EngravingFont::smuflAnchor(SymId symId, SmuflAnchorId anchorId, double ma
         return engravingFonts()->fallbackFont()->smuflAnchor(symId, anchorId, mag);
     }
 
-    const std::map<SmuflAnchorId, mu::PointF>& smuflAnchors = sym(symId).smuflAnchors;
+    const std::map<SmuflAnchorId, PointF>& smuflAnchors = sym(symId).smuflAnchors;
 
     auto it = smuflAnchors.find(anchorId);
     if (it == smuflAnchors.cend()) {

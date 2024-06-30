@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -35,26 +35,24 @@
 #include "shortcuts/ishortcutsregister.h"
 #include "iinteractive.h"
 
-#ifndef MU_QT5_COMPAT
 Q_MOC_INCLUDE("uicomponents/view/itemmultiselectionmodel.h")
-#endif
 
-namespace mu::uicomponents {
+namespace muse::uicomponents {
 class ItemMultiSelectionModel;
 }
 
 class QItemSelectionModel;
 
 namespace mu::instrumentsscene {
-class InstrumentsPanelTreeModel : public QAbstractItemModel, public async::Asyncable, public muse::actions::Actionable
+class InstrumentsPanelTreeModel : public QAbstractItemModel, public muse::async::Asyncable, public muse::actions::Actionable
 {
     Q_OBJECT
 
     INJECT(context::IGlobalContext, context)
     INJECT(notation::ISelectInstrumentsScenario, selectInstrumentsScenario)
     INJECT(muse::actions::IActionsDispatcher, dispatcher)
-    INJECT(shortcuts::IShortcutsRegister, shortcutsRegister)
-    INJECT(IInteractive, interactive)
+    INJECT(muse::shortcuts::IShortcutsRegister, shortcutsRegister)
+    INJECT(muse::IInteractive, interactive)
 
     Q_PROPERTY(bool isMovingUpAvailable READ isMovingUpAvailable NOTIFY isMovingUpAvailableChanged)
     Q_PROPERTY(bool isMovingDownAvailable READ isMovingDownAvailable NOTIFY isMovingDownAvailableChanged)
@@ -134,7 +132,7 @@ private:
     void sortParts(notation::PartList& parts);
 
     void setupPartsConnections();
-    void setupStavesConnections(const ID& stavesPartId);
+    void setupStavesConnections(const muse::ID& stavesPartId);
     void listenNotationSelectionChanged();
     void updateSelectedRows();
 
@@ -153,7 +151,7 @@ private:
     AbstractInstrumentsPanelTreeItem* loadMasterPart(const notation::Part* masterPart);
     AbstractInstrumentsPanelTreeItem* buildPartItem(const mu::notation::Part* masterPart);
     AbstractInstrumentsPanelTreeItem* buildMasterStaffItem(const mu::notation::Staff* masterStaff, QObject* parent);
-    AbstractInstrumentsPanelTreeItem* buildAddStaffControlItem(const ID& partId, QObject* parent);
+    AbstractInstrumentsPanelTreeItem* buildAddStaffControlItem(const muse::ID& partId, QObject* parent);
     AbstractInstrumentsPanelTreeItem* modelIndexToItem(const QModelIndex& index) const;
 
     bool m_isMovingUpAvailable = false;
@@ -164,13 +162,13 @@ private:
     bool m_notationChangedWhileLoadingWasBlocked = false;
 
     AbstractInstrumentsPanelTreeItem* m_rootItem = nullptr;
-    uicomponents::ItemMultiSelectionModel* m_selectionModel = nullptr;
+    muse::uicomponents::ItemMultiSelectionModel* m_selectionModel = nullptr;
     mu::notation::IMasterNotationPtr m_masterNotation = nullptr;
     mu::notation::INotationPtr m_notation = nullptr;
-    std::shared_ptr<async::Asyncable> m_partsNotifyReceiver = nullptr;
+    std::shared_ptr<muse::async::Asyncable> m_partsNotifyReceiver = nullptr;
 
     using NotationKey = QString;
-    QHash<NotationKey, QList<ID> > m_sortedPartIdList;
+    QHash<NotationKey, QList<muse::ID> > m_sortedPartIdList;
 
     bool m_instrumentsPanelVisible = true;
 

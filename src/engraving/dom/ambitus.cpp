@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -301,7 +301,7 @@ double Ambitus::headWidth() const
 //   pagePos
 //---------------------------------------------------------
 
-mu::PointF Ambitus::pagePos() const
+PointF Ambitus::pagePos() const
 {
     if (explicitParent() == 0) {
         return pos();
@@ -550,7 +550,7 @@ EngravingItem* Ambitus::prevSegmentElement()
 String Ambitus::accessibleInfo() const
 {
     return EngravingItem::accessibleInfo() + u"; "
-           + mtrc("engraving", "Top pitch: %1; Bottom pitch: %2")
+           + muse::mtrc("engraving", "Top pitch: %1; Bottom pitch: %2")
            .arg(tpc2name(topTpc(), NoteSpellingType::STANDARD, NoteCaseType::AUTO, false) + String::number(topOctave()),
                 tpc2name(bottomTpc(), NoteSpellingType::STANDARD, NoteCaseType::AUTO, false) + String::number(bottomOctave()));
 }

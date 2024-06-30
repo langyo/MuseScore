@@ -24,7 +24,7 @@
 
 #include "muse_framework_config.h"
 
-#ifdef MUSE_BUILD_UNIT_TESTS
+#ifdef MUSE_ENABLE_UNIT_TESTS
 #include <gtest/gtest_prod.h>
 #endif
 
@@ -32,7 +32,7 @@
 #include "types/datetime.h"
 #include "io/path.h"
 
-namespace mu {
+namespace muse {
 class LogRemover
 {
 public:
@@ -41,7 +41,7 @@ public:
 
 private:
 
-#ifdef MUSE_BUILD_UNIT_TESTS
+#ifdef MUSE_ENABLE_UNIT_TESTS
     FRIEND_TEST(Global_LogRemoverTests, ParseDate);
 #endif
 

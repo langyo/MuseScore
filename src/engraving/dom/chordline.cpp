@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -35,8 +35,6 @@ using namespace muse::draw;
 using namespace mu::engraving;
 
 namespace mu::engraving {
-const SymIdList ChordLine::WAVE_SYMBOLS = { SymId::wiggleVIbratoMediumSlower, SymId::wiggleVIbratoMediumSlower };
-
 //---------------------------------------------------------
 //   ChordLine
 //---------------------------------------------------------
@@ -69,7 +67,7 @@ void ChordLine::setChordLineType(ChordLineType st)
 
 const TranslatableString& ChordLine::chordLineTypeName() const
 {
-    return TConv::userName(m_chordLineType, m_straight);
+    return TConv::userName(m_chordLineType, m_straight, m_wavy);
 }
 
 //---------------------------------------------------------
@@ -244,6 +242,15 @@ void ChordLine::setNote(Note* note)
     if (note) {
         note->attachSlide(slideType(m_chordLineType));
     }
+}
+
+SymId ChordLine::waveSym() const
+{
+    if (m_chordLineType == ChordLineType::FALL || m_chordLineType == ChordLineType::PLOP) {
+        return SymId::brassFallRoughShort;
+    }
+
+    return SymId::brassLiftShort;
 }
 
 //---------------------------------------------------------

@@ -31,7 +31,7 @@
 #include "multiinstances/imultiinstancesprovider.h"
 #include "global/iapplication.h"
 
-namespace mu::workspace {
+namespace muse::workspace {
 class Workspace : public IWorkspace, public async::Asyncable
 {
     Inject<mi::IMultiInstancesProvider> multiInstancesProvider;

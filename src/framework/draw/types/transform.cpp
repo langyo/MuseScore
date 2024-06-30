@@ -26,7 +26,7 @@
 
 #include "log.h"
 
-using namespace mu;
+using namespace muse;
 using namespace muse::draw;
 
 static constexpr double NEAR_CLIP = 0.000001;

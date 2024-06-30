@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -899,7 +899,7 @@ void MidiFile::separateChannel()
         MidiTrack& midiTrack = _tracks[i];          // current track
         for (const auto& ie : midiTrack.events()) {
             const MidiEvent& e = ie.second;
-            if (e.isChannelEvent() && !mu::contains(channel, static_cast<int>(e.channel()))) {
+            if (e.isChannelEvent() && !muse::contains(channel, static_cast<int>(e.channel()))) {
                 channel.push_back(e.channel());
             }
         }
@@ -926,7 +926,7 @@ void MidiFile::separateChannel()
             const MidiEvent& e = ie->second;
             if (e.isChannelEvent()) {
                 int ch  = e.channel();
-                size_t idx = mu::indexOf(channel, ch);
+                size_t idx = muse::indexOf(channel, ch);
                 MidiTrack& t = _tracks[i + idx];
                 if (&t != &actualMidiTrack) {
                     t.insert(ie->first, e);

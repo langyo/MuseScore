@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_SHORTCUTS_MIDIDEVICEMAPPINGMODEL_H
-#define MU_SHORTCUTS_MIDIDEVICEMAPPINGMODEL_H
+#ifndef MUSE_SHORTCUTS_MIDIDEVICEMAPPINGMODEL_H
+#define MUSE_SHORTCUTS_MIDIDEVICEMAPPINGMODEL_H
 
 #include <QAbstractListModel>
 #include <QItemSelection>
@@ -37,15 +37,15 @@
 #include "ui/iuiactionsregister.h"
 #include "ui/uitypes.h"
 
-namespace mu::shortcuts {
+namespace muse::shortcuts {
 class MidiDeviceMappingModel : public QAbstractListModel, public async::Asyncable
 {
     Q_OBJECT
 
-    INJECT(ui::IUiActionsRegister, uiActionsRegister)
+    INJECT(muse::ui::IUiActionsRegister, uiActionsRegister)
     INJECT(shortcuts::IMidiRemote, midiRemote)
     INJECT(IShortcutsConfiguration, configuration)
-    INJECT(midi::IMidiConfiguration, midiConfiguration)
+    INJECT(muse::midi::IMidiConfiguration, midiConfiguration)
 
     Q_PROPERTY(bool useRemoteControl READ useRemoteControl WRITE setUseRemoteControl NOTIFY useRemoteControlChanged)
 
@@ -98,4 +98,4 @@ private:
 };
 }
 
-#endif // MU_SHORTCUTS_MIDIDEVICEMAPPINGMODEL_H
+#endif // MUSE_SHORTCUTS_MIDIDEVICEMAPPINGMODEL_H

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -321,6 +321,12 @@ void TRead::readProperty(EngravingItem* item, XmlReader& xml, ReadContext& ctx, 
         break;
     }
 
+    // Pre-4.4 compatibility: these items now use DIRECTION property
+    if (pid == Pid::PLACEMENT && item->hasVoiceApplicationProperties()) {
+        pid = Pid::DIRECTION;
+        v = v.value<PlacementV>() == PlacementV::ABOVE ? PropertyValue(DirectionV::UP) : PropertyValue(DirectionV::DOWN);
+    }
+
     item->setProperty(pid, v);
     if (item->isStyled(pid)) {
         item->setPropertyFlags(pid, PropertyFlags::UNSTYLED);
@@ -421,7 +427,7 @@ bool TRead::readItemProperties(EngravingItem* item, XmlReader& e, ReadContext& c
             return true;
         }
         int id = e.readInt();
-        item->setLinks(mu::value(ctx.linkIds(), id, nullptr));
+        item->setLinks(muse::value(ctx.linkIds(), id, nullptr));
         if (!item->links()) {
             if (!ctx.isMasterScore()) {       // DEBUG
                 LOGD() << "not found link, id: " << id << ", count: " << ctx.linkIds().size() << ", item: " << item->typeName();
@@ -536,7 +542,7 @@ bool TRead::readProperties(StaffTextBase* t, XmlReader& e, ReadContext& ctx)
         voice_idx_t voice = static_cast<voice_idx_t>(e.intAttribute("voice", -1));
         if (voice < VOICES) {
             t->setChannelName(voice, e.attribute("name"));
-        } else if (voice == mu::nidx) {
+        } else if (voice == muse::nidx) {
             // no voice applies channel to all voices for
             // compatibility
             for (voice_idx_t i = 0; i < VOICES; ++i) {
@@ -1529,6 +1535,7 @@ void TRead::read(Tuplet* t, XmlReader& e, ReadContext& ctx)
             Tuplet::resetNumberProperty(number);
             TRead::read(number, e, ctx);
             number->setVisible(t->visible());         //?? override saved property
+            number->setColor(t->color());
             number->setTrack(t->track());
             // move property flags from _number back to tuplet
             for (auto p : { Pid::FONT_FACE, Pid::FONT_SIZE, Pid::FONT_STYLE, Pid::ALIGN }) {

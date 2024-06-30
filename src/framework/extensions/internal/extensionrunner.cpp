@@ -26,11 +26,17 @@
 
 #include "log.h"
 
+using namespace muse;
 using namespace muse::extensions;
 
-mu::Ret ExtensionRunner::run(const Action& action)
+ExtensionRunner::ExtensionRunner(const modularity::ContextPtr& iocCtx)
+    : m_iocContext(iocCtx)
 {
-    ScriptEngine engine(action.apiversion);
+}
+
+Ret ExtensionRunner::run(const Action& action)
+{
+    ScriptEngine engine(m_iocContext, action.apiversion);
     engine.setScriptPath(action.main);
     Ret ret = engine.evaluate();
     if (!ret) {

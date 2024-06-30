@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -139,6 +139,18 @@ void Tuplet::setVisible(bool f)
     EngravingItem::setVisible(f);
     if (m_number) {
         m_number->setVisible(f);
+    }
+}
+
+//---------------------------------------------------------
+//   setColor
+//---------------------------------------------------------
+
+void Tuplet::setColor(const Color& col)
+{
+    EngravingItem::setColor(col);
+    if (m_number) {
+        m_number->setColor(col);
     }
 }
 
@@ -491,21 +503,22 @@ bool Tuplet::cross() const
 staff_idx_t Tuplet::vStaffIdx() const
 {
     if (elements().empty()) {
-        return mu::nidx;
+        return muse::nidx;
     }
 
     const DurationElement* cr = elements().front();
     if (!cr) {
-        return mu::nidx;
+        return muse::nidx;
     }
 
     while (cr->isTuplet()) {
         const Tuplet* t = toTuplet(cr);
         if (t->elements().empty()) {
-            break;
+            return muse::nidx;
         }
         cr = t->elements().front();
     }
+
     return cr->vStaffIdx();
 }
 

@@ -35,10 +35,10 @@
 
 using namespace muse::dock;
 using namespace muse::actions;
-using namespace mu::uicomponents;
+using namespace muse::uicomponents;
 
 DockFrameModel::DockFrameModel(QObject* parent)
-    : QObject(parent)
+    : QObject(parent), muse::Injectable(muse::iocCtxForQmlObject(this))
 {
     qApp->installEventFilter(this);
 }

@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_UI_INTERACTIVEPROVIDER_H
-#define MU_UI_INTERACTIVEPROVIDER_H
+#ifndef MUSE_UI_INTERACTIVEPROVIDER_H
+#define MUSE_UI_INTERACTIVEPROVIDER_H
 
 #include <QObject>
 #include <QVariant>
@@ -35,7 +35,7 @@
 #include "extensions/iextensionsprovider.h"
 #include "types/retval.h"
 
-namespace mu::ui {
+namespace muse::ui {
 class QmlLaunchData : public QObject
 {
     Q_OBJECT
@@ -50,16 +50,16 @@ private:
     QVariantMap m_data;
 };
 
-class InteractiveProvider : public QObject, public IInteractiveProvider
+class InteractiveProvider : public QObject, public IInteractiveProvider, public Injectable
 {
     Q_OBJECT
 
-    Inject<IInteractiveUriRegister> uriRegister;
-    Inject<IMainWindow> mainWindow;
-    Inject<muse::extensions::IExtensionsProvider> extensionsProvider;
+    Inject<IInteractiveUriRegister> uriRegister = { this };
+    Inject<IMainWindow> mainWindow = { this };
+    Inject<muse::extensions::IExtensionsProvider> extensionsProvider = { this };
 
 public:
-    explicit InteractiveProvider();
+    explicit InteractiveProvider(const modularity::ContextPtr& iocCtx);
 
     RetVal<Val> question(const std::string& title, const IInteractive::Text& text, const IInteractive::ButtonDatas& buttons,
                          int defBtn = int(IInteractive::Button::NoButton), const IInteractive::Options& options = {}) override;
@@ -75,7 +75,7 @@ public:
                       const IInteractive::ButtonDatas& buttons = {}, int defBtn = int(IInteractive::Button::NoButton),
                       const IInteractive::Options& options = {}) override;
 
-    Ret showProgress(const std::string& title, mu::Progress* progress) override;
+    Ret showProgress(const std::string& title, Progress* progress) override;
 
     RetVal<io::path_t> selectOpeningFile(const std::string& title, const io::path_t& dir, const std::vector<std::string>& filter) override;
     RetVal<io::path_t> selectSavingFile(const std::string& title, const io::path_t& path, const std::vector<std::string>& filter,
@@ -106,13 +106,13 @@ public:
     Q_INVOKABLE void onClose(const QString& objectId, const QVariant& rv);
 
 signals:
-    void fireOpen(mu::ui::QmlLaunchData* data);
+    void fireOpen(muse::ui::QmlLaunchData* data);
     void fireClose(QVariant data);
     void fireRaise(QVariant data);
 
-    void fireOpenStandardDialog(mu::ui::QmlLaunchData* data);
-    void fireOpenFileDialog(mu::ui::QmlLaunchData* data);
-    void fireOpenProgressDialog(mu::ui::QmlLaunchData* data);
+    void fireOpenStandardDialog(muse::ui::QmlLaunchData* data);
+    void fireOpenFileDialog(muse::ui::QmlLaunchData* data);
+    void fireOpenProgressDialog(muse::ui::QmlLaunchData* data);
 
 private:
     struct OpenData
@@ -182,4 +182,4 @@ private:
 };
 }
 
-#endif // MU_UI_INTERACTIVEPROVIDER_H
+#endif // MUSE_UI_INTERACTIVEPROVIDER_H

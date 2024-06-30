@@ -26,8 +26,8 @@
 #include "types/translatablestring.h"
 #include "shortcuts/shortcutstypes.h"
 
-using namespace mu::uicomponents;
-using namespace mu::ui;
+using namespace muse::uicomponents;
+using namespace muse::ui;
 
 MenuItem::MenuItem(QObject* parent)
     : QObject(parent)
@@ -103,12 +103,12 @@ bool MenuItem::isValid() const
 
 QString MenuItem::shortcutsTitle() const
 {
-    return mu::shortcuts::sequencesToNativeText(m_action.shortcuts);
+    return shortcuts::sequencesToNativeText(m_action.shortcuts);
 }
 
 QString MenuItem::portableShortcuts() const
 {
-    return QString::fromStdString(mu::shortcuts::Shortcut::sequencesToString(m_action.shortcuts));
+    return QString::fromStdString(shortcuts::Shortcut::sequencesToString(m_action.shortcuts));
 }
 
 void MenuItem::setId(const QString& id)
@@ -206,7 +206,7 @@ void MenuItem::setArgs(const muse::actions::ActionData& args)
     m_args = args;
 }
 
-QString mu::uicomponents::MenuItem::code_property() const
+QString muse::uicomponents::MenuItem::code_property() const
 {
     return QString::fromStdString(m_action.code);
 }

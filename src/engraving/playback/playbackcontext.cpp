@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -33,18 +33,79 @@
 #include "dom/score.h"
 #include "dom/segment.h"
 #include "dom/spanner.h"
+#include "dom/measurerepeat.h"
 
 #include "utils/arrangementutils.h"
 #include "utils/expressionutils.h"
 #include "types/typesconv.h"
 
 using namespace mu::engraving;
-using namespace mu::mpe;
+using namespace muse;
+using namespace muse::mpe;
 
-dynamic_level_t PlaybackContext::appliableDynamicLevel(const int nominalPositionTick) const
+static std::vector<track_idx_t> resolveTracksForDynamic(const EngravingItem* dynamicItem, track_idx_t startTrack, track_idx_t endTrack)
 {
-    auto it = findLessOrEqual(m_dynamicsMap, nominalPositionTick);
-    if (it == m_dynamicsMap.cend()) {
+    VoiceApplication applyToVoice = dynamicItem->getProperty(Pid::APPLY_TO_VOICE).value<VoiceApplication>();
+    voice_idx_t voiceIdx = dynamicItem->voice();
+    staff_idx_t staffIdx = dynamicItem->staffIdx();
+
+    auto trackAcceptedByVoice = [applyToVoice, staffIdx, voiceIdx](track_idx_t trackIdx) {
+        switch (applyToVoice) {
+        case VoiceApplication::ALL_VOICE_IN_INSTRUMENT:
+            return true;
+        case VoiceApplication::ALL_VOICE_IN_STAFF:
+            return staffIdx == track2staff(trackIdx);
+        case VoiceApplication::CURRENT_VOICE_ONLY:
+            return voiceIdx == track2voice(trackIdx);
+        }
+
+        return false;
+    };
+
+    std::vector<track_idx_t> result;
+
+    for (track_idx_t trackIdx = startTrack; trackIdx < endTrack; ++trackIdx) {
+        if (trackAcceptedByVoice(trackIdx)) {
+            result.push_back(trackIdx);
+        }
+    }
+
+    return result;
+}
+
+static std::vector<track_idx_t> resolveTracksForSoundFlag(const SoundFlag* flag, track_idx_t startTrack, track_idx_t endTrack)
+{
+    staff_idx_t staffIdx = flag->staffIdx();
+
+    auto trackAcceptedByStaff = [flag, staffIdx](track_idx_t trackIdx) {
+        if (flag->applyToAllStaves()) {
+            return true;
+        }
+
+        return staffIdx == track2staff(trackIdx);
+    };
+
+    std::vector<track_idx_t> result;
+
+    for (track_idx_t trackIdx = startTrack; trackIdx < endTrack; ++trackIdx) {
+        if (trackAcceptedByStaff(trackIdx)) {
+            result.push_back(trackIdx);
+        }
+    }
+
+    return result;
+}
+
+dynamic_level_t PlaybackContext::appliableDynamicLevel(const track_idx_t trackIdx, const int nominalPositionTick) const
+{
+    auto dynamicsIt = m_dynamicsByTrack.find(trackIdx);
+    if (dynamicsIt == m_dynamicsByTrack.end()) {
+        return mpe::dynamicLevelFromType(mpe::DynamicType::Natural);
+    }
+
+    const DynamicMap& dynamics = dynamicsIt->second;
+    auto it = muse::findLessOrEqual(dynamics, nominalPositionTick);
+    if (it == dynamics.end()) {
         return mpe::dynamicLevelFromType(mpe::DynamicType::Natural);
     }
 
@@ -61,45 +122,49 @@ ArticulationType PlaybackContext::persistentArticulationType(const int nominalPo
     return it->second;
 }
 
-PlaybackParamMap PlaybackContext::playbackParamMap(const Score* score, const int nominalPositionTick) const
+PlaybackParamList PlaybackContext::playbackParams(const track_idx_t trackIdx, const int nominalPositionTick) const
 {
-    mu::mpe::PlaybackParamMap result;
-
-    auto it = mu::findLessOrEqual(m_playbackParamMap, nominalPositionTick);
-    if (it == m_playbackParamMap.end()) {
-        return result;
+    auto paramsIt = m_playbackParamByTrack.find(trackIdx);
+    if (paramsIt == m_playbackParamByTrack.end()) {
+        return {};
     }
 
-    auto endIt = m_playbackParamMap.upper_bound(nominalPositionTick);
+    const ParamMap& params = paramsIt->second;
+    auto it = muse::findLessOrEqual(params, nominalPositionTick);
+    if (it == params.end()) {
+        return {};
+    }
 
-    for (; it != endIt; ++it) {
-        result.insert_or_assign(timestampFromTicks(score, it->first), it->second);
+    return it->second;
+}
+
+PlaybackParamLayers PlaybackContext::playbackParamLayers(const Score* score) const
+{
+    PlaybackParamLayers result;
+
+    for (const auto& params : m_playbackParamByTrack) {
+        PlaybackParamMap paramMap;
+        for (const auto& pair : params.second) {
+            paramMap.emplace(timestampFromTicks(score, pair.first), pair.second);
+        }
+
+        result.emplace(static_cast<layer_idx_t>(params.first), std::move(paramMap));
     }
 
     return result;
 }
 
-PlaybackParamMap PlaybackContext::playbackParamMap(const Score* score) const
+DynamicLevelLayers PlaybackContext::dynamicLevelLayers(const Score* score) const
 {
-    mu::mpe::PlaybackParamMap result;
+    DynamicLevelLayers result;
 
-    for (const auto& pair : m_playbackParamMap) {
-        result.insert_or_assign(timestampFromTicks(score, pair.first), pair.second);
-    }
+    for (const auto& dynamics : m_dynamicsByTrack) {
+        DynamicLevelMap dynamicLevelMap;
+        for (const auto& dynamic : dynamics.second) {
+            dynamicLevelMap.emplace(timestampFromTicks(score, dynamic.first), dynamic.second);
+        }
 
-    return result;
-}
-
-DynamicLevelMap PlaybackContext::dynamicLevelMap(const Score* score) const
-{
-    DynamicLevelMap result;
-
-    for (const auto& pair : m_dynamicsMap) {
-        result.insert_or_assign(timestampFromTicks(score, pair.first), pair.second);
-    }
-
-    if (result.empty()) {
-        result.emplace(0, mpe::dynamicLevelFromType(mpe::DynamicType::Natural));
+        result.emplace(static_cast<layer_idx_t>(dynamics.first), std::move(dynamicLevelMap));
     }
 
     return result;
@@ -107,12 +172,39 @@ DynamicLevelMap PlaybackContext::dynamicLevelMap(const Score* score) const
 
 void PlaybackContext::update(const ID partId, const Score* score)
 {
+    const Part* part = score->partById(partId);
+    IF_ASSERT_FAILED(part) {
+        return;
+    }
+
+    // cache them for optimization
+    m_partStartTrack = part->startTrack();
+    m_partEndTrack = part->endTrack();
+
+    IF_ASSERT_FAILED(m_partStartTrack <= m_partEndTrack) {
+        return;
+    }
+
+    const size_t ntracks = m_partEndTrack - m_partStartTrack;
+    m_dynamicsByTrack.reserve(ntracks);
+    m_playbackParamByTrack.reserve(ntracks);
+
     for (const RepeatSegment* repeatSegment : score->repeatList()) {
+        std::vector<const MeasureRepeat*> measureRepeats;
         int tickPositionOffset = repeatSegment->utick - repeatSegment->tick;
 
         for (const Measure* measure : repeatSegment->measureList()) {
             for (Segment* segment = measure->first(); segment; segment = segment->next()) {
                 int segmentStartTick = segment->tick().ticks() + tickPositionOffset;
+
+                for (track_idx_t track = m_partStartTrack; track < m_partEndTrack; ++track) {
+                    const EngravingItem* item = segment->elementAt(track);
+                    if (!item || !item->isMeasureRepeat()) {
+                        continue;
+                    }
+
+                    measureRepeats.push_back(toMeasureRepeat(item));
+                }
 
                 handleAnnotations(partId, segment, segmentStartTick);
             }
@@ -120,39 +212,34 @@ void PlaybackContext::update(const ID partId, const Score* score)
 
         handleSpanners(partId, score, repeatSegment->tick,
                        repeatSegment->tick + repeatSegment->len(), tickPositionOffset);
+
+        handleMeasureRepeats(measureRepeats, tickPositionOffset);
     }
 }
 
 void PlaybackContext::clear()
 {
-    m_dynamicsMap.clear();
+    m_partStartTrack = 0;
+    m_partEndTrack = 0;
+    m_dynamicsByTrack.clear();
     m_playTechniquesMap.clear();
-    m_playbackParamMap.clear();
+    m_playbackParamByTrack.clear();
 }
 
 bool PlaybackContext::hasSoundFlags() const
 {
-    for (const auto& pair : m_playbackParamMap) {
-        for (const mpe::PlaybackParam& param : pair.second) {
-            if (param.code == mpe::SOUND_PRESET_PARAM_CODE
-                || param.code == mpe::PLAY_TECHNIQUE_PARAM_CODE) {
-                return true;
-            }
-        }
-    }
-
-    return false;
+    return !m_playbackParamByTrack.empty();
 }
 
-dynamic_level_t PlaybackContext::nominalDynamicLevel(const int positionTick) const
+dynamic_level_t PlaybackContext::nominalDynamicLevel(const track_idx_t trackIdx, const int positionTick) const
 {
-    auto search = m_dynamicsMap.find(positionTick);
-
-    if (search == m_dynamicsMap.cend()) {
+    auto dynamicsIt = m_dynamicsByTrack.find(trackIdx);
+    if (dynamicsIt == m_dynamicsByTrack.end()) {
         return mpe::dynamicLevelFromType(mpe::DynamicType::Natural);
     }
 
-    return search->second;
+    const DynamicMap& dynamics = dynamicsIt->second;
+    return muse::value(dynamics, positionTick, mpe::dynamicLevelFromType(mpe::DynamicType::Natural));
 }
 
 void PlaybackContext::updateDynamicMap(const Dynamic* dynamic, const Segment* segment, const int segmentPositionTick)
@@ -160,22 +247,24 @@ void PlaybackContext::updateDynamicMap(const Dynamic* dynamic, const Segment* se
     if (!dynamic->playDynamic()) {
         return;
     }
+
     const DynamicType type = dynamic->dynamicType();
+
     if (isOrdinaryDynamicType(type)) {
-        m_dynamicsMap[segmentPositionTick] = dynamicLevelFromType(type);
+        applyDynamic(dynamic, dynamicLevelFromType(type), segmentPositionTick);
         return;
     }
 
     if (isSingleNoteDynamicType(type)) {
-        mpe::dynamic_level_t prevDynamicLevel = appliableDynamicLevel(segmentPositionTick);
+        mpe::dynamic_level_t prevDynamicLevel = appliableDynamicLevel(dynamic->track(), segmentPositionTick);
+        applyDynamic(dynamic, dynamicLevelFromType(type), segmentPositionTick);
 
-        m_dynamicsMap[segmentPositionTick] = dynamicLevelFromType(type);
-
-        if (!segment->next()) {
-            return;
+        if (segment->next()) {
+            int tickPositionOffset = segmentPositionTick - segment->tick().ticks();
+            int nextSegmentPositionTick = segment->next()->tick().ticks() + tickPositionOffset;
+            applyDynamic(dynamic, prevDynamicLevel, nextSegmentPositionTick);
         }
 
-        applyDynamicToNextSegment(segment, segmentPositionTick, prevDynamicLevel);
         return;
     }
 
@@ -193,7 +282,7 @@ void PlaybackContext::updateDynamicMap(const Dynamic* dynamic, const Segment* se
                                                                ChangeMethod::NORMAL);
 
     for (const auto& pair : dynamicsCurve) {
-        m_dynamicsMap[segmentPositionTick + pair.first] = levelFrom + pair.second;
+        applyDynamic(dynamic, levelFrom + pair.second, segmentPositionTick + pair.first);
     }
 }
 
@@ -206,9 +295,19 @@ void PlaybackContext::updatePlayTechMap(const PlayTechAnnotation* annotation, co
     }
 
     m_playTechniquesMap[segmentPositionTick] = articulationFromPlayTechType(type);
+
+    bool cancelPlayTechniques = type == PlayingTechniqueType::Natural || type == PlayingTechniqueType::Open;
+
+    if (cancelPlayTechniques && !m_playbackParamByTrack.empty()) {
+        PlaybackParam ordTechnique(PlaybackParam::PlayingTechnique, mpe::ORDINARY_PLAYING_TECHNIQUE_CODE);
+
+        for (track_idx_t idx = m_partStartTrack; idx < m_partEndTrack; ++idx) {
+            m_playbackParamByTrack[idx][segmentPositionTick].push_back(ordTechnique);
+        }
+    }
 }
 
-void PlaybackContext::updatePlaybackParamMap(const SoundFlag* flag, const int segmentPositionTick)
+void PlaybackContext::updatePlaybackParams(const SoundFlag* flag, const int segmentPositionTick)
 {
     if (!flag->play()) {
         return;
@@ -218,30 +317,25 @@ void PlaybackContext::updatePlaybackParamMap(const SoundFlag* flag, const int se
         return;
     }
 
-    mpe::PlaybackParamList params;
+    std::vector<track_idx_t> trackIdxList = resolveTracksForSoundFlag(flag, m_partStartTrack, m_partEndTrack);
 
-    for (const String& presetCode : flag->soundPresets()) {
-        params.emplace_back(mpe::PlaybackParam { mpe::SOUND_PRESET_PARAM_CODE, Val(presetCode.toStdString()) });
+    for (track_idx_t trackIdx : trackIdxList) {
+        mpe::PlaybackParamList& params = m_playbackParamByTrack[trackIdx][segmentPositionTick];
+
+        for (const String& soundPreset : flag->soundPresets()) {
+            if (!soundPreset.empty()) {
+                params.emplace_back(PlaybackParam::SoundPreset, soundPreset);
+            }
+        }
+
+        if (!flag->playingTechnique().empty()) {
+            params.emplace_back(PlaybackParam::PlayingTechnique, flag->playingTechnique());
+        }
     }
 
-    if (!flag->playingTechnique().empty()) {
-        params.emplace_back(mpe::PlaybackParam { mpe::PLAY_TECHNIQUE_PARAM_CODE, Val(flag->playingTechnique().toStdString()) });
+    if (flag->playingTechnique() == mpe::ORDINARY_PLAYING_TECHNIQUE_CODE) {
+        m_playTechniquesMap[segmentPositionTick] = mpe::ArticulationType::Standard;
     }
-
-    m_playbackParamMap.emplace(segmentPositionTick, std::move(params));
-}
-
-void PlaybackContext::applyDynamicToNextSegment(const Segment* currentSegment, const int segmentPositionTick,
-                                                const mpe::dynamic_level_t dynamicLevel)
-{
-    if (!currentSegment->next()) {
-        return;
-    }
-
-    const int tickPositionOffset = segmentPositionTick - currentSegment->tick().ticks();
-
-    int nextSegmentPositionTick = currentSegment->next()->tick().ticks() + tickPositionOffset;
-    m_dynamicsMap[nextSegmentPositionTick] = dynamicLevel;
 }
 
 void PlaybackContext::handleSpanners(const ID partId, const Score* score, const int segmentStartTick, const int segmentEndTick,
@@ -274,11 +368,12 @@ void PlaybackContext::handleSpanners(const ID partId, const Score* score, const 
         }
 
         const Hairpin* hairpin = toHairpin(spanner);
+        const track_idx_t trackIdx = hairpin->track();
 
         {
             Segment* startSegment = hairpin->startSegment();
             Dynamic* startDynamic = startSegment
-                                    ? toDynamic(startSegment->findAnnotation(ElementType::DYNAMIC, hairpin->track(), hairpin->track()))
+                                    ? toDynamic(startSegment->findAnnotation(ElementType::DYNAMIC, trackIdx, trackIdx))
                                     : nullptr;
             if (startDynamic) {
                 if (startDynamic->dynamicType() != DynamicType::OTHER
@@ -304,8 +399,10 @@ void PlaybackContext::handleSpanners(const ID partId, const Score* score, const 
         // If it doesn't:
         // - for the start level, use the currently-applicable level at the start tick of the hairpin
         // - for the end level, check if there is a dynamic marking at the end of the hairpin
-        const dynamic_level_t levelFrom = dynamicLevelFromType(dynamicTypeFrom, appliableDynamicLevel(spannerFrom + tickPositionOffset));
-        const dynamic_level_t nominalLevelTo = dynamicLevelFromType(dynamicTypeTo, nominalDynamicLevel(spannerTo + tickPositionOffset));
+        const dynamic_level_t levelFrom
+            = dynamicLevelFromType(dynamicTypeFrom, appliableDynamicLevel(trackIdx, spannerFrom + tickPositionOffset));
+        const dynamic_level_t nominalLevelTo
+            = dynamicLevelFromType(dynamicTypeTo, nominalDynamicLevel(trackIdx, spannerTo + tickPositionOffset));
 
         // If there is an end dynamic marking, check if it matches the 'direction' of the hairpin (cresc. vs decresc.)
         const bool isCrescendo = hairpin->isCrescendo();
@@ -324,13 +421,13 @@ void PlaybackContext::handleSpanners(const ID partId, const Score* score, const 
                                                                    hairpin->veloChangeMethod());
 
         for (const auto& pair : dynamicsCurve) {
-            m_dynamicsMap.insert_or_assign(spannerFrom + pair.first + tickPositionOffset, levelFrom + pair.second);
+            applyDynamic(hairpin, levelFrom + pair.second, spannerFrom + pair.first + tickPositionOffset);
         }
 
         if (hasNominalLevelTo && !useNominalLevelTo) {
             // If there is a dynamic at the end of the hairpin that we couldn't use because it didn't match the direction of the hairpin,
             // insert that dynamic directly after the hairpin
-            m_dynamicsMap.insert_or_assign(spannerTo + tickPositionOffset, nominalLevelTo);
+            applyDynamic(hairpin, nominalLevelTo, spannerTo + tickPositionOffset);
         }
     }
 }
@@ -358,33 +455,115 @@ void PlaybackContext::handleAnnotations(const ID partId, const Segment* segment,
 
         if (annotation->isStaffText()) {
             if (const SoundFlag* flag = toStaffText(annotation)->soundFlag()) {
-                updatePlaybackParamMap(flag, segmentPositionTick);
-                continue;
+                updatePlaybackParams(flag, segmentPositionTick);
             }
         }
     }
+}
 
-    if (m_dynamicsMap.empty()) {
-        m_dynamicsMap.emplace(0, mpe::dynamicLevelFromType(mpe::DynamicType::Natural));
+void PlaybackContext::handleMeasureRepeats(const std::vector<const MeasureRepeat*>& measureRepeats, const int tickPositionOffset)
+{
+    for (const MeasureRepeat* mr : measureRepeats) {
+        const Measure* currMeasure = mr->firstMeasureOfGroup();
+        if (!currMeasure) {
+            continue;
+        }
+
+        const Measure* referringMeasure = mr->referringMeasure(currMeasure);
+        if (!referringMeasure) {
+            continue;
+        }
+
+        int currentMeasureTick = currMeasure->tick().ticks();
+        int referringMeasureTick = referringMeasure->tick().ticks();
+        int newItemsOffsetTick = currentMeasureTick - referringMeasureTick;
+
+        for (int num = 0; num < mr->numMeasures(); ++num) {
+            int startTick = referringMeasure->tick().ticks() + tickPositionOffset;
+            int endTick = referringMeasure->endTick().ticks() + tickPositionOffset;
+
+            copyDynamicsInRange(startTick, endTick, newItemsOffsetTick);
+            copyPlaybackParamsInRange(startTick, endTick, newItemsOffsetTick);
+            copyPlayTechniquesInRange(startTick, endTick, newItemsOffsetTick);
+
+            currMeasure = currMeasure->nextMeasure();
+            if (!currMeasure) {
+                break;
+            }
+
+            referringMeasure = mr->referringMeasure(currMeasure);
+            if (!referringMeasure) {
+                break;
+            }
+        }
     }
 }
 
-void PlaybackContext::removeDynamicData(const int from, const int to)
+void PlaybackContext::copyDynamicsInRange(const int rangeStartTick, const int rangeEndTick, const int newDynamicsOffsetTick)
 {
-    auto lowerBound = m_dynamicsMap.lower_bound(from);
-    auto upperBound = m_dynamicsMap.upper_bound(to);
+    for (auto& pair : m_dynamicsByTrack) {
+        DynamicMap& dynamics = pair.second;
+        auto startIt = dynamics.lower_bound(rangeStartTick);
+        if (startIt == dynamics.end()) {
+            return;
+        }
 
-    for (auto it = lowerBound; it != upperBound;) {
-        it = m_dynamicsMap.erase(it);
+        auto endIt = dynamics.lower_bound(rangeEndTick);
+
+        DynamicMap newDynamics;
+        for (auto it = startIt; it != endIt; ++it) {
+            int tick = it->first + newDynamicsOffsetTick;
+            newDynamics.insert_or_assign(tick, it->second);
+        }
+
+        dynamics.merge(std::move(newDynamics));
     }
 }
 
-void PlaybackContext::removePlayTechniqueData(const int from, const int to)
+void PlaybackContext::copyPlaybackParamsInRange(const int rangeStartTick, const int rangeEndTick, const int newParamsOffsetTick)
 {
-    auto lowerBound = m_playTechniquesMap.lower_bound(from);
-    auto upperBound = m_playTechniquesMap.upper_bound(to);
+    for (auto& pair : m_playbackParamByTrack) {
+        ParamMap& params = pair.second;
+        auto startIt = params.lower_bound(rangeStartTick);
+        if (startIt == params.end()) {
+            return;
+        }
 
-    for (auto it = lowerBound; it != upperBound;) {
-        it = m_playTechniquesMap.erase(it);
+        auto endIt = params.lower_bound(rangeEndTick);
+
+        ParamMap newParams;
+        for (auto it = startIt; it != endIt; ++it) {
+            int tick = it->first + newParamsOffsetTick;
+            newParams.insert_or_assign(tick, it->second);
+        }
+
+        params.merge(std::move(newParams));
+    }
+}
+
+void PlaybackContext::copyPlayTechniquesInRange(const int rangeStartTick, const int rangeEndTick, const int newPlayTechOffsetTick)
+{
+    auto startIt = m_playTechniquesMap.lower_bound(rangeStartTick);
+    if (startIt == m_playTechniquesMap.end()) {
+        return;
+    }
+
+    auto endIt = m_playTechniquesMap.lower_bound(rangeEndTick);
+
+    PlayTechniquesMap newPlayTechniques;
+    for (auto it = startIt; it != endIt; ++it) {
+        int tick = it->first + newPlayTechOffsetTick;
+        newPlayTechniques.insert_or_assign(tick, it->second);
+    }
+
+    m_playTechniquesMap.merge(std::move(newPlayTechniques));
+}
+
+void PlaybackContext::applyDynamic(const EngravingItem* dynamicItem, const dynamic_level_t dynamicLevel, const int positionTick)
+{
+    std::vector<track_idx_t> trackIdxList = resolveTracksForDynamic(dynamicItem, m_partStartTrack, m_partEndTrack);
+
+    for (track_idx_t trackIdx : trackIdxList) {
+        m_dynamicsByTrack[trackIdx].insert_or_assign(positionTick, dynamicLevel);
     }
 }

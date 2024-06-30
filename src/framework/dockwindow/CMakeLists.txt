@@ -18,7 +18,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-set(MODULE dockwindow)
+declare_module(muse_dockwindow)
+set(MODULE_ALIAS muse::dockwindow)
 
 set(MODULE_QRC dock.qrc)
 
@@ -69,9 +70,7 @@ if (NOT BUILD_SHARED_LIBS)
     set(KDDockWidgets_STATIC ON CACHE BOOL "Build static versions of the libraries" FORCE)
 endif(NOT BUILD_SHARED_LIBS)
 
-if (NOT MUE_COMPILE_QT5_COMPAT)
-    set(KDDockWidgets_QT6 ON CACHE BOOL "Build against Qt 6" FORCE)
-endif()
+set(KDDockWidgets_QT6 ON CACHE BOOL "Build against Qt 6" FORCE)
 set(KDDockWidgets_QTQUICK ON CACHE BOOL "Build for QtQuick instead of QtWidgets" FORCE)
 set(KDDockWidgets_EXAMPLES OFF CACHE BOOL "Build the examples" FORCE)
 add_subdirectory(thirdparty/KDDockWidgets)
@@ -80,5 +79,5 @@ set(MODULE_LINK kddockwidgets)
 
 set(MODULE_QML_IMPORT ${CMAKE_CURRENT_LIST_DIR}/qml)
 
-include(SetupModule)
+setup_module()
 

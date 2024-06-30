@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -31,13 +31,13 @@
 
 #include "global/async/asyncable.h"
 
-namespace mu::workspace {
-class WorkspaceListModel : public QAbstractListModel, public async::Asyncable
+namespace mu::workspacescene {
+class WorkspaceListModel : public QAbstractListModel, public muse::async::Asyncable
 {
     Q_OBJECT
 
-    Inject<IWorkspaceManager> workspacesManager;
-    Inject<IInteractive> interactive;
+    Inject<muse::workspace::IWorkspaceManager> workspacesManager;
+    Inject<muse::IInteractive> interactive;
 
     Q_PROPERTY(QVariant selectedWorkspace READ selectedWorkspace NOTIFY selectedWorkspaceChanged)
 
@@ -60,9 +60,9 @@ signals:
     void selectedWorkspaceChanged(QVariant selectedWorkspace);
 
 private:
-    void setSelectedWorkspace(IWorkspacePtr workspace);
+    void setSelectedWorkspace(muse::workspace::IWorkspacePtr workspace);
 
-    QVariantMap workspaceToObject(IWorkspacePtr workspace) const;
+    QVariantMap workspaceToObject(muse::workspace::IWorkspacePtr workspace) const;
     bool isIndexValid(int index) const;
 
     enum Roles {
@@ -71,8 +71,8 @@ private:
         RoleIsRemovable
     };
 
-    QList<IWorkspacePtr> m_workspaces;
-    IWorkspacePtr m_selectedWorkspace;
+    QList<muse::workspace::IWorkspacePtr> m_workspaces;
+    muse::workspace::IWorkspacePtr m_selectedWorkspace;
 };
 }
 

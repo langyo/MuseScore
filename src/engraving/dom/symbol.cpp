@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -116,7 +116,7 @@ bool Symbol::setProperty(Pid propertyId, const PropertyValue& v)
         m_sym = v.value<SymId>();
         break;
     case Pid::SCORE_FONT:
-        m_scoreFont = engravingFonts()->fontByName(v.value<String>().toStdString());
+        m_scoreFont = score()->engravingFonts()->fontByName(v.value<String>().toStdString());
         break;
     case Pid::SYMBOLS_SIZE:
         m_symbolsSize = v.toDouble();

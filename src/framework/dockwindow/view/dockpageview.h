@@ -33,9 +33,7 @@
 #include "internal/dockbase.h"
 #include "docktypes.h"
 
-#ifndef MU_QT5_COMPAT
 Q_MOC_INCLUDE("dockwindow/view/dockstatusbarview.h")
-#endif
 
 namespace mu::ui {
 class NavigationControl;
@@ -47,11 +45,9 @@ class DockPanelView;
 class DockCentralView;
 class DockStatusBarView;
 class DockingHolderView;
-class DockPageView : public QQuickItem
+class DockPageView : public QQuickItem, public muse::Injectable
 {
     Q_OBJECT
-
-    INJECT(mu::ui::INavigationController, navigationController)
 
     Q_PROPERTY(QString uri READ uri WRITE setUri NOTIFY uriChanged)
     Q_PROPERTY(QQmlListProperty<muse::dock::DockToolBarView> mainToolBars READ mainToolBarsProperty)
@@ -61,6 +57,8 @@ class DockPageView : public QQuickItem
     Q_PROPERTY(QQmlListProperty<muse::dock::DockingHolderView> panelsDockingHolders READ panelsDockingHoldersProperty)
     Q_PROPERTY(muse::dock::DockCentralView * centralDock READ centralDock WRITE setCentralDock NOTIFY centralDockChanged)
     Q_PROPERTY(muse::dock::DockStatusBarView * statusBar READ statusBar WRITE setStatusBar NOTIFY statusBarChanged)
+
+    muse::Inject<ui::INavigationController> navigationController = { this };
 
 public:
     explicit DockPageView(QQuickItem* parent = nullptr);
@@ -98,7 +96,7 @@ public:
     bool isDockFloating(const QString& dockName) const;
     void toggleDockFloating(const QString& dockName);
 
-    Q_INVOKABLE void setDefaultNavigationControl(mu::ui::NavigationControl* control);
+    Q_INVOKABLE void setDefaultNavigationControl(muse::ui::NavigationControl* control);
 
 public slots:
     void setUri(const QString& uri);
@@ -123,11 +121,11 @@ private:
     void reorderNavigationSectionPanels(QList<DockBase*>& sectionDocks);
 
     QString m_uri;
-    mu::uicomponents::QmlListProperty<DockToolBarView> m_mainToolBars;
-    mu::uicomponents::QmlListProperty<DockToolBarView> m_toolBars;
-    mu::uicomponents::QmlListProperty<DockingHolderView> m_toolBarsDockingHolders;
-    mu::uicomponents::QmlListProperty<DockPanelView> m_panels;
-    mu::uicomponents::QmlListProperty<DockingHolderView> m_panelsDockingHolders;
+    uicomponents::QmlListProperty<DockToolBarView> m_mainToolBars;
+    uicomponents::QmlListProperty<DockToolBarView> m_toolBars;
+    uicomponents::QmlListProperty<DockingHolderView> m_toolBarsDockingHolders;
+    uicomponents::QmlListProperty<DockPanelView> m_panels;
+    uicomponents::QmlListProperty<DockingHolderView> m_panelsDockingHolders;
     DockCentralView* m_central = nullptr;
     DockStatusBarView* m_statusBar = nullptr;
 };

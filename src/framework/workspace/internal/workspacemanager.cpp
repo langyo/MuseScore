@@ -23,8 +23,8 @@
 
 #include "log.h"
 
-using namespace mu;
-using namespace mu::workspace;
+using namespace muse;
+using namespace muse::workspace;
 
 static const std::string WORKSPACE_EXT(".mws");
 

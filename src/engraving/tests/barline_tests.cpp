@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -239,7 +239,7 @@ TEST_F(Engraving_BarlineTests, barline05)
     // create and add a LineBreak element
     LayoutBreak* lb = Factory::createLayoutBreak(msr);
     lb->setLayoutBreakType(LayoutBreakType::LINE);
-    lb->setTrack(mu::nidx);               // system-level element
+    lb->setTrack(muse::nidx);               // system-level element
     lb->setParent(msr);
     score->undoAddElement(lb);
     score->doLayout();

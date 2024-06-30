@@ -26,8 +26,8 @@
 
 #include "log.h"
 
-using namespace mu;
-using namespace mu::autobot;
+using namespace muse;
+using namespace muse::autobot;
 
 Scripts AutobotScriptsRepository::scripts() const
 {
@@ -46,7 +46,7 @@ Scripts AutobotScriptsRepository::scripts() const
         s.path = p;
 
         //! NOTE Get script info
-        ScriptEngine engine;
+        ScriptEngine engine(iocContext());
         engine.setScriptPath(p);
         if (!engine.evaluate()) {
             LOGW() << "Bad script: " << p;

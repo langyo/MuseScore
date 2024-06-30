@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -74,14 +74,14 @@ void ScoreVerticalViewLayout::layoutVerticalView(Score* score, LayoutContext& ct
 
     if (!ctx.state().isLayoutAll() && m->system()) {
         System* system = m->system();
-        system_idx_t systemIndex = mu::indexOf(score->systems(), system);
+        system_idx_t systemIndex = muse::indexOf(score->systems(), system);
         ctx.mutState().setPage(system->page());
         ctx.mutState().setPageIdx(score->pageIdx(ctx.state().page()));
-        if (ctx.state().pageIdx() == mu::nidx) {
+        if (ctx.state().pageIdx() == muse::nidx) {
             ctx.mutState().setPageIdx(0);
         }
         ctx.mutState().setCurSystem(system);
-        ctx.mutState().setSystemList(mu::mid(score->systems(), systemIndex));
+        ctx.mutState().setSystemList(muse::mid(score->systems(), systemIndex));
 
         if (systemIndex == 0) {
             ctx.mutState().setNextMeasure(ctx.conf().isShowVBox() ? score->first() : score->firstMeasure());
@@ -130,10 +130,10 @@ void ScoreVerticalViewLayout::layoutVerticalView(Score* score, LayoutContext& ct
                 toMeasure(mb)->mmRest()->moveToDummy();
             }
         }
-        DeleteAll(score->systems());
+        muse::DeleteAll(score->systems());
         score->systems().clear();
 
-        DeleteAll(score->pages());
+        muse::DeleteAll(score->pages());
         score->pages().clear();
 
         ctx.mutState().setNextMeasure(ctx.conf().isShowVBox() ? score->first() : score->firstMeasure());
@@ -182,7 +182,7 @@ void ScoreVerticalViewLayout::doLayout(LayoutContext& ctx)
 
     if (!ctx.state().curSystem()) {
         // The end of the score. The remaining systems are not needed...
-        DeleteAll(ctx.mutState().systemList());
+        muse::DeleteAll(ctx.mutState().systemList());
         ctx.mutState().systemList().clear();
         // ...and the remaining pages too
         while (ctx.dom().npages() > ctx.state().pageIdx()) {

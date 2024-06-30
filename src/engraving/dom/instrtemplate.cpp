@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -42,50 +42,38 @@
 #include "log.h"
 
 using namespace mu;
-using namespace mu::io;
+using namespace muse::io;
 using namespace mu::engraving;
 
 namespace mu::engraving {
-std::vector<InstrumentGroup*> instrumentGroups;
+std::vector<const InstrumentGroup*> instrumentGroups;
+std::vector<const InstrumentGenre*> instrumentGenres;
+std::vector<const InstrumentFamily*> instrumentFamilies;
 std::vector<MidiArticulation> midiArticulations;            // global articulations
-std::vector<InstrumentGenre*> instrumentGenres;
-std::vector<InstrumentFamily*> instrumentFamilies;
 std::vector<ScoreOrder> instrumentOrders;
 
-//---------------------------------------------------------
-//   InstrumentIndex
-//---------------------------------------------------------
-
-InstrumentIndex::InstrumentIndex(int g, int i, InstrumentTemplate* it)
+InstrumentIndex::InstrumentIndex(int g, int i, const InstrumentTemplate* it)
     : groupIndex{g}, instrIndex{i}, instrTemplate{it}
 {
     templateCount = 0;
-    for (InstrumentGroup* ig : instrumentGroups) {
+    for (const InstrumentGroup* ig : instrumentGroups) {
         templateCount += ig->instrumentTemplates.size();
     }
 }
 
-//---------------------------------------------------------
-//   searchInstrumentGenre
-//---------------------------------------------------------
-
-static InstrumentGenre* searchInstrumentGenre(const String& genre)
+const InstrumentGenre* searchInstrumentGenre(const String& id)
 {
-    for (InstrumentGenre* ig : instrumentGenres) {
-        if (ig->id == genre) {
+    for (const InstrumentGenre* ig : instrumentGenres) {
+        if (ig->id == id) {
             return ig;
         }
     }
     return nullptr;
 }
 
-//---------------------------------------------------------
-//   searchInstrumentFamily
-//---------------------------------------------------------
-
-static InstrumentFamily* searchInstrumentFamily(const String& name)
+static const InstrumentFamily* searchInstrumentFamily(const String& name)
 {
-    for (InstrumentFamily* fam : instrumentFamilies) {
+    for (const InstrumentFamily* fam : instrumentFamilies) {
         if (fam->id == name) {
             return fam;
         }
@@ -93,23 +81,15 @@ static InstrumentFamily* searchInstrumentFamily(const String& name)
     return nullptr;
 }
 
-//---------------------------------------------------------
-//   searchInstrumentGroup
-//---------------------------------------------------------
-
-InstrumentGroup* searchInstrumentGroup(const String& name)
+static InstrumentGroup* searchInstrumentGroup(const String& id)
 {
-    for (InstrumentGroup* g : instrumentGroups) {
-        if (g->id == name) {
-            return g;
+    for (const InstrumentGroup* g : instrumentGroups) {
+        if (g->id == id) {
+            return const_cast<InstrumentGroup*>(g);
         }
     }
     return nullptr;
 }
-
-//---------------------------------------------------------
-//   searchArticulation
-//---------------------------------------------------------
 
 static MidiArticulation searchArticulation(const String& name)
 {
@@ -120,10 +100,6 @@ static MidiArticulation searchArticulation(const String& name)
     }
     return MidiArticulation();
 }
-
-//---------------------------------------------------------
-//   readStaffIdx
-//---------------------------------------------------------
 
 static int readStaffIdx(XmlReader& e)
 {
@@ -139,13 +115,13 @@ static int readStaffIdx(XmlReader& e)
 
 static TraitType traitTypeFromString(const String& str)
 {
-    static const std::map<String, TraitType> types {
+    static const std::unordered_map<String, TraitType> types {
         { u"transposition", TraitType::Transposition },
         { u"tuning", TraitType::Tuning },
         { u"course", TraitType::Course }
     };
 
-    return mu::value(types, str.toLower(), TraitType::Unknown);
+    return muse::value(types, str.toLower(), TraitType::Unknown);
 }
 
 //---------------------------------------------------------
@@ -155,14 +131,14 @@ static TraitType traitTypeFromString(const String& str)
 void InstrumentGroup::read(XmlReader& e)
 {
     id       = e.attribute("id");
-    name     = mtrc("engraving/instruments/group", e.attribute("name"));
+    name     = muse::mtrc("engraving/instruments/group", e.attribute("name"));
     extended = e.intAttribute("extended", 0);
 
     while (e.readNextStartElement()) {
         const AsciiStringView tag(e.name());
         if (tag == "instrument" || tag == "Instrument") {
             String sid = e.attribute("id");
-            InstrumentTemplate* t = searchTemplate(sid);
+            InstrumentTemplate* t = const_cast<InstrumentTemplate*>(searchTemplate(sid));
             if (t == 0) {
                 t = new InstrumentTemplate;
                 // init with global articulation
@@ -172,7 +148,7 @@ void InstrumentGroup::read(XmlReader& e)
             }
             t->read(e);
         } else if (tag == "ref") {
-            InstrumentTemplate* ttt = searchTemplate(e.readText());
+            const InstrumentTemplate* ttt = searchTemplate(e.readText());
             if (ttt) {
                 InstrumentTemplate* t = new InstrumentTemplate(*ttt);
                 instrumentTemplates.push_back(t);
@@ -180,7 +156,7 @@ void InstrumentGroup::read(XmlReader& e)
                 LOGD("instrument reference not found <%s>", e.text().toUtf8().data());
             }
         } else if (tag == "name") {
-            name = mtrc("engraving/instruments/group", e.readAsciiText().ascii());
+            name = muse::mtrc("engraving/instruments/group", e.readAsciiText().ascii());
         } else if (tag == "extended") {
             extended = e.readInt();
         } else {
@@ -190,6 +166,10 @@ void InstrumentGroup::read(XmlReader& e)
     if (id.isEmpty()) {
         id = name.toLower().replace(u" ", u"-");
     }
+
+    for (const InstrumentTemplate* templ : instrumentTemplates) {
+        const_cast<InstrumentTemplate*>(templ)->groupId = id;
+    }
 }
 
 //---------------------------------------------------------
@@ -198,7 +178,7 @@ void InstrumentGroup::read(XmlReader& e)
 
 void InstrumentGroup::clear()
 {
-    DeleteAll(instrumentTemplates);
+    muse::DeleteAll(instrumentTemplates);
     instrumentTemplates.clear();
 }
 
@@ -246,6 +226,7 @@ InstrumentTemplate::InstrumentTemplate(const InstrumentTemplate& t)
 void InstrumentTemplate::init(const InstrumentTemplate& t)
 {
     id = t.id;
+    soundId = t.soundId;
     trackName = t.trackName;
     longNames = t.longNames;
     shortNames = t.shortNames;
@@ -306,6 +287,11 @@ bool InstrumentTemplate::isValid() const
 void InstrumentTemplate::write(XmlWriter& xml) const
 {
     xml.startElement("Instrument",  { { "id", id } });
+
+    if (!soundId.empty()) {
+        xml.tag("soundId", soundId);
+    }
+
     write::TWrite::write(&longNames, xml, "longName");
     write::TWrite::write(&shortNames, xml, "shortName");
 
@@ -428,7 +414,7 @@ void InstrumentTemplate::write(XmlWriter& xml) const
 String translateInstrumentName(const String& instrumentId, const String& nameType, const String& text)
 {
     String disambiguation = instrumentId + u' ' + nameType;
-    return mtrc("engraving/instruments", text, disambiguation);
+    return muse::mtrc("engraving/instruments", text, disambiguation);
 }
 
 void InstrumentTemplate::read(XmlReader& e)
@@ -438,7 +424,9 @@ void InstrumentTemplate::read(XmlReader& e)
     while (e.readNextStartElement()) {
         const AsciiStringView tag(e.name());
 
-        if (tag == "longName" || tag == "name") {                   // "name" is obsolete
+        if (tag == "soundId") {
+            soundId = e.readText();
+        } else if (tag == "longName" || tag == "name") {                   // "name" is obsolete
             int pos = e.intAttribute("pos", 0);
             for (std::list<StaffName>::iterator i = longNames.begin(); i != longNames.end(); ++i) {
                 if ((*i).pos() == pos) {
@@ -573,7 +561,7 @@ void InstrumentTemplate::read(XmlReader& e)
             }
         } else if (tag == "init") {
             String val(e.readText());
-            InstrumentTemplate* ttt = searchTemplate(val);
+            const InstrumentTemplate* ttt = searchTemplate(val);
             if (ttt) {
                 String id_ = id;
                 init(*ttt);
@@ -643,14 +631,14 @@ void InstrumentTemplate::setPitchRange(const String& s, char* a, char* b) const
 
 void clearInstrumentTemplates()
 {
-    for (InstrumentGroup* g : instrumentGroups) {
-        g->clear();
+    for (const InstrumentGroup* g : instrumentGroups) {
+        const_cast<InstrumentGroup*>(g)->clear();
     }
-    DeleteAll(instrumentGroups);
+    muse::DeleteAll(instrumentGroups);
     instrumentGroups.clear();
-    DeleteAll(instrumentGenres);
+    muse::DeleteAll(instrumentGenres);
     instrumentGenres.clear();
-    DeleteAll(instrumentFamilies);
+    muse::DeleteAll(instrumentFamilies);
     instrumentFamilies.clear();
     midiArticulations.clear();
     instrumentOrders.clear();
@@ -660,7 +648,7 @@ void clearInstrumentTemplates()
 //   loadInstrumentTemplates
 //---------------------------------------------------------
 
-bool loadInstrumentTemplates(const io::path_t& instrTemplatesPath)
+bool loadInstrumentTemplates(const muse::io::path_t& instrTemplatesPath)
 {
     File qf(instrTemplatesPath);
     if (!qf.open(IODevice::ReadOnly)) {
@@ -689,7 +677,7 @@ bool loadInstrumentTemplates(const io::path_t& instrTemplatesPath)
                     midiArticulations.push_back(a);
                 } else if (tag == "Genre") {
                     String idGenre(e.attribute("id"));
-                    InstrumentGenre* genre = searchInstrumentGenre(idGenre);
+                    InstrumentGenre* genre = const_cast<InstrumentGenre*>(searchInstrumentGenre(idGenre));
                     if (!genre) {
                         genre = new InstrumentGenre;
                         instrumentGenres.push_back(genre);
@@ -697,7 +685,7 @@ bool loadInstrumentTemplates(const io::path_t& instrTemplatesPath)
                     genre->read(e);
                 } else if (tag == "Family") {
                     String idFamily(e.attribute("id"));
-                    InstrumentFamily* fam = searchInstrumentFamily(idFamily);
+                    InstrumentFamily* fam = const_cast<InstrumentFamily*>(searchInstrumentFamily(idFamily));
                     if (!fam) {
                         fam = new InstrumentFamily;
                         instrumentFamilies.push_back(fam);
@@ -717,14 +705,10 @@ bool loadInstrumentTemplates(const io::path_t& instrTemplatesPath)
     return true;
 }
 
-//---------------------------------------------------------
-//   searchTemplate
-//---------------------------------------------------------
-
-InstrumentTemplate* searchTemplate(const String& name)
+const InstrumentTemplate* searchTemplate(const String& name)
 {
-    for (InstrumentGroup* g : instrumentGroups) {
-        for (InstrumentTemplate* it : g->instrumentTemplates) {
+    for (const InstrumentGroup* g : instrumentGroups) {
+        for (const InstrumentTemplate* it : g->instrumentTemplates) {
             if (it->id == name) {
                 return it;
             }
@@ -733,14 +717,93 @@ InstrumentTemplate* searchTemplate(const String& name)
     return 0;
 }
 
-//---------------------------------------------------------
-//   searchTemplateForMusicXMLid
-//---------------------------------------------------------
-
-InstrumentTemplate* searchTemplateForMusicXmlId(const String& mxmlId)
+const InstrumentTemplate* combinedTemplateSearch(const String& mxmlId, const String& name, const int transposition, int bank,
+                                                 int program)
 {
-    for (InstrumentGroup* g : instrumentGroups) {
-        for (InstrumentTemplate* it : g->instrumentTemplates) {
+    if (mxmlId.empty() && name.empty() && bank == 0 && program == -1) {
+        // No instrument information provided
+        return nullptr;
+    }
+
+    String id = mxmlId;
+    if (mxmlId.empty()) {
+        if (name.contains(u"drum", muse::CaseInsensitive)) {
+            id = u"drum.group.set";
+        } else if (name.contains(u"piano", muse::CaseInsensitive)) {
+            id = u"keyboard.piano";
+        }
+    }
+
+    // This is to workaround old generic instrument templates
+    if ((mxmlId == u"wind.reed.clarinet" || mxmlId == u"brass.trumpet") && transposition == 10) {
+        id.append(u".bflat");
+    }
+
+    // Perform a weighted search over musicxml ID, instrument name, transposition, and midi program
+    static const int MXML_ID_WEIGHT = 4;
+    static const int TRACK_NAME_WEIGHT = 32;
+    static const int LONG_NAME_WEIGHT = 16;
+    static const int SHORT_NAME_WEIGHT = 8;
+    static const int MIDI_WEIGHT = 2;
+    static const int TRANSPOSITION_WEIGHT = 1;
+
+    // Exclude text weights from a perfect score as we only have one string to match, and it won't match all three track, long and short names
+    int perfectMatchStrength = 0 + (id.isEmpty() ? 0 : MXML_ID_WEIGHT)
+                               + (program == -1 ? 0 : MIDI_WEIGHT)
+                               + TRANSPOSITION_WEIGHT;
+    const InstrumentTemplate* bestMatch = nullptr;
+    int bestMatchStrength = 0;
+    for (const InstrumentGroup* g : instrumentGroups) {
+        for (const InstrumentTemplate* it : g->instrumentTemplates) {
+            if (it->trait.name == u"[hide]") {
+                continue;
+            }
+            int matchStrength = 0;
+            int nameWeight = 0;
+
+            // MusicXML ID
+            if (!it->musicXMLid.empty() && it->musicXMLid == id) {
+                matchStrength += MXML_ID_WEIGHT;
+            }
+
+            // Instrument names
+            if (!name.isEmpty()) {
+                nameWeight = 0 + (TRACK_NAME_WEIGHT * (it->trackName == name ? 1 : 0))
+                             + (LONG_NAME_WEIGHT * (muse::contains(it->longNames, StaffName(name)) ? 1 : 0))
+                             + (SHORT_NAME_WEIGHT * (muse::contains(it->shortNames, StaffName(name)) ? 1 : 0));
+                matchStrength += nameWeight;
+            }
+
+            // Midi program
+            for (const InstrChannel& channel : it->channel) {
+                if (channel.bank() == bank && channel.program() == program) {
+                    matchStrength += MIDI_WEIGHT;
+                    break;
+                }
+            }
+
+            // We aren't concerned about the octave of transpositions
+            if (transposition == (it->transpose.chromatic + 12) % 12) {
+                matchStrength += TRANSPOSITION_WEIGHT;
+            }
+
+            if (matchStrength > bestMatchStrength) {
+                bestMatch = it;
+                bestMatchStrength = matchStrength;
+                if (bestMatchStrength - nameWeight == perfectMatchStrength && nameWeight > 0) {
+                    return bestMatch; // stop looking for matches
+                }
+            }
+        }
+    }
+
+    return bestMatch;
+}
+
+const InstrumentTemplate* searchTemplateForMusicXmlId(const String& mxmlId)
+{
+    for (const InstrumentGroup* g : instrumentGroups) {
+        for (const InstrumentTemplate* it : g->instrumentTemplates) {
             if (it->musicXMLid == mxmlId) {
                 return it;
             }
@@ -749,21 +812,36 @@ InstrumentTemplate* searchTemplateForMusicXmlId(const String& mxmlId)
     return 0;
 }
 
-InstrumentTemplate* searchTemplateForInstrNameList(const std::list<String>& nameList, bool useDrumset)
+const InstrumentTemplate* searchTemplateForInstrNameList(const std::list<String>& nameList, bool useDrumset, bool caseSensitive)
 {
-    InstrumentTemplate* bestMatch = nullptr; // default if no matches
+    const InstrumentTemplate* bestMatch = nullptr; // default if no matches
     int bestMatchStrength = 0; // higher for better matches
-    for (InstrumentGroup* g : instrumentGroups) {
-        for (InstrumentTemplate* it : g->instrumentTemplates) {
+    for (const InstrumentGroup* g : instrumentGroups) {
+        for (const InstrumentTemplate* it : g->instrumentTemplates) {
             for (const String& name : nameList) {
                 if (name.isEmpty() || it->useDrumset != useDrumset) {
                     continue;
                 }
+                String trackName = it->trackName;
+                StaffNameList longNames = it->longNames;
+                StaffNameList shortNames = it->shortNames;
+                String instrName = name;
+
+                if (!caseSensitive) {
+                    instrName = instrName.toLower();
+                    trackName = trackName.toLower();
+                    for (StaffName& n : longNames) {
+                        n.setName(n.name().toLower());
+                    }
+                    for (StaffName& n : shortNames) {
+                        n.setName(n.name().toLower());
+                    }
+                }
 
                 int matchStrength = 0
-                                    + (4 * (it->trackName == name ? 1 : 0)) // most weight to track name since there are fewer duplicates
-                                    + (2 * (mu::contains(it->longNames, StaffName(name)) ? 1 : 0))
-                                    + (1 * (mu::contains(it->shortNames, StaffName(name)) ? 1 : 0)); // least weight to short name
+                                    + (4 * (trackName == instrName ? 1 : 0)) // most weight to track name since there are fewer duplicates
+                                    + (2 * (muse::contains(longNames, StaffName(instrName)) ? 1 : 0))
+                                    + (1 * (muse::contains(shortNames, StaffName(instrName)) ? 1 : 0)); // least weight to short name
                 const int perfectMatchStrength = 7;
                 assert(matchStrength <= perfectMatchStrength);
                 if (matchStrength > bestMatchStrength) {
@@ -779,11 +857,11 @@ InstrumentTemplate* searchTemplateForInstrNameList(const std::list<String>& name
 
     if (!bestMatch) {
         for (const String& name : nameList) {
-            if (name.contains(u"drum", mu::CaseInsensitive)) {
+            if (name.contains(u"drum", muse::CaseInsensitive)) {
                 return searchTemplate(u"drumset");
             }
 
-            if (name.contains(u"piano", mu::CaseInsensitive)) {
+            if (name.contains(u"piano", muse::CaseInsensitive)) {
                 return searchTemplate(u"piano");
             }
         }
@@ -792,10 +870,10 @@ InstrumentTemplate* searchTemplateForInstrNameList(const std::list<String>& name
     return bestMatch; // nullptr if no matches found
 }
 
-InstrumentTemplate* searchTemplateForMidiProgram(int bank, int program, bool useDrumset)
+const InstrumentTemplate* searchTemplateForMidiProgram(int bank, int program, bool useDrumset)
 {
-    for (InstrumentGroup* g : instrumentGroups) {
-        for (InstrumentTemplate* it : g->instrumentTemplates) {
+    for (const InstrumentGroup* g : instrumentGroups) {
+        for (const InstrumentTemplate* it : g->instrumentTemplates) {
             if (it->useDrumset != useDrumset) {
                 continue;
             }
@@ -811,6 +889,18 @@ InstrumentTemplate* searchTemplateForMidiProgram(int bank, int program, bool use
     return nullptr;
 }
 
+void addTemplateToGroup(const InstrumentTemplate* templ, const String& groupId)
+{
+    IF_ASSERT_FAILED(templ) {
+        return;
+    }
+
+    InstrumentGroup* group = searchInstrumentGroup(groupId);
+    if (group) {
+        group->instrumentTemplates.push_back(templ);
+    }
+}
+
 //---------------------------------------------------------
 //   searchTemplateIndexForTrackName
 //---------------------------------------------------------
@@ -819,8 +909,8 @@ InstrumentIndex searchTemplateIndexForTrackName(const String& trackName)
 {
     int instIndex = 0;
     int grpIndex = 0;
-    for (InstrumentGroup* g : instrumentGroups) {
-        for (InstrumentTemplate* it : g->instrumentTemplates) {
+    for (const InstrumentGroup* g : instrumentGroups) {
+        for (const InstrumentTemplate* it : g->instrumentTemplates) {
             if (it->trackName == trackName) {
                 return InstrumentIndex(grpIndex, instIndex, it);
             }
@@ -839,8 +929,8 @@ InstrumentIndex searchTemplateIndexForId(const String& id)
 {
     int instIndex = 0;
     int grpIndex = 0;
-    for (InstrumentGroup* g : instrumentGroups) {
-        for (InstrumentTemplate* it : g->instrumentTemplates) {
+    for (const InstrumentGroup* g : instrumentGroups) {
+        for (const InstrumentTemplate* it : g->instrumentTemplates) {
             if (it->id == id) {
                 return InstrumentIndex(grpIndex, instIndex, it);
             }
@@ -860,7 +950,7 @@ InstrumentIndex searchTemplateIndexForId(const String& id)
 
 void InstrumentTemplate::linkGenre(const String& genre)
 {
-    InstrumentGenre* ig = searchInstrumentGenre(genre);
+    const InstrumentGenre* ig = searchInstrumentGenre(genre);
     if (ig) {
         genres.push_back(ig);
     }
@@ -879,7 +969,7 @@ void InstrumentGenre::read(XmlReader& e)
     while (e.readNextStartElement()) {
         const AsciiStringView tag(e.name());
         if (tag == "name") {
-            name = mtrc("engraving/instruments/genre", e.readText());
+            name = muse::mtrc("engraving/instruments/genre", e.readText());
         } else {
             e.unknown();
         }
@@ -899,7 +989,7 @@ void InstrumentFamily::read(XmlReader& e)
     while (e.readNextStartElement()) {
         const AsciiStringView tag(e.name());
         if (tag == "name") {
-            name = mtrc("engraving/instruments/family", e.readText());
+            name = muse::mtrc("engraving/instruments/family", e.readText());
         } else {
             e.unknown();
         }
@@ -949,8 +1039,8 @@ ClefType defaultClef(int program)
         return ClefType::F8_VB;
     }
 
-    for (InstrumentGroup* g : instrumentGroups) {
-        for (InstrumentTemplate* it : g->instrumentTemplates) {
+    for (const InstrumentGroup* g : instrumentGroups) {
+        for (const InstrumentTemplate* it : g->instrumentTemplates) {
             if (it->channel[0].bank() == 0 && it->channel[0].program() == program) {
                 return it->clefTypes[0].concertClef;
             }

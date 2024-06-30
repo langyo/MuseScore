@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -204,6 +204,7 @@ public:
     Segment* first() const { return m_segments.first(); }
     Segment* first(SegmentType t) const { return m_segments.first(t); }
     Segment* firstEnabled() const { return m_segments.first(ElementFlag::ENABLED); }
+    Segment* firstActive() const { return m_segments.firstActive(); }
 
     Segment* last() const { return m_segments.last(); }
     Segment* lastEnabled() const { return m_segments.last(ElementFlag::ENABLED); }
@@ -216,7 +217,8 @@ public:
     void setLayoutStretch(double stretchCoeff) { m_layoutStretch = stretchCoeff; }
     double layoutStretch() const { return m_layoutStretch; }
 
-    Fraction computeTicks();
+    void computeTicks();
+    Fraction anacrusisOffset() const;
     Fraction shortestChordRest() const;
     Fraction maxTicks() const;
 
@@ -225,8 +227,8 @@ public:
 
     Chord* findChord(Fraction tick, track_idx_t track);
     ChordRest* findChordRest(Fraction tick, track_idx_t track);
-    Fraction snap(const Fraction& tick, const mu::PointF p) const;
-    Fraction snapNote(const Fraction& tick, const mu::PointF p, int staff) const;
+    Fraction snap(const Fraction& tick, const PointF p) const;
+    Fraction snapNote(const Fraction& tick, const PointF p, int staff) const;
 
     Segment* searchSegment(double x, SegmentType st, track_idx_t strack, track_idx_t etrack, const Segment* preferredSegment = nullptr,
                            double spacingFactor = 0.5) const;
@@ -266,7 +268,7 @@ public:
 
     void connectTremolo();
 
-    void setEndBarLineType(BarLineType val, track_idx_t track, bool visible = true, muse::draw::Color color = muse::draw::Color());
+    void setEndBarLineType(BarLineType val, track_idx_t track, bool visible = true, Color color = Color());
 
     void scanElements(void* data, void (* func)(void*, EngravingItem*), bool all=true) override;
     void createVoice(int track);
@@ -296,7 +298,7 @@ public:
 
     int playbackCount() const { return m_playbackCount; }
     void setPlaybackCount(int val) { m_playbackCount = val; }
-    mu::RectF staffabbox(staff_idx_t staffIdx) const;
+    RectF staffabbox(staff_idx_t staffIdx) const;
 
     PropertyValue getProperty(Pid propertyId) const override;
     bool setProperty(Pid propertyId, const PropertyValue&) override;

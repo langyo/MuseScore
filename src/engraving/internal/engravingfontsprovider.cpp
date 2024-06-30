@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -29,18 +29,23 @@
 using namespace mu;
 using namespace mu::engraving;
 
-void EngravingFontsProvider::addFont(const std::string& name, const std::string& family, const io::path_t& filePath)
+EngravingFontsProvider::EngravingFontsProvider(const muse::modularity::ContextPtr& iocCtx)
+    : muse::Injectable(iocCtx)
 {
-    std::shared_ptr<EngravingFont> f = std::make_shared<EngravingFont>(name, family, filePath);
+}
+
+void EngravingFontsProvider::addFont(const std::string& name, const std::string& family, const muse::io::path_t& filePath)
+{
+    std::shared_ptr<EngravingFont> f = std::make_shared<EngravingFont>(name, family, filePath, iocContext());
     m_symbolFonts.push_back(f);
     m_fallback.font = nullptr;
 }
 
 std::shared_ptr<EngravingFont> EngravingFontsProvider::doFontByName(const std::string& name) const
 {
-    std::string name_lo = mu::strings::toLower(name);
+    std::string name_lo = muse::strings::toLower(name);
     for (const std::shared_ptr<EngravingFont>& f : m_symbolFonts) {
-        if (mu::strings::toLower(f->name()) == name_lo) {
+        if (muse::strings::toLower(f->name()) == name_lo) {
             return f;
         }
     }

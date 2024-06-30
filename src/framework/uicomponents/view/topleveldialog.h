@@ -20,28 +20,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_UICOMPONENTS_TOPLEVELDIALOG_H
-#define MU_UICOMPONENTS_TOPLEVELDIALOG_H
+#ifndef MUSE_UICOMPONENTS_TOPLEVELDIALOG_H
+#define MUSE_UICOMPONENTS_TOPLEVELDIALOG_H
 
 #include <QDialog>
 
 #include "modularity/ioc.h"
 #include "ui/imainwindow.h"
 
-namespace mu::uicomponents {
-class TopLevelDialog : public QDialog
+namespace muse::uicomponents {
+class TopLevelDialog : public QDialog, public muse::Injectable
 {
-    INJECT(ui::IMainWindow, mainWindow)
+public:
+    muse::Inject<ui::IMainWindow> mainWindow = { this };
 
 public:
     explicit TopLevelDialog(QWidget* parent = nullptr);
-#ifdef MU_QT5_COMPAT
-    TopLevelDialog(const TopLevelDialog& dialog);
-#endif
 
 protected:
     bool event(QEvent* e) override;
 };
 }
 
-#endif // MU_UICOMPONENTS_TOPLEVELDIALOG_H
+#endif // MUSE_UICOMPONENTS_TOPLEVELDIALOG_H

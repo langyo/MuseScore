@@ -24,8 +24,8 @@
 #include "modularity/ioc.h"
 #include "vstconfigurationstub.h"
 
-using namespace mu::vst;
-using namespace mu::modularity;
+using namespace muse::vst;
+using namespace muse::modularity;
 
 std::string VSTModule::moduleName() const
 {

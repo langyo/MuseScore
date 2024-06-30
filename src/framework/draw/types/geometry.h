@@ -41,7 +41,7 @@
 #include <QPolygonF>
 #endif
 
-namespace mu {
+namespace muse {
 template<typename T>
 inline bool isEqual(T a1, T a2)
 {
@@ -372,6 +372,8 @@ public:
 
     bool contains(const PointX<T>& p) const;
     bool contains(const RectX<T>& r) const;
+
+    T distanceTo(const PointX<T>& p) const;
 
     bool intersects(const RectX<T>& r) const;
 
@@ -746,6 +748,14 @@ bool RectX<T>::contains(const RectX<T>& r) const
 }
 
 template<typename T>
+T RectX<T>::distanceTo(const PointX<T>& p) const
+{
+    T dx = std::max({ bottomLeft().x() - p.x(), 0.0, p.x() - bottomRight().x() });
+    T dy = std::max({ bottomLeft().y() - p.y(), 0.0, p.y() - topLeft().y() });
+    return std::sqrt(dx * dx + dy * dy);
+}
+
+template<typename T>
 RectX<T> RectX<T>::normalized() const
 {
     RectX<T> r = *this;
@@ -762,26 +772,17 @@ RectX<T> RectX<T>::normalized() const
 }
 
 template<typename T>
-inline mu::logger::Stream& operator<<(mu::logger::Stream& s, const mu::RectX<T>& r)
+inline muse::logger::Stream& operator<<(muse::logger::Stream& s, const muse::RectX<T>& r)
 {
-    s << mu::dump(r);
+    s << muse::dump(r);
     return s;
 }
 
 template<typename T>
-inline mu::logger::Stream& operator<<(mu::logger::Stream& s, const mu::PointX<T>& p)
+inline muse::logger::Stream& operator<<(muse::logger::Stream& s, const muse::PointX<T>& p)
 {
-    s << mu::dump(p);
+    s << muse::dump(p);
     return s;
-}
-
-namespace muse {
-using RectF = mu::RectF;
-using Size = mu::Size;
-using SizeF = mu::SizeF;
-using PointF = mu::PointF;
-using LineF = mu::LineF;
-using PolygonF = mu::PolygonF;
 }
 
 #endif // MUSE_DRAW_GEOMETRY_H

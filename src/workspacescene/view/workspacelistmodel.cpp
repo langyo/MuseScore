@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -27,7 +27,9 @@
 
 #include "log.h"
 
-using namespace mu::workspace;
+using namespace mu::workspacescene;
+using namespace muse;
+using namespace muse::workspace;
 
 static const QString NAME_KEY("name");
 static const QString IS_SELECTED_KEY("isSelected");
@@ -153,7 +155,7 @@ void WorkspaceListModel::createNewWorkspace()
         workspaceNames << QString::fromStdString(workspace->name());
     }
 
-    UriQuery uri("musescore://workspace/create");
+    UriQuery uri("muse://workspace/create");
     uri.addParam("sync", Val(true));
     uri.addParam("workspaceNames", Val(workspaceNames.join(',')));
 
@@ -169,9 +171,9 @@ void WorkspaceListModel::createNewWorkspace()
     }
 
     IWorkspacePtr newWorkspace = workspacesManager()->newWorkspace(name.toStdString());
-    newWorkspace->setIsManaged(ui::WS_UiSettings, meta.value(ui::WS_UiSettings).toBool());
-    newWorkspace->setIsManaged(ui::WS_UiStates, meta.value(ui::WS_UiStates).toBool());
-    newWorkspace->setIsManaged(ui::WS_UiToolConfigs, meta.value(ui::WS_UiToolConfigs).toBool());
+    newWorkspace->setIsManaged(muse::ui::WS_UiSettings, meta.value(muse::ui::WS_UiSettings).toBool());
+    newWorkspace->setIsManaged(muse::ui::WS_UiStates, meta.value(muse::ui::WS_UiStates).toBool());
+    newWorkspace->setIsManaged(muse::ui::WS_UiToolConfigs, meta.value(muse::ui::WS_UiToolConfigs).toBool());
     newWorkspace->setIsManaged(palette::WS_Palettes, meta.value(palette::WS_Palettes).toBool());
 
     int newWorkspaceIndex = m_workspaces.size();

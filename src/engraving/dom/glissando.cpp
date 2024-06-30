@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -436,7 +436,7 @@ Note* Glissando::guessFinalNote(Chord* chord, Note* startNote)
         }
         // normal case: try to return the note in the next chord that is in the
         // same position as the start note relative to the end chord
-        size_t startNoteIdx = mu::indexOf(chord->notes(), startNote);
+        size_t startNoteIdx = muse::indexOf(chord->notes(), startNote);
         size_t endNoteIdx = std::min(startNoteIdx, target->notes().size() - 1);
         return target->notes().at(endNoteIdx);
     }

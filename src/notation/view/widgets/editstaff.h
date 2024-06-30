@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -31,24 +31,23 @@
 #include "modularity/ioc.h"
 #include "context/iglobalcontext.h"
 #include "global/iinteractive.h"
+#include "engraving/iengravingconfiguration.h"
 #include "iselectinstrumentscenario.h"
 
 namespace mu::notation {
 class EditStaffType;
 
-class EditStaff : public QDialog, private Ui::EditStaffBase
+class EditStaff : public QDialog, private Ui::EditStaffBase, public muse::Injectable
 {
     Q_OBJECT
 
-    INJECT(context::IGlobalContext, globalContext)
-    INJECT(IInteractive, interactive)
-    INJECT(ISelectInstrumentsScenario, selectInstrumentsScenario)
+    muse::Inject<context::IGlobalContext> globalContext = { this };
+    muse::Inject<muse::IInteractive> interactive = { this };
+    muse::Inject<ISelectInstrumentsScenario> selectInstrumentsScenario = { this };
+    muse::Inject<engraving::IEngravingConfiguration> engravingConfiguration = { this };
 
 public:
     EditStaff(QWidget* parent = nullptr);
-#ifdef MU_QT5_COMPAT
-    EditStaff(const EditStaff&);
-#endif
 
 private:
     void hideEvent(QHideEvent*) override;

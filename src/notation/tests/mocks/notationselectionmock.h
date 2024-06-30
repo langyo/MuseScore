@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2024 MuseScore BVBA and others
+ * Copyright (C) 2024 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -34,7 +34,7 @@ public:
     MOCK_METHOD(bool, isRange, (), (const, override));
     MOCK_METHOD(SelectionState, state, (), (const, override));
 
-    MOCK_METHOD(mu::Ret, canCopy, (), (const, override));
+    MOCK_METHOD(muse::Ret, canCopy, (), (const, override));
     MOCK_METHOD(QMimeData*, mimeData, (), (const, override));
 
     MOCK_METHOD(EngravingItem*, element, (), (const, override));
@@ -42,7 +42,7 @@ public:
 
     MOCK_METHOD(std::vector<Note*>, notes, (NoteFilter filter), (const, override));
 
-    MOCK_METHOD(RectF, canvasBoundingRect, (), (const, override));
+    MOCK_METHOD(muse::RectF, canvasBoundingRect, (), (const, override));
 
     MOCK_METHOD(INotationSelectionRangePtr, range, (), (const, override));
 

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -64,7 +64,8 @@ public:
 
     static void layoutChords1(LayoutContext& ctx, Segment* segment, staff_idx_t staffIdx);
     static double layoutChords2(std::vector<Note*>& notes, bool up, LayoutContext& ctx);
-    static void layoutChords3(const MStyle& style, const std::vector<Chord*>&, const std::vector<Note*>&, const Staff*, LayoutContext& ctx);
+    static void layoutChords3(const std::vector<Chord*>&, const std::vector<Note*>&, const Staff*, LayoutContext& ctx);
+    static void layoutLedgerLines(const std::vector<Chord*>& chords);
     static void getNoteListForDots(Chord* c, std::vector<Note*>&, std::vector<Note*>&, std::vector<int>&);
     static void updateGraceNotes(Measure* measure, LayoutContext& ctx);
     static void repositionGraceNotesAfter(Segment* segment, size_t tracks);
@@ -84,8 +85,8 @@ public:
 
     static void checkAndFillShape(const ChordRest* item, ChordRest::LayoutData* ldata, const LayoutConfiguration& conf);
     static void fillShape(const ChordRest* item, Chord::LayoutData* ldata, const LayoutConfiguration& conf);
-    static void fillShape(const Chord* item, Chord::LayoutData* ldata, const LayoutConfiguration& conf);
-    static void fillShape(const Rest* item, Rest::LayoutData* ldata, const LayoutConfiguration& conf);
+    static void fillShape(const Chord* item, Chord::LayoutData* ldata);
+    static void fillShape(const Rest* item, Rest::LayoutData* ldata);
     static void fillShape(const MeasureRepeat* item, MeasureRepeat::LayoutData* ldata, const LayoutConfiguration& conf);
     static void fillShape(const MMRest* item, MMRest::LayoutData* ldata, const LayoutConfiguration& conf);
 
@@ -97,9 +98,12 @@ private:
 
     static void placeDots(const std::vector<Chord*>& chords, const std::vector<Note*>& notes);
 
+    static void setDotX(const std::vector<Chord*>& chords, const std::array<double, 3 * VOICES>& dotPos, const Staff* staff,
+                        const double upDotPosX, const double downDotPosX);
+
     static void skipAccidentals(Segment* segment, track_idx_t startTrack, track_idx_t endTrack);
 
-    static Shape chordRestShape(const ChordRest* item, const LayoutConfiguration& conf);
+    static Shape chordRestShape(const ChordRest* item);
 
     static bool leaveSpaceForTie(const Articulation* item);
 

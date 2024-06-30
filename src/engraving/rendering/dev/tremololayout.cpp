@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -125,6 +125,7 @@ void TremoloLayout::layoutOneNoteTremolo(TremoloSingleChord* item, const LayoutC
         x = item->chord()->centerX();
     }
 
+    double staveOffset = item->staffOffsetY();
     bool up = item->chord()->up();
     int upValue = up ? -1 : 1;
     double mag = item->chord()->intrinsicMag();
@@ -154,12 +155,13 @@ void TremoloLayout::layoutOneNoteTremolo(TremoloSingleChord* item, const LayoutC
     yOffset -= item->isBuzzRoll() && up ? 0.5 * spatium : 0.0;
     yOffset -= up ? 0.0 : item->minHeight() * spatium / mag;
     yOffset *= upValue;
-
+    yOffset += staveOffset;
     y += yOffset;
 
     if (up) {
         double height = item->isBuzzRoll() ? 0 : item->minHeight();
-        y = std::min(y, ((item->staff()->lines(item->tick()) - 1) - height) * spatium / mag);
+        double staveHeight = (((item->staff()->lines(item->tick()) - 1) - height) * spatium / mag) + staveOffset;
+        y = std::min(y, staveHeight);
     } else {
         y = std::max(y, 0.0);
     }
@@ -335,13 +337,13 @@ void TremoloLayout::createBeamSegments(TremoloTwoChord* item, const LayoutContex
     PointF endAnchor = item->ldata()->endAnchor - PointF(0.0, pagePos.y());
 
     // inset trem from stems for default style
-    const double slope = mu::divide(endAnchor.y() - startAnchor.y(), endAnchor.x() - startAnchor.x(), 0.0);
+    const double slope = muse::divide(endAnchor.y() - startAnchor.y(), endAnchor.x() - startAnchor.x(), 0.0);
 
     double gapSp = stemGapSp;
     if (defaultStyle || item->tremoloStyle() == TremoloStyle::TRADITIONAL_ALTERNATE) {
         // we can eat into the stemGapSp margin if the anchorpoints are sufficiently close together
         double widthSp = (endAnchor.x() - startAnchor.x()) / item->spatium() - (stemGapSp * 2);
-        if (!RealIsEqualOrMore(widthSp, 0.6)) {
+        if (!muse::RealIsEqualOrMore(widthSp, 0.6)) {
             // tremolo beam is too short; we can eat into the gap spacing a little
             gapSp = std::max(stemGapSp - ((0.6 - widthSp) * 0.5), 0.4);
         }

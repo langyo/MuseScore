@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -43,12 +43,9 @@
 #include "types/commontypes.h"
 
 namespace mu::inspector {
-class AbstractInspectorModel : public QObject, public async::Asyncable
+class AbstractInspectorModel : public QObject, public muse::async::Asyncable
 {
     Q_OBJECT
-
-    INJECT(context::IGlobalContext, context)
-    INJECT(muse::actions::IActionsDispatcher, dispatcher)
 
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(int icon READ icon CONSTANT)
@@ -56,6 +53,9 @@ class AbstractInspectorModel : public QObject, public async::Asyncable
     Q_PROPERTY(InspectorModelType modelType READ modelType CONSTANT)
     Q_PROPERTY(bool isEmpty READ isEmpty NOTIFY isEmptyChanged)
 
+public:
+    INJECT(context::IGlobalContext, context)
+    INJECT(muse::actions::IActionsDispatcher, dispatcher)
 public:
     enum class InspectorSectionType {
         SECTION_UNDEFINED = -1,
@@ -166,7 +166,7 @@ public:
 
 public slots:
     void setTitle(QString title);
-    void setIcon(ui::IconCode::Code icon);
+    void setIcon(muse::ui::IconCode::Code icon);
     void setSectionType(InspectorSectionType sectionType);
     void setModelType(InspectorModelType modelType);
 
@@ -209,7 +209,7 @@ protected:
 
     void updateNotation();
     notation::INotationPtr currentNotation() const;
-    async::Notification currentNotationChanged() const;
+    muse::async::Notification currentNotationChanged() const;
     bool isMasterNotation() const;
 
     notation::INotationSelectionPtr selection() const;
@@ -236,20 +236,12 @@ private:
     mu::engraving::PropertyIdSet propertyIdSetFromStyleIdSet(const mu::engraving::StyleIdSet& styleIdSet) const;
 
     QString m_title;
-    ui::IconCode::Code m_icon = ui::IconCode::Code::NONE;
+    muse::ui::IconCode::Code m_icon = muse::ui::IconCode::Code::NONE;
     InspectorSectionType m_sectionType = InspectorSectionType::SECTION_UNDEFINED;
     InspectorModelType m_modelType = InspectorModelType::TYPE_UNDEFINED;
     mu::engraving::ElementType m_elementType = mu::engraving::ElementType::INVALID;
     bool m_updatePropertiesAllowed = false;
 };
-
-#ifdef MU_QT5_COMPAT
-inline uint qHash(AbstractInspectorModel::InspectorModelType t)
-{
-    return ::qHash(int(t));
-}
-
-#endif
 
 using InspectorModelType = AbstractInspectorModel::InspectorModelType;
 using InspectorSectionType = AbstractInspectorModel::InspectorSectionType;

@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
-# MuseScore-CLA-applies
+# MuseScore-Studio-CLA-applies
 #
-# MuseScore
+# MuseScore Studio
 # Music Composition & Notation
 #
-# Copyright (C) 2021 MuseScore BVBA and others
+# Copyright (C) 2021 MuseScore Limited
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 3 as
@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-set(MODULE iex_musicxml)
+declare_module(iex_musicxml)
 
 set(MODULE_QRC musicxml.qrc)
 
@@ -45,16 +45,14 @@ else()
         ${CMAKE_CURRENT_LIST_DIR}/internal/mxlwriter.h
         )
 
-    if (NOT MUE_COMPILE_QT5_COMPAT)
-        set(MODULE_DEF ${MODULE_DEF} -DMUSICXML_NO_VALIDATION)
-    endif()
+    set(MODULE_DEF ${MODULE_DEF} -DMUSICXML_NO_VALIDATION) # TODO
 endif()
 
 set(MODULE_LINK
     engraving
     )
 
-include(SetupModule)
+setup_module()
 
 if (MUE_BUILD_IMPORTEXPORT_TESTS)
     add_subdirectory(tests)

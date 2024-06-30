@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -28,14 +28,12 @@
 #include "modularity/ioc.h"
 #include "ui/imainwindow.h"
 
-#ifndef MU_QT5_COMPAT
 Q_MOC_INCLUDE(< QQuickItem >)
 Q_MOC_INCLUDE("uicomponents/view/popupview.h")
-#endif
 
 class QQuickItem;
 
-namespace mu::uicomponents {
+namespace muse::uicomponents {
 class PopupView;
 }
 
@@ -45,11 +43,11 @@ class InspectorPopupController : public QObject
     Q_OBJECT
 
     Q_PROPERTY(QQuickItem * visualControl READ visualControl WRITE setVisualControl NOTIFY visualControlChanged)
-    Q_PROPERTY(mu::uicomponents::PopupView * popup READ popup WRITE setPopup NOTIFY popupChanged)
+    Q_PROPERTY(muse::uicomponents::PopupView * popup READ popup WRITE setPopup NOTIFY popupChanged)
 
     Q_PROPERTY(QQuickItem * notationView READ notationView WRITE setNotationView NOTIFY notationViewChanged)
 
-    INJECT(ui::IMainWindow, mainWindow)
+    INJECT(muse::ui::IMainWindow, mainWindow)
 
 public:
     explicit InspectorPopupController(QObject* parent = nullptr);
@@ -58,13 +56,13 @@ public:
     Q_INVOKABLE void load();
 
     QQuickItem* visualControl() const;
-    uicomponents::PopupView* popup() const;
+    muse::uicomponents::PopupView* popup() const;
 
     QQuickItem* notationView() const;
 
 public slots:
     void setVisualControl(QQuickItem* control);
-    void setPopup(uicomponents::PopupView* popup);
+    void setPopup(muse::uicomponents::PopupView* popup);
     void setNotationView(QQuickItem* notationView);
 
 signals:
@@ -79,10 +77,10 @@ private slots:
 private:
     bool eventFilter(QObject* watched, QEvent* event) override;
 
-    void closePopupIfNeed(const QPoint& mouseGlobalPos);
+    void closePopupIfNeed(const QPointF& mouseGlobalPos);
 
     QQuickItem* m_visualControl = nullptr;
-    uicomponents::PopupView* m_popup = nullptr;
+    muse::uicomponents::PopupView* m_popup = nullptr;
     QQuickItem* m_notationView = nullptr;
 };
 }

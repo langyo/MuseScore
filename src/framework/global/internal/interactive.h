@@ -19,21 +19,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_GLOBAL_INTERACTIVE_H
-#define MU_GLOBAL_INTERACTIVE_H
+#ifndef MUSE_GLOBAL_INTERACTIVE_H
+#define MUSE_GLOBAL_INTERACTIVE_H
 
-#include "../iinteractive.h"
+#include "async/asyncable.h"
+
 #include "modularity/ioc.h"
 #include "ui/iinteractiveprovider.h"
 #include "ui/imainwindow.h"
 
-namespace mu {
-class Interactive : public IInteractive
+#include "../iinteractive.h"
+#include "shortcuts/ishortcutsregister.h"
+
+namespace muse {
+class Interactive : public IInteractive, public Injectable, public async::Asyncable
 {
-    Inject<ui::IInteractiveProvider> provider;
-    Inject<ui::IMainWindow> mainWindow;
+    Inject<muse::ui::IInteractiveProvider> provider = { this };
+    Inject<muse::ui::IMainWindow> mainWindow = { this };
+    Inject<shortcuts::IShortcutsRegister> shortcutsRegister = { this };
 
 public:
+
+    Interactive(const muse::modularity::ContextPtr& ctx)
+        : Injectable(ctx) {}
+
     // question
     Result question(const std::string& title, const std::string& text, const Buttons& buttons, const Button& def = Button::NoButton,
                     const Options& options = {}) const override;
@@ -71,7 +80,7 @@ public:
                  int defBtn = int(Button::NoButton), const Options& options = { WithIcon }) const override;
 
     // progress
-    Ret showProgress(const std::string& title, mu::Progress* progress) const override;
+    Ret showProgress(const std::string& title, Progress* progress) const override;
 
     // files
     io::path_t selectOpeningFile(const QString& title, const io::path_t& dir, const std::vector<std::string>& filter) override;
@@ -107,6 +116,10 @@ public:
     Ret openUrl(const std::string& url) const override;
     Ret openUrl(const QUrl& url) const override;
 
+    Ret isAppExists(const std::string& appIdentifier) const override;
+    Ret canOpenApp(const Uri& uri) const override;
+    async::Promise<Ret> openApp(const Uri& uri) const override;
+
     Ret revealInFileBrowser(const io::path_t& filePath) const override;
 
 private:
@@ -114,4 +127,4 @@ private:
 };
 }
 
-#endif // MU_GLOBAL_UIINTERACTIVE_H
+#endif // MUSE_GLOBAL_UIINTERACTIVE_H

@@ -19,15 +19,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_WORKSPACE_WORKSPACEUIACTIONS_H
-#define MU_WORKSPACE_WORKSPACEUIACTIONS_H
+#ifndef MUSE_WORKSPACE_WORKSPACEUIACTIONS_H
+#define MUSE_WORKSPACE_WORKSPACEUIACTIONS_H
 
 #include "framework/ui/iuiactionsmodule.h"
 #include "workspaceactioncontroller.h"
 #include "modularity/ioc.h"
 #include "ui/iuicontextresolver.h"
 
-namespace mu::workspace {
+namespace muse::workspace {
 class WorkspaceUiActions : public ui::IUiActionsModule
 {
     Inject<ui::IUiContextResolver> uicontextResolver;
@@ -38,16 +38,16 @@ public:
     const ui::UiActionList& actionsList() const override;
 
     bool actionEnabled(const ui::UiAction& act) const override;
-    async::Channel<muse::actions::ActionCodeList> actionEnabledChanged() const override;
+    async::Channel<actions::ActionCodeList> actionEnabledChanged() const override;
 
     bool actionChecked(const ui::UiAction& act) const override;
-    async::Channel<muse::actions::ActionCodeList> actionCheckedChanged() const override;
+    async::Channel<actions::ActionCodeList> actionCheckedChanged() const override;
 
 private:
     static const ui::UiActionList m_actions;
     std::shared_ptr<WorkspaceActionController> m_controller;
-    async::Channel<muse::actions::ActionCodeList> m_actionEnabledChanged;
-    async::Channel<muse::actions::ActionCodeList> m_actionCheckedChanged;
+    async::Channel<actions::ActionCodeList> m_actionEnabledChanged;
+    async::Channel<actions::ActionCodeList> m_actionCheckedChanged;
 };
 }
 

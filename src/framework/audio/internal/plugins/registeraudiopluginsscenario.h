@@ -37,12 +37,13 @@
 namespace muse::audio {
 class RegisterAudioPluginsScenario : public IRegisterAudioPluginsScenario, public async::Asyncable
 {
+public:
     INJECT(IKnownAudioPluginsRegister, knownPluginsRegister)
     INJECT(IAudioPluginsScannerRegister, scannerRegister)
     INJECT(IAudioPluginMetaReaderRegister, metaReaderRegister)
-    INJECT(mu::IGlobalConfiguration, globalConfiguration)
-    INJECT(mu::IInteractive, interactive)
-    INJECT(mu::IProcess, process)
+    INJECT(IGlobalConfiguration, globalConfiguration)
+    INJECT(IInteractive, interactive)
+    INJECT(IProcess, process)
 
 public:
     void init();
@@ -55,7 +56,7 @@ private:
     void processPluginsRegistration(const io::paths_t& pluginPaths);
     IAudioPluginMetaReaderPtr metaReader(const io::path_t& pluginPath) const;
 
-    mu::Progress m_progress;
+    Progress m_progress;
     bool m_aborted = false;
 };
 }

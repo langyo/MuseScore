@@ -38,9 +38,9 @@
 
 #include "log.h"
 
-using namespace mu;
+using namespace muse;
 using namespace muse::cloud;
-using namespace mu::network;
+using namespace muse::network;
 
 const QString muse::cloud::ACCESS_TOKEN_KEY("access_token");
 const QString muse::cloud::REFRESH_TOKEN_KEY("refresh_token");
@@ -110,19 +110,11 @@ void AbstractCloudService::initOAuthIfNecessary()
 
     m_oauth2->setAuthorizationUrl(m_serverConfig.authorizationUrl);
     m_oauth2->setAccessTokenUrl(m_serverConfig.accessTokenUrl);
-#ifdef MU_QT5_COMPAT
-    m_oauth2->setModifyParametersFunction([this](QAbstractOAuth::Stage, QVariantMap* parameters) {
-        for (const QString& key : m_serverConfig.authorizationParameters.keys()) {
-            parameters->insert(key, m_serverConfig.authorizationParameters.value(key));
-        }
-    });
-#else
     m_oauth2->setModifyParametersFunction([this](QAbstractOAuth::Stage, QMultiMap<QString, QVariant>* parameters) {
         for (const QString& key : m_serverConfig.authorizationParameters.keys()) {
-            parameters->insert(key, m_serverConfig.authorizationParameters.value(key));
+            parameters->replace(key, m_serverConfig.authorizationParameters.value(key));
         }
     });
-#endif
 
     m_oauth2->setReplyHandler(m_replyHandler);
 
@@ -224,7 +216,7 @@ void AbstractCloudService::onUserAuthorized()
     }
 }
 
-mu::RetVal<QUrl> AbstractCloudService::prepareUrlForRequest(QUrl apiUrl, const QVariantMap& params) const
+RetVal<QUrl> AbstractCloudService::prepareUrlForRequest(QUrl apiUrl, const QVariantMap& params) const
 {
     if (m_accessToken.isEmpty()) {
         return make_ret(cloud::Err::AccessTokenIsEmpty);
@@ -301,30 +293,30 @@ void AbstractCloudService::signOut()
     clearTokens();
 }
 
-mu::RetVal<Val> AbstractCloudService::ensureAuthorization(bool publishingScore, const std::string& text)
+RetVal<Val> AbstractCloudService::ensureAuthorization(bool publishingScore, const std::string& text)
 {
     if (m_userAuthorized.val) {
-        return make_ok();
+        return muse::make_ok();
     }
 
-    UriQuery query("musescore://cloud/requireauthorization");
+    UriQuery query("muse://cloud/requireauthorization");
     query.addParam("text", Val(text));
     query.addParam("cloudCode", Val(cloudInfo().code));
     query.addParam("publishingScore", Val(publishingScore));
     return interactive()->open(query);
 }
 
-mu::ValCh<bool> AbstractCloudService::userAuthorized() const
+ValCh<bool> AbstractCloudService::userAuthorized() const
 {
     return m_userAuthorized;
 }
 
-mu::ValCh<AccountInfo> AbstractCloudService::accountInfo() const
+ValCh<AccountInfo> AbstractCloudService::accountInfo() const
 {
     return m_accountInfo;
 }
 
-mu::Ret AbstractCloudService::checkCloudIsAvailable() const
+Ret AbstractCloudService::checkCloudIsAvailable() const
 {
     QBuffer receivedData;
     INetworkManagerPtr manager = networkManagerCreator()->makeNetworkManager();
@@ -351,7 +343,7 @@ Ret AbstractCloudService::executeRequest(const RequestCallback& requestCallback)
 {
     Ret ret = requestCallback();
     if (ret) {
-        return make_ok();
+        return muse::make_ok();
     }
 
     if (statusCode(ret) == USER_UNAUTHORIZED_STATUS_CODE) {
@@ -408,7 +400,7 @@ Ret AbstractCloudService::uploadingDownloadingRetFromRawRet(const Ret& rawRet, b
     return rawRet;
 }
 
-int AbstractCloudService::statusCode(const mu::Ret& ret) const
+int AbstractCloudService::statusCode(const Ret& ret) const
 {
     std::any status = ret.data(STATUS_KEY);
     return status.has_value() ? std::any_cast<int>(status) : 0;

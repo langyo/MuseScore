@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -51,7 +51,7 @@ public:
     void updateDrumset();
     bool handleEvent(QEvent* event);
 
-    mu::async::Channel<QString> pitchNameChanged() const;
+    muse::async::Channel<QString> pitchNameChanged() const;
 
     PaletteWidget* paletteWidget() const;
 
@@ -65,11 +65,7 @@ private:
     void mouseMoveEvent(QMouseEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
     void mouseDoubleClickEvent(QMouseEvent* event) override;
-#ifdef MU_QT5_COMPAT
-    void enterEvent(QEvent* event) override;
-#else
     void enterEvent(QEnterEvent* event) override;
-#endif
     void leaveEvent(QEvent* event) override;
 
     int selectedDrumNote();
@@ -82,7 +78,7 @@ private:
     PaletteWidget* m_drumPalette = nullptr;
     const mu::engraving::Drumset* m_drumset = nullptr;
     mu::notation::INotationPtr m_notation;
-    mu::async::Channel<QString> m_pitchNameChanged;
+    muse::async::Channel<QString> m_pitchNameChanged;
 };
 }
 

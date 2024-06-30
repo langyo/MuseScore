@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2022 MuseScore BVBA and others
+ * Copyright (C) 2022 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -26,6 +26,7 @@
 #include "log.h"
 
 using namespace mu::playback;
+using namespace muse;
 using namespace muse::audio;
 
 void SoundProfilesRepository::init()
@@ -84,7 +85,7 @@ const SoundProfile& SoundProfilesRepository::profile(const SoundProfileName& nam
 
 bool SoundProfilesRepository::containsProfile(const SoundProfileName& name) const
 {
-    return mu::contains(m_profilesMap, name);
+    return muse::contains(m_profilesMap, name);
 }
 
 const SoundProfilesMap& SoundProfilesRepository::availableProfiles() const

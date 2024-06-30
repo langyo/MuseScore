@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,7 +30,7 @@ using namespace mu::project;
 NotationSwitchListModel::NotationSwitchListModel(QObject* parent)
     : QAbstractListModel(parent)
 {
-    m_notationChangedReceiver = std::make_unique<async::Asyncable>();
+    m_notationChangedReceiver = std::make_unique<muse::async::Asyncable>();
 }
 
 void NotationSwitchListModel::load()
@@ -288,17 +288,17 @@ QVariantList NotationSwitchListModel::contextMenuItems(int index) const
     }
 
     QVariantList result {
-        QVariantMap { { "id", "close-tab" }, { "title", qtrc("notation", "Close tab") } },
+        QVariantMap { { "id", "close-tab" }, { "title", muse::qtrc("notation", "Close tab") } },
     };
 
     bool canCloseOtherTabs = rowCount() > 2 || (rowCount() == 2 && isMasterNotation(m_notations[index]));
     if (canCloseOtherTabs) {
-        result << QVariantMap { { "id", "close-other-tabs" }, { "title", qtrc("notation", "Close other tabs") } };
+        result << QVariantMap { { "id", "close-other-tabs" }, { "title", muse::qtrc("notation", "Close other tabs") } };
     }
 
     bool canCloseAllTabs = rowCount() > 1;
     if (canCloseAllTabs) {
-        result << QVariantMap { { "id", "close-all-tabs" }, { "title", qtrc("notation", "Close all tabs") } };
+        result << QVariantMap { { "id", "close-all-tabs" }, { "title", muse::qtrc("notation", "Close all tabs") } };
     }
 
     return result;

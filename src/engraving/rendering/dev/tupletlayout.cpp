@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -63,6 +63,7 @@ void TupletLayout::layout(Tuplet* item, LayoutContext& ctx)
             number->setTrack(item->track());
             number->setParent(item);
             number->setVisible(item->visible());
+            number->setColor(item->color());
             item->setNumber(number);
             item->resetNumberProperty();
         }
@@ -427,6 +428,11 @@ void TupletLayout::layout(Tuplet* item, LayoutContext& ctx)
 
     item->p1().ry() -= l2l * (item->isUp() ? 1.0 : -1.0);
     item->p2().ry() -= l2r * (item->isUp() ? 1.0 : -1.0);
+
+    const double yOffset = item->staffOffsetY();
+
+    item->p1().ry() -= yOffset;
+    item->p2().ry() -= yOffset;
 
     // l2l l2r, mp, _p1, _p2 const
 

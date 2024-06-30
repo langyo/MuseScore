@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -41,8 +41,6 @@ public:
     static void layout(Lyrics* item, LayoutContext& ctx);
     static void layout(LyricsLine* item, LayoutContext& ctx);
     static void layout(LyricsLineSegment* item, LayoutContext& ctx);
-
-    static void layoutLyrics(LayoutContext& ctx, System* system);
 };
 }
 #endif // MU_ENGRAVING_LYRICSLAYOUT_STABLE_H

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -25,6 +25,7 @@
 #include "settings.h"
 
 using namespace mu::braille;
+using namespace muse;
 
 namespace mu::engraving {
 static const std::string module_name("braille");
@@ -49,7 +50,7 @@ void BrailleConfiguration::init()
     });
 }
 
-async::Notification BrailleConfiguration::braillePanelEnabledChanged() const
+muse::async::Notification BrailleConfiguration::braillePanelEnabledChanged() const
 {
     return m_braillePanelEnabledChanged;
 }
@@ -64,7 +65,7 @@ void BrailleConfiguration::setBraillePanelEnabled(const bool enabled)
     settings()->setSharedValue(BRAILLE_STATUS, Val(enabled));
 }
 
-async::Notification BrailleConfiguration::intervalDirectionChanged() const
+muse::async::Notification BrailleConfiguration::intervalDirectionChanged() const
 {
     return m_intervalDirectionChanged;
 }
@@ -79,7 +80,7 @@ void BrailleConfiguration::setIntervalDirection(const BrailleIntervalDirection d
     settings()->setSharedValue(BRAILLE_INTERVAL_DIRECTION, Val(direction));
 }
 
-async::Notification BrailleConfiguration::brailleTableChanged() const
+muse::async::Notification BrailleConfiguration::brailleTableChanged() const
 {
     return m_brailleTableChanged;
 }

@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -29,7 +29,7 @@
 using namespace mu::inspector;
 
 FretCanvas::FretCanvas(QQuickItem* parent)
-    : uicomponents::QuickPaintedView(parent)
+    : muse::uicomponents::QuickPaintedView(parent)
 {
     setAcceptedMouseButtons(Qt::AllButtons);
     setAcceptHoverEvents(true);
@@ -305,13 +305,7 @@ void FretCanvas::hoverMoveEvent(QHoverEvent* ev)
     int string = 0;
     int fret = 0;
 
-#ifdef MU_QT5_COMPAT
-    QPointF pos = ev->pos();
-#else
-    QPointF pos = ev->position();
-#endif
-
-    getPosition(pos, &string, &fret);
+    getPosition(ev->position(), &string, &fret);
     if (m_cstring != string || m_cfret != fret) {
         m_cfret = fret;
         m_cstring = string;

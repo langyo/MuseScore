@@ -20,18 +20,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "learnconfiguration.h"
+#include "global/configreader.h"
 
 #include "settings.h"
 
-using namespace mu;
-using namespace mu::learn;
-using namespace mu::network;
+using namespace muse;
+using namespace muse::learn;
+using namespace muse::network;
 
 static const std::string module_name("learn");
 static const Settings::Key GET_PLAYLISTS_TESTING_MODE_KEY(module_name, "learn/getPlaylistsTestingMode");
 
 void LearnConfiguration::init()
 {
+    m_config = ConfigReader::read(":/configs/learn.cfg");
+
     settings()->setDefaultValue(GET_PLAYLISTS_TESTING_MODE_KEY, Val(false));
 }
 
@@ -44,14 +47,19 @@ RequestHeaders LearnConfiguration::headers() const
 
 QUrl LearnConfiguration::startedPlaylistUrl() const
 {
-    return !isTestingMode() ? QUrl("https://s3.amazonaws.com/extensions.musescore.org/4.0/learn/started_playlist.json")
-           : QUrl("https://s3.amazonaws.com/extensions.musescore.org/4.0/learn/started_playlist.test.json");
+    return !isTestingMode() ? QUrl(m_config.value("started_playlist_url").toQString())
+           : QUrl(m_config.value("started_playlist_url.test").toQString());
 }
 
 QUrl LearnConfiguration::advancedPlaylistUrl() const
 {
-    return !isTestingMode() ? QUrl("https://s3.amazonaws.com/extensions.musescore.org/4.0/learn/advanced_playlist.json")
-           : QUrl("https://s3.amazonaws.com/extensions.musescore.org/4.0/learn/advanced_playlist.test.json");
+    return !isTestingMode() ? QUrl(m_config.value("advanced_playlist_url").toQString())
+           : QUrl(m_config.value("advanced_playlist_url.test").toQString());
+}
+
+bool LearnConfiguration::classesEnabled() const
+{
+    return m_config.value("classes_enabled", Val(true)).toBool();
 }
 
 bool LearnConfiguration::isTestingMode() const

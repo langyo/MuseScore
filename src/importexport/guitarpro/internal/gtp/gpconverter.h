@@ -11,9 +11,6 @@
 #include "../continiouselementsbuilder.h"
 #include "types/fraction.h"
 
-#include "engraving/dom/vibrato.h"
-#include "engraving/dom/ottava.h"
-
 #include "iengravingconfiguration.h"
 
 namespace mu::iex::guitarpro {
@@ -107,8 +104,8 @@ private:
     void addBend(const GPNote* gpnote, Note* note);
     void setPitch(Note* note, const GPNote::MidiPitch& midiPitch);
     void setTpc(Note* note, int accidental);
-    int calculateDrumPitch(int element, int variation, const String& instrumentName);
-    void addTextToNote(String string, Note* note);
+    int calculateDrumPitch(int element, int variation, const muse::String& instrumentName);
+    void addTextToNote(muse::String string, Note* note);
 
     void addLegato(const GPBeat* beat, ChordRest* cr);
     void addOttava(const GPBeat* gpb, ChordRest* cr);

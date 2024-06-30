@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -30,8 +30,9 @@
 
 #include "log.h"
 
+using namespace muse;
 using namespace mu::appshell;
-using namespace mu::ui;
+using namespace muse::ui;
 using namespace muse::actions;
 using namespace muse::dock;
 
@@ -61,7 +62,7 @@ const UiActionList ApplicationUiActions::m_actions = {
     UiAction("about-musescore",
              mu::context::UiCtxAny,
              mu::context::CTX_ANY,
-             TranslatableString("action", "&About MuseScore…")
+             TranslatableString("action", "&About MuseScore Studio…")
              ),
     UiAction("about-qt",
              mu::context::UiCtxAny,
@@ -257,7 +258,7 @@ void ApplicationUiActions::listenOpenedDocksChanged(IDockWindow* window)
     });
 }
 
-const mu::ui::UiActionList& ApplicationUiActions::actionsList() const
+const muse::ui::UiActionList& ApplicationUiActions::actionsList() const
 {
     return m_actions;
 }
@@ -296,12 +297,12 @@ bool ApplicationUiActions::actionChecked(const UiAction& act) const
     return window ? window->isDockOpen(dockName) : false;
 }
 
-mu::async::Channel<ActionCodeList> ApplicationUiActions::actionEnabledChanged() const
+muse::async::Channel<ActionCodeList> ApplicationUiActions::actionEnabledChanged() const
 {
     return m_actionEnabledChanged;
 }
 
-mu::async::Channel<ActionCodeList> ApplicationUiActions::actionCheckedChanged() const
+muse::async::Channel<ActionCodeList> ApplicationUiActions::actionCheckedChanged() const
 {
     return m_actionCheckedChanged;
 }

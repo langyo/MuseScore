@@ -27,17 +27,18 @@
 
 #include "log.h"
 
+using namespace muse;
 using namespace muse::extensions;
 using namespace muse::extensions::legacy;
 
-ManifestList ExtPluginsLoader::loadManifesList(const io::path_t& defPath, const io::path_t& extPath) const
+ManifestList ExtPluginsLoader::loadManifestList(const io::path_t& defPath, const io::path_t& extPath) const
 {
     TRACEFUNC;
 
     LOGD() << "try load extensions, def: " << defPath << ", user: " << extPath;
 
-    ManifestList defaultManifests = manifesList(defPath);
-    ManifestList externalManifests = manifesList(extPath);
+    ManifestList defaultManifests = manifestList(defPath);
+    ManifestList externalManifests = manifestList(extPath);
 
     ManifestList retList;
     for (const Manifest& m : defaultManifests) {
@@ -57,12 +58,12 @@ ManifestList ExtPluginsLoader::loadManifesList(const io::path_t& defPath, const 
     return retList;
 }
 
-ManifestList ExtPluginsLoader::manifesList(const io::path_t& rootPath) const
+ManifestList ExtPluginsLoader::manifestList(const io::path_t& rootPath) const
 {
     ManifestList manifests;
     io::paths_t paths = qmlsPaths(rootPath);
     for (const io::path_t& path : paths) {
-        Manifest manifest = parseManifest(path);
+        Manifest manifest = parseManifest(rootPath, path);
         resolvePaths(manifest, io::FileInfo(path).dirPath());
         manifests.push_back(manifest);
     }
@@ -70,7 +71,7 @@ ManifestList ExtPluginsLoader::manifesList(const io::path_t& rootPath) const
     return manifests;
 }
 
-mu::io::paths_t ExtPluginsLoader::qmlsPaths(const io::path_t& rootPath) const
+io::paths_t ExtPluginsLoader::qmlsPaths(const io::path_t& rootPath) const
 {
     RetVal<io::paths_t> paths = io::Dir::scanFiles(rootPath, { "*.qml" });
     if (!paths.ret) {
@@ -80,7 +81,7 @@ mu::io::paths_t ExtPluginsLoader::qmlsPaths(const io::path_t& rootPath) const
     return paths.val;
 }
 
-Manifest ExtPluginsLoader::parseManifest(const io::path_t& path) const
+Manifest ExtPluginsLoader::parseManifest(const io::path_t& rootPath, const io::path_t& path) const
 {
     ByteArray data;
     Ret ret = io::File::readFile(path, data);
@@ -92,19 +93,31 @@ Manifest ExtPluginsLoader::parseManifest(const io::path_t& path) const
     io::FileInfo fi(path);
 
     Manifest m;
-    m.uri = Uri("musescore://extensions/v1/" + fi.baseName().toLower().toStdString());
+    m.uri = Uri("muse://extensions/v1" + path.toQString().sliced(rootPath.size()).toLower().toStdString());
     m.type = Type::Macros;
     m.apiversion = 1;
     m.legacyPlugin = true;
 
-    auto dropQuotes = [](const String& str) {
+    auto dropQuotes = [](String str) {
+        while (str.back() == ';') {
+            str.truncate(str.size() - 1);
+        }
         if (str.size() < 3) {
             return String();
         }
-        return str.mid(1, str.size() - 2);
+        if (str.startsWith(u"qsTr(\"") && str.endsWith(u"\")")) {
+            return str.mid(6, str.size() - 8);
+        }
+
+        if (str.startsWith(u"\"") && str.endsWith(u"\"")) {
+            return str.mid(1, str.size() - 2);
+        }
+
+        return str;
     };
 
-    int needProperties = 5; // title, description, pluginType, category, thumbnail
+    String uiCtx = DEFAULT_UI_CONTEXT;
+    int needProperties = 6; // title, description, pluginType, category, thumbnail, requiresScore
     int propertiesFound = 0;
     String content = String::fromUtf8(data);
     size_t current, previous = 0;
@@ -132,6 +145,12 @@ Manifest ExtPluginsLoader::parseManifest(const io::path_t& path) const
         } else if (line.startsWith(u"thumbnailName:")) {
             m.thumbnail = dropQuotes(line.mid(14).trimmed()).toStdString();
             ++propertiesFound;
+        } else if (line.startsWith(u"requiresScore:")) {
+            String requiresScore = dropQuotes(line.mid(14).trimmed());
+            if (requiresScore == u"false") {
+                uiCtx = "Any";
+            }
+            ++propertiesFound;
         }
 
         if (propertiesFound == needProperties) {
@@ -146,6 +165,7 @@ Manifest ExtPluginsLoader::parseManifest(const io::path_t& path) const
     a.code = "main";
     a.type = m.type;
     a.title = m.title;
+    a.uiCtx = uiCtx;
     a.apiversion = m.apiversion;
     a.legacyPlugin = m.legacyPlugin;
     a.main = fi.fileName();

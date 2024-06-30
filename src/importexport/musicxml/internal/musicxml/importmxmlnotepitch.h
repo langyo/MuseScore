@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -43,14 +43,14 @@ class MxmlNotePitch
 public:
     MxmlNotePitch(MxmlLogger* logger)
         : m_logger(logger) { /* nothing so far */ }
-    void pitch(XmlStreamReader& e);
-    bool readProperties(XmlStreamReader& e, Score* score);
+    void pitch(muse::XmlStreamReader& e);
+    bool readProperties(muse::XmlStreamReader& e, Score* score);
     Accidental* acc() const { return m_acc; }
     AccidentalType accType() const { return m_accType; }
     int alter() const { return m_alter; }
     int displayOctave() const { return m_displayOctave; }
     int displayStep() const { return m_displayStep; }
-    void displayStepOctave(XmlStreamReader& e);
+    void displayStepOctave(muse::XmlStreamReader& e);
     int octave() const { return m_octave; }
     int step() const { return m_step; }
     bool unpitched() const { return m_unpitched; }

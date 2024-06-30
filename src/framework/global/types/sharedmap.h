@@ -20,13 +20,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_GLOBAL_SHAREDMAP_H
-#define MU_GLOBAL_SHAREDMAP_H
+#ifndef MUSE_GLOBAL_SHAREDMAP_H
+#define MUSE_GLOBAL_SHAREDMAP_H
 
 #include <memory>
 #include <map>
 
-namespace mu {
+namespace muse {
 template<typename KeyType, typename ValType>
 class SharedMap
 {
@@ -242,4 +242,4 @@ protected:
 };
 }
 
-#endif // MU_GLOBAL_SHAREDMAP_H
+#endif // MUSE_GLOBAL_SHAREDMAP_H

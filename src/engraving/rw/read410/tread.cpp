@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -439,6 +439,10 @@ PropertyValue TRead::readPropertyValue(Pid id, XmlReader& e, ReadContext& ctx)
         return PropertyValue(TConv::fromXml(e.readAsciiText(), GradualTempoChangeType::Undefined));
     case P_TYPE::TIE_PLACEMENT:
         return PropertyValue(TConv::fromXml(e.readAsciiText(), TiePlacement::AUTO));
+    case P_TYPE::VOICE_APPLICATION:
+        return PropertyValue(TConv::fromXml(e.readAsciiText(), VoiceApplication::ALL_VOICE_IN_INSTRUMENT));
+    case P_TYPE::AUTO_ON_OFF:
+        return PropertyValue(TConv::fromXml(e.readAsciiText(), AutoOnOff::AUTO));
     default:
         ASSERT_X("unhandled PID type");
         break;
@@ -472,6 +476,12 @@ void TRead::readProperty(EngravingItem* item, XmlReader& xml, ReadContext& ctx, 
         break;
     default:
         break;
+    }
+
+    // Pre-4.4 compatibility: these items now use DIRECTION property
+    if (pid == Pid::PLACEMENT && item->hasVoiceApplicationProperties()) {
+        pid = Pid::DIRECTION;
+        v = v.value<PlacementV>() == PlacementV::ABOVE ? PropertyValue(DirectionV::UP) : PropertyValue(DirectionV::DOWN);
     }
 
     item->setProperty(pid, v);
@@ -580,7 +590,7 @@ bool TRead::readItemProperties(EngravingItem* item, XmlReader& e, ReadContext& c
             return true;
         }
         int id = e.readInt();
-        item->setLinks(mu::value(ctx.linkIds(), id, nullptr));
+        item->setLinks(muse::value(ctx.linkIds(), id, nullptr));
         if (!item->links()) {
             if (!ctx.isMasterScore()) {       // DEBUG
                 LOGD() << "not found link, id: " << id << ", count: " << ctx.linkIds().size() << ", item: " << item->typeName();
@@ -715,7 +725,7 @@ bool TRead::readProperties(StaffTextBase* t, XmlReader& e, ReadContext& ctx)
         voice_idx_t voice = static_cast<voice_idx_t>(e.intAttribute("voice", -1));
         if (voice < VOICES) {
             t->setChannelName(voice, e.attribute("name"));
-        } else if (voice == mu::nidx) {
+        } else if (voice == muse::nidx) {
             // no voice applies channel to all voices for
             // compatibility
             for (voice_idx_t i = 0; i < VOICES; ++i) {
@@ -993,7 +1003,9 @@ bool TRead::readProperties(Instrument* item, XmlReader& e, ReadContext& ctx, Par
     partAudioSetting.instrumentId = trackId;
 
     const AsciiStringView tag(e.name());
-    if (tag == "longName") {
+    if (tag == "soundId") {
+        item->setSoundId(e.readText());
+    } else if (tag == "longName") {
         StaffName name;
         TRead::read(&name, e);
         item->appendLongName(name);
@@ -1706,6 +1718,7 @@ void TRead::read(Tuplet* t, XmlReader& e, ReadContext& ctx)
             Tuplet::resetNumberProperty(number);
             TRead::read(number, e, ctx);
             number->setVisible(t->visible());         //?? override saved property
+            number->setColor(t->color());
             number->setTrack(t->track());
             // move property flags from _number back to tuplet
             for (auto p : { Pid::FONT_FACE, Pid::FONT_SIZE, Pid::FONT_STYLE, Pid::ALIGN }) {
@@ -1838,6 +1851,7 @@ void TRead::read(Accidental* a, XmlReader& e, ReadContext& ctx)
             a->setRole(TConv::fromXml(e.readAsciiText(), AccidentalRole::AUTO));
         } else if (tag == "small") {
             a->setSmall(e.readInt());
+        } else if (readProperty(a, tag, e, ctx, Pid::ACCIDENTAL_STACKING_ORDER_OFFSET)) {
         } else if (readItemProperties(a, e, ctx)) {
         } else {
             e.unknown();
@@ -2506,6 +2520,8 @@ void TRead::read(SoundFlag* item, XmlReader& xml, ReadContext&)
             item->setSoundPresets(xml.readText().split(u","));
         } else if (tag == "playingTechnique") {
             item->setPlayingTechnique(xml.readText());
+        } else if (tag == "applyToAllStaves") {
+            item->setApplyToAllStaves(xml.readBool());
         } else {
             xml.unknown();
         }
@@ -2645,6 +2661,8 @@ bool TRead::readProperties(Chord* ch, XmlReader& e, ReadContext& ctx)
         ChordLine* cl = Factory::createChordLine(ch);
         TRead::read(cl, e, ctx);
         ch->add(cl);
+    } else if (tag == "combineVoice") {
+        ch->setCombineVoice(e.readBool());
     } else {
         return false;
     }
@@ -2954,6 +2972,10 @@ void TRead::read(GradualTempoChange* c, XmlReader& xml, ReadContext& ctx)
             continue;
         }
 
+        if (TRead::readProperty(c, tag, xml, ctx, Pid::SNAP_AFTER)) {
+            continue;
+        }
+
         if (!readProperties(static_cast<TextLineBase*>(c), xml, ctx)) {
             xml.unknown();
         }
@@ -3055,6 +3077,11 @@ void TRead::read(Hairpin* h, XmlReader& e, ReadContext& ctx)
             h->setVeloChangeMethod(TConv::fromXml(e.readAsciiText(), ChangeMethod::NORMAL));
         } else if (tag == "play") {
             h->setPlayHairpin(e.readBool());
+        } else if (readProperty(h, tag, e, ctx, Pid::APPLY_TO_VOICE)) {
+        } else if (readProperty(h, tag, e, ctx, Pid::DIRECTION)) {
+        } else if (readProperty(h, tag, e, ctx, Pid::CENTER_BETWEEN_STAVES)) {
+        } else if (readProperty(h, tag, e, ctx, Pid::SNAP_BEFORE)) {
+        } else if (readProperty(h, tag, e, ctx, Pid::SNAP_AFTER)) {
         } else if (!readProperties(static_cast<TextLineBase*>(h), e, ctx)) {
             e.unknown();
         }
@@ -4582,6 +4609,9 @@ bool TRead::readProperties(TextBase* t, XmlReader& e, ReadContext& ctx)
             t->setPropertyFlags(Pid::FONT_STYLE, PropertyFlags::UNSTYLED);
         }
     } else if (TRead::readProperty(t, tag, e, ctx, Pid::TEXT_LINKED_TO_MASTER)) {
+    } else if (readProperty(t, tag, e, ctx, Pid::APPLY_TO_VOICE)) {
+    } else if (readProperty(t, tag, e, ctx, Pid::DIRECTION)) {
+    } else if (readProperty(t, tag, e, ctx, Pid::CENTER_BETWEEN_STAVES)) {
     } else if (!readItemProperties(t, e, ctx)) {
         return false;
     }

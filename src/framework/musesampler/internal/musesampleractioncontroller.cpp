@@ -22,12 +22,16 @@
 #include "musesampleractioncontroller.h"
 
 #include "translation.h"
+#include "log.h"
 
-using namespace mu::musesampler;
+using namespace muse::musesampler;
 
-void MuseSamplerActionController::init()
+void MuseSamplerActionController::init(const ReloadMuseSamplerFunc& reloadMuseSampler)
 {
+    m_reloadMuseSampler = reloadMuseSampler;
+
     dispatcher()->reg(this, "musesampler-check", this, &MuseSamplerActionController::checkLibraryIsDetected);
+    dispatcher()->reg(this, "musesampler-reload", this, &MuseSamplerActionController::reloadMuseSampler);
 }
 
 void MuseSamplerActionController::checkLibraryIsDetected()
@@ -36,11 +40,22 @@ void MuseSamplerActionController::checkLibraryIsDetected()
     std::string status;
 
     if (libVersion.empty()) {
-        status = trc("musesampler", "Muse Sampler library is not found");
+        status = muse::trc("musesampler", "Muse Sampler library is not found");
     } else {
-        status = qtrc("musesampler", "Muse Sampler library is detected, version %1")
+        status = muse::qtrc("musesampler", "Muse Sampler library is detected, version %1")
                  .arg(QString::fromStdString(libVersion)).toStdString();
     }
 
     interactive()->info(status, std::string());
+}
+
+void MuseSamplerActionController::reloadMuseSampler()
+{
+    IF_ASSERT_FAILED(m_reloadMuseSampler) {
+        return;
+    }
+
+    if (!m_reloadMuseSampler()) {
+        interactive()->error("", std::string("Could not reload Muse Sampler library"));
+    }
 }

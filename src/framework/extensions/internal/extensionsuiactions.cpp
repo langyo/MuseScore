@@ -27,19 +27,20 @@
 
 #include "log.h"
 
-using namespace mu::ui;
+using namespace muse;
+using namespace muse::ui;
 using namespace muse::actions;
 using namespace muse::extensions;
 
 static UiAction MANAGE_ACTION = UiAction(
     "manage-plugins",
-    mu::ui::UiCtxAny,
-    mu::shortcuts::CTX_ANY,
-    mu::TranslatableString("action", "&Manage plugins…"),
-    mu::TranslatableString("action", "Manage plugins…")
+    ui::UiCtxAny,
+    shortcuts::CTX_ANY,
+    TranslatableString("action", "&Manage plugins…"),
+    TranslatableString("action", "Manage plugins…")
     );
 
-const mu::ui::UiActionList& ExtensionsUiActions::actionsList() const
+const muse::ui::UiActionList& ExtensionsUiActions::actionsList() const
 {
     UiActionList result;
 
@@ -47,8 +48,8 @@ const mu::ui::UiActionList& ExtensionsUiActions::actionsList() const
         for (const Action& a : m.actions) {
             UiAction action;
             action.code = makeUriQuery(m.uri, a.code).toString();
-            action.uiCtx = m.requiresProject ? mu::ui::UiCtxProjectOpened : mu::ui::UiCtxAny;
-            action.scCtx = m.requiresProject ? mu::shortcuts::CTX_PROJECT_OPENED : mu::shortcuts::CTX_ANY;
+            action.uiCtx = toUiContext(a.uiCtx);
+            action.scCtx = toScContext(a.uiCtx);
             action.description = TranslatableString("extensions", "Run plugin %1 (%2)").arg(m.title, a.title);
             action.title = action.description;
 
@@ -68,7 +69,7 @@ bool ExtensionsUiActions::actionEnabled(const UiAction&) const
     return true;
 }
 
-mu::async::Channel<ActionCodeList> ExtensionsUiActions::actionEnabledChanged() const
+async::Channel<ActionCodeList> ExtensionsUiActions::actionEnabledChanged() const
 {
     static async::Channel<muse::actions::ActionCodeList> ch;
     return ch;
@@ -79,7 +80,7 @@ bool ExtensionsUiActions::actionChecked(const UiAction&) const
     return false;
 }
 
-mu::async::Channel<ActionCodeList> ExtensionsUiActions::actionCheckedChanged() const
+async::Channel<ActionCodeList> ExtensionsUiActions::actionCheckedChanged() const
 {
     static async::Channel<muse::actions::ActionCodeList> ch;
     return ch;

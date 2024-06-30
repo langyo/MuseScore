@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -197,7 +197,7 @@ void VelocityMap::addHairpin(Fraction stick, Fraction etick, int change, ChangeM
 
 void VelocityMap::sortHairpins()
 {
-    for (auto& tick : mu::uniqueKeys(*this)) {
+    for (auto& tick : muse::uniqueKeys(*this)) {
         // hairpinEvents will contain all the hairpins at this tick
         std::vector<VelocityEvent> hairpinEvents;
         auto values = this->equal_range(tick);

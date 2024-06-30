@@ -20,8 +20,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MU_GLOBAL_DLIB_H
-#define MU_GLOBAL_DLIB_H
+#ifndef MUSE_GLOBAL_DLIB_H
+#define MUSE_GLOBAL_DLIB_H
 
 #if defined(Q_OS_WIN) && !defined(__MINGW64__)
 #include <windows.h>
@@ -33,13 +33,13 @@
 
 #include "log.h"
 
-namespace mu {
+namespace muse {
 inline void* loadLib(const io::path_t& path)
 {
 #if defined(Q_OS_WIN) && !defined(__MINGW64__)
-    return LoadLibrary(path.toStdWString().c_str());
+    return LoadLibrary(io::toNativeSeparators(path).toStdWString().data());
 #else
-    return dlopen(path.c_str(), RTLD_LAZY);
+    return dlopen(io::toNativeSeparators(path).toStdString().data(), RTLD_LAZY);
 #endif
 }
 
@@ -63,4 +63,4 @@ inline void closeLib(void* libHandle)
 }
 }
 
-#endif // MU_GLOBAL_DLIB_H
+#endif // MUSE_GLOBAL_DLIB_H

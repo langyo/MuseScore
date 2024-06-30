@@ -31,8 +31,8 @@
 #include "containers.h"
 #include "log.h"
 
-using namespace mu;
-using namespace mu::ui;
+using namespace muse;
+using namespace muse::ui;
 
 class WidgetDialogEventFilter : public QObject
 {
@@ -61,8 +61,8 @@ private:
     std::function<void()> m_onHideCallBack;
 };
 
-InteractiveProvider::InteractiveProvider()
-    : QObject()
+InteractiveProvider::InteractiveProvider(const modularity::ContextPtr& iocCtx)
+    : QObject(), Injectable(iocCtx)
 {
     connect(qApp, &QGuiApplication::focusWindowChanged, this, [this](QWindow* window) {
         raiseWindowInStack(window);
@@ -105,7 +105,8 @@ RetVal<Val> InteractiveProvider::question(const std::string& title, const IInter
     return openStandardDialog("QUESTION", title, text, {}, buttons, defBtn, options);
 }
 
-RetVal<Val> InteractiveProvider::info(const std::string& title, const IInteractive::Text& text, const IInteractive::ButtonDatas& buttons,
+RetVal<Val> InteractiveProvider::info(const std::string& title, const IInteractive::Text& text,
+                                      const IInteractive::ButtonDatas& buttons,
                                       int defBtn,
                                       const IInteractive::Options& options)
 {
@@ -130,7 +131,7 @@ RetVal<Val> InteractiveProvider::error(const std::string& title, const IInteract
     return openStandardDialog("ERROR", title, text, detailedText, buttons, defBtn, options);
 }
 
-Ret InteractiveProvider::showProgress(const std::string& title, mu::Progress* progress)
+Ret InteractiveProvider::showProgress(const std::string& title, Progress* progress)
 {
     IF_ASSERT_FAILED(progress) {
         return false;
@@ -161,7 +162,7 @@ Ret InteractiveProvider::showProgress(const std::string& title, mu::Progress* pr
         }
     }
 
-    return make_ok();
+    return muse::make_ok();
 }
 
 RetVal<io::path_t> InteractiveProvider::selectOpeningFile(const std::string& title, const io::path_t& dir,
@@ -203,7 +204,7 @@ RetVal<Val> InteractiveProvider::open(const UriQuery& q)
         break;
     case ContainerType::Undefined: {
         //! NOTE Not found default, try extension
-        muse::extensions::Manifest ext = extensionsProvider()->manifest(q.uri());
+        extensions::Manifest ext = extensionsProvider()->manifest(q.uri());
         if (ext.isValid()) {
             openedRet = openExtensionDialog(q);
         } else {
@@ -330,7 +331,7 @@ void InteractiveProvider::closeObject(const ObjectInfo& obj)
 
 void InteractiveProvider::fillExtData(QmlLaunchData* data, const UriQuery& q) const
 {
-    static Uri VIEWER_URI = Uri("musescore://extensions/viewer");
+    static Uri VIEWER_URI = Uri("muse://extensions/viewer");
 
     ContainerMeta meta = uriRegister()->meta(VIEWER_URI);
     data->setValue("path", meta.qmlPath);
@@ -810,7 +811,7 @@ void InteractiveProvider::onClose(const QString& objectId, const QVariant& jsrv)
     if (found) {
         notifyAboutCurrentUriChanged();
     } else {
-        mu::remove_if(m_floatingObjects, [objectId](const ObjectInfo& obj) {
+        muse::remove_if(m_floatingObjects, [objectId](const ObjectInfo& obj) {
             return obj.objectId == objectId;
         });
     }

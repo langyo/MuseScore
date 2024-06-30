@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2023 MuseScore BVBA and others
+ * Copyright (C) 2023 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -113,7 +113,7 @@ void HarmonyLayout::alignHarmonies(const System* system, const std::vector<Segme
             //    the highest element if placed below.
             bool first { true };
             double ref { 0.0 };
-            for (auto s : mu::keys(elements)) {
+            for (auto s : muse::keys(elements)) {
                 EngravingItem* e { getReferenceElement(s, above, true) };
                 if (!e) {
                     continue;
@@ -136,11 +136,11 @@ void HarmonyLayout::alignHarmonies(const System* system, const std::vector<Segme
             // elements will remain their original placement with respect to
             // the reference element.
             bool moved { false };
-            if (mu::RealIsNull(reference)) {
+            if (muse::RealIsNull(reference)) {
                 return moved;
             }
 
-            for (auto s : mu::keys(elements)) {
+            for (auto s : muse::keys(elements)) {
                 std::list<EngravingItem*> handled;
                 EngravingItem* be = getReferenceElement(s, above, false);
                 if (!be) {
@@ -164,7 +164,7 @@ void HarmonyLayout::alignHarmonies(const System* system, const std::vector<Segme
                         }
                     }
                     for (auto e : handled) {
-                        mu::remove(elements[s], e);
+                        muse::remove(elements[s], e);
                     }
                 }
             }
@@ -190,7 +190,7 @@ void HarmonyLayout::alignHarmonies(const System* system, const std::vector<Segme
         }
     };
 
-    if (RealIsNull(maxShiftAbove) && RealIsNull(maxShiftBelow)) {
+    if (muse::RealIsNull(maxShiftAbove) && muse::RealIsNull(maxShiftBelow)) {
         return;
     }
 
@@ -205,7 +205,7 @@ void HarmonyLayout::alignHarmonies(const System* system, const std::vector<Segme
         }
     }
 
-    for (staff_idx_t idx : mu::keys(staves)) {
+    for (staff_idx_t idx : muse::keys(staves)) {
         // Align the objects.
         // Algorithm:
         //    - Find highest placed harmony/fretdiagram.

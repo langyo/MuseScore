@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-CLA-applies
+ * MuseScore-Studio-CLA-applies
  *
- * MuseScore
+ * MuseScore Studio
  * Music Composition & Notation
  *
- * Copyright (C) 2021 MuseScore BVBA and others
+ * Copyright (C) 2021 MuseScore Limited
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -46,14 +46,15 @@
 
 using namespace mu;
 using namespace mu::notation;
-using namespace mu::midi;
-using namespace mu::async;
 using namespace mu::engraving;
+using namespace muse;
+using namespace muse::midi;
+using namespace muse::async;
 
 static constexpr int PLAYBACK_TAIL_SECS = 3;
 
 NotationPlayback::NotationPlayback(IGetScore* getScore,
-                                   async::Notification notationChanged)
+                                   muse::async::Notification notationChanged)
     : m_getScore(getScore), m_notationChanged(notationChanged)
 {
     m_notationChanged.onNotify(this, [this]() {
@@ -118,7 +119,7 @@ bool NotationPlayback::isChordSymbolsTrack(const engraving::InstrumentTrackId& t
     return m_playbackModel.isChordSymbolsTrack(trackId);
 }
 
-const mpe::PlaybackData& NotationPlayback::trackPlaybackData(const engraving::InstrumentTrackId& trackId) const
+const muse::mpe::PlaybackData& NotationPlayback::trackPlaybackData(const engraving::InstrumentTrackId& trackId) const
 {
     return m_playbackModel.resolveTrackPlaybackData(trackId);
 }
@@ -138,12 +139,12 @@ InstrumentTrackIdSet NotationPlayback::existingTrackIdSet() const
     return m_playbackModel.existingTrackIdSet();
 }
 
-async::Channel<InstrumentTrackId> NotationPlayback::trackAdded() const
+muse::async::Channel<InstrumentTrackId> NotationPlayback::trackAdded() const
 {
     return m_playbackModel.trackAdded();
 }
 
-async::Channel<InstrumentTrackId> NotationPlayback::trackRemoved() const
+muse::async::Channel<InstrumentTrackId> NotationPlayback::trackRemoved() const
 {
     return m_playbackModel.trackRemoved();
 }
@@ -187,7 +188,7 @@ muse::audio::msecs_t NotationPlayback::totalPlayTime() const
     return m_totalPlayTime;
 }
 
-async::Channel<muse::audio::msecs_t> NotationPlayback::totalPlayTimeChanged() const
+muse::async::Channel<muse::audio::msecs_t> NotationPlayback::totalPlayTimeChanged() const
 {
     return m_totalPlayTimeChanged;
 }
@@ -217,18 +218,18 @@ tick_t NotationPlayback::secToTick(float sec) const
     return score()->repeatList(m_playbackModel.isPlayRepeatsEnabled()).utick2tick(utick);
 }
 
-RetVal<midi::tick_t> NotationPlayback::playPositionTickByRawTick(midi::tick_t tick) const
+RetVal<muse::midi::tick_t> NotationPlayback::playPositionTickByRawTick(muse::midi::tick_t tick) const
 {
     if (!score()) {
         return make_ret(Err::Undefined);
     }
 
-    midi::tick_t playbackTick = score()->repeatList(m_playbackModel.isPlayRepeatsEnabled()).tick2utick(tick);
+    muse::midi::tick_t playbackTick = score()->repeatList(m_playbackModel.isPlayRepeatsEnabled()).tick2utick(tick);
 
-    return RetVal<midi::tick_t>::make_ok(std::move(playbackTick));
+    return RetVal<muse::midi::tick_t>::make_ok(std::move(playbackTick));
 }
 
-RetVal<midi::tick_t> NotationPlayback::playPositionTickByElement(const EngravingItem* element) const
+RetVal<muse::midi::tick_t> NotationPlayback::playPositionTickByElement(const EngravingItem* element) const
 {
     IF_ASSERT_FAILED(element) {
         return make_ret(Err::Undefined);
@@ -522,7 +523,7 @@ std::vector<StaffText*> NotationPlayback::collectStaffText(const InstrumentTrack
             }
 
             InstrumentTrackId trackId = mu::engraving::makeInstrumentTrackId(annotation);
-            if (mu::contains(trackIdSet, trackId)) {
+            if (muse::contains(trackIdSet, trackId)) {
                 result.push_back(staffText);
             }
         }
