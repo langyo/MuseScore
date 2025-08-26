@@ -33,7 +33,7 @@
 #include "notation/inotationplayback.h"
 #include "audio/main/iplayer.h"
 #include "audio/main/iplayback.h"
-#include "audio/iaudioconfiguration.h"
+#include "audio/main/iaudioconfiguration.h"
 #include "audio/common/audiotypes.h"
 #include "iinteractive.h"
 #include "tours/itoursservice.h"
@@ -228,7 +228,6 @@ private:
     void addToOnlineSounds(const muse::audio::TrackId trackId, const muse::audio::AudioResourceMeta& meta);
     void removeFromOnlineSounds(const muse::audio::TrackId trackId);
     void listenOnlineSoundsProcessingProgress(const muse::audio::TrackId trackId);
-    void listenAutoProcessOnlineSoundsInBackgroundChanged();
     bool shouldShowOnlineSoundsProcessingError() const;
     void showOnlineSoundsProcessingError();
 
